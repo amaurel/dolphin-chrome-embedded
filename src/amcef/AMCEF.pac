@@ -1,34 +1,35 @@
 | package |
 package := Package name: 'AMCEF'.
 package paxVersion: 1;
-	basicComment: 'app := CEFApp new.
-app main. 
+	basicComment: 'CEF3Library default cef_version_infos. #(3 1706 35 0 1916 86)
+CEF3Library default cef_build_revision. 1706
 
 shell := ShellView new 
 			layoutManager: BorderLayout new;
 			create; 
-			extent: 300@300;
+			extent: 800@600;
 			yourself.
 view := CEFView new
-			client: app client;
 			parentView: shell;
 			arrangement: #center;
 			create; show;
 			yourself.
 shell show.
-
-view cefBrowser mainFrame loadUrl: ''client://myapp''.
-
-view cefBrowser mainFrame loadUrl: ''http://www.google.com''.
-view cefBrowser mainFrame executeJavascript: ''alert("hello")''.
  
+view setUrl: ''http://www.google.com''.
+view executeJavascript: ''alert("hello")''.
 
-CEFApp.
-CEFResourceHandler.'.
+view setUrl: ''chrome://chrome-urls/''.
+  
+view addResourceHandler: (CEFHtmlResourceHandler html: ''<html><body bgcolor="white">Hello from Dolphin</body></html>'' acceptUrl: [:aUrl |  aUrl = ''http://hello-from-dolphin/'' ] ).
+view setUrl: ''http://hello-from-dolphin/''.
+ 
+ 
+  '.
 
 package imageStripperBytes: (ByteArray fromBase64String: 'IVNUQiAzIEYPDQAEAAAASW1hZ2VTdHJpcHBlcgAAAABSAAAABQAAAEFNQ0VGUgAAAA8AAABkb2xw
 aGluLWNlZi5leGWaAAAAUgAAAAUAAABBTUNFRlIAAAAZAAAAQ0VGM1J1bnRpbWVTZXNzaW9uTWFu
-YWdlcq+9JQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA').
+YWdlcu+9JQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA').
 
 package classNames
 	add: #CEF3;
@@ -50,6 +51,10 @@ package classNames
 	add: #CEF3LifeSpanHandler;
 	add: #CEF3LoadHandler;
 	add: #CEF3MainArgs;
+	add: #CEF3PostData;
+	add: #CEF3PostDataElement;
+	add: #CEF3PostDataElementEx;
+	add: #CEF3PostDataEx;
 	add: #CEF3ProcessMessage;
 	add: #CEF3Request;
 	add: #CEF3RequestEx;
@@ -65,10 +70,17 @@ package classNames
 	add: #CEF3WindowInfo;
 	add: #CEFApp;
 	add: #CEFBase;
-	add: #CEFBrowserWindow;
+	add: #CEFClassCallbackRegistry;
+	add: #CEFClassCallbackRegistryEx;
+	add: #CEFClient;
 	add: #CEFExternalStructure;
+	add: #CEFHandlerMessageCallback;
+	add: #CEFHtmlResourceHandler;
 	add: #CEFLibrary;
+	add: #CEFLogMessageCallback;
+	add: #CEFMessageCallback;
 	add: #CEFObject;
+	add: #CEFRequestHandler;
 	add: #CEFResourceHandler;
 	add: #CEFString;
 	add: #CEFStringUserFree;
@@ -78,6 +90,9 @@ package classNames
 
 package methodNames
 	add: #ExternalMethod -> #procAddress:;
+	add: #KernelLibrary -> #getProcessDEPPolicy:lpFlags:lpPermanent:;
+	add: #KernelLibrary -> #getSystemDEPPolicy;
+	add: #KernelLibrary -> #setProcessDEPPolicy:;
 	add: #SessionManager -> #log:;
 	add: #SessionManager -> #processType;
 	add: #String -> #asCefString;
@@ -90,14 +105,10 @@ package globalAliases: (Set new
 	yourself).
 
 package setPrerequisites: (IdentitySet new
-	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
 	add: '..\..\bin\Object Arts\Dolphin\Base\Dolphin';
 	add: '..\..\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
 	yourself).
-
-package setManualPrerequisites: #(
-	'AMCyclicPrerequisities').
 
 package!
 
@@ -109,21 +120,56 @@ Object subclass: #CEFObject
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFApp
-	instanceVariableNames: 'args app settings logStream browserWindow shemeHandlerFactory client resourceHandler browserProcessHandler'
+	instanceVariableNames: 'isInitialize args app settings logStream browserWindow shemeHandlerFactory browserProcessHandler'
+	classVariableNames: 'Current'
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFObject subclass: #CEFClassCallbackRegistry
+	instanceVariableNames: 'cefClass callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-CEFObject subclass: #CEFBrowserWindow
-	instanceVariableNames: 'handle oldWndProc windowInfo browserSettings client url shell'
-	classVariableNames: 'MessageMap'
-	poolDictionaries: 'Win32Constants'
+CEFObject subclass: #CEFClient
+	instanceVariableNames: 'client requestHandler'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFObject subclass: #CEFRequestHandler
+	instanceVariableNames: 'resourceHandlers pendingResourceHandlers'
+	classVariableNames: ''
+	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFResourceHandler
-	instanceVariableNames: 'app cefHandler stream'
+	instanceVariableNames: 'requestHandler cefHandler stream postData url'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFClassCallbackRegistry subclass: #CEFClassCallbackRegistryEx
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFResourceHandler subclass: #CEFHtmlResourceHandler
+	instanceVariableNames: 'html acceptUrlBlock'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+MessageCallback subclass: #CEFMessageCallback
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 MessageCallback subclass: #TestMessageCallback
+	instanceVariableNames: 'logMsg'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFMessageCallback subclass: #CEFHandlerMessageCallback
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFHandlerMessageCallback subclass: #CEFLogMessageCallback
 	instanceVariableNames: 'logMsg'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -140,7 +186,7 @@ CEFLibrary subclass: #CEF3Library
 	classInstanceVariableNames: ''!
 ExternalStructure subclass: #CEFExternalStructure
 	instanceVariableNames: ''
-	classVariableNames: ''
+	classVariableNames: 'CEFCompiledMethods'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFExternalStructure subclass: #CEF3
@@ -159,10 +205,10 @@ CEFExternalStructure subclass: #CEFString
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3 subclass: #CEF3BaseObject
-	instanceVariableNames: 'refCount baseCallbacks'
-	classVariableNames: ''
+	instanceVariableNames: 'refCount baseCallbacks handler'
+	classVariableNames: 'Instances'
 	poolDictionaries: ''
-	classInstanceVariableNames: ''!
+	classInstanceVariableNames: 'CallbackRegistry'!
 CEF3 subclass: #CEF3BrowserSettings
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -184,7 +230,7 @@ CEF3 subclass: #CEF3WindowInfo
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3App
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -199,7 +245,7 @@ CEF3BaseObject subclass: #CEF3BrowserHost
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3BrowserProcessHandler
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -224,12 +270,22 @@ CEF3BaseObject subclass: #CEF3Frame
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3LifeSpanHandler
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3LoadHandler
 	instanceVariableNames: 'callbacks'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3PostData
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3PostDataElement
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -244,12 +300,12 @@ CEF3BaseObject subclass: #CEF3Request
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3RequestHandler
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3ResourceHandler
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -259,7 +315,7 @@ CEF3BaseObject subclass: #CEF3Response
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3SchemeHandlerFactory
-	instanceVariableNames: 'callbacks handler'
+	instanceVariableNames: 'callbacks'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -288,8 +344,18 @@ CEF3Frame subclass: #CEF3FrameEx
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEF3PostData subclass: #CEF3PostDataEx
+	instanceVariableNames: 'get_elements_ex get_element_count_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3PostDataElement subclass: #CEF3PostDataElementEx
+	instanceVariableNames: 'get_bytes_ex get_bytes_count_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEF3Request subclass: #CEF3RequestEx
-	instanceVariableNames: 'get_url_ex'
+	instanceVariableNames: 'get_url_ex get_post_data_ex'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -308,12 +374,12 @@ CEFString subclass: #CEFStringUserFree
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-ConsoleSessionManager subclass: #CEF3RuntimeSessionManager
+RuntimeSessionManager subclass: #CEF3RuntimeSessionManager
 	instanceVariableNames: 'windowInfo url args app settings browserSettings client browserWindow logStream processType'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-View subclass: #CEFView
+ContainerView subclass: #CEFView
 	instanceVariableNames: 'windowInfo browserSettings client url cefHandle cefBrowser'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -333,17 +399,52 @@ procAddress: anExternalAddress
 	self descriptorLiteral dwordAtOffset: 0 put: anExternalAddress! !
 !ExternalMethod categoriesFor: #procAddress:!accessing!private! !
 
+!KernelLibrary methodsFor!
+
+getProcessDEPPolicy: hProcess lpFlags: lpFlags lpPermanent: lpPermanent 
+	"
+BOOL WINAPI GetProcessDEPPolicy(
+  _In_   HANDLE hProcess,
+  _Out_  LPDWORD lpFlags,
+  _Out_  PBOOL lpPermanent
+);
+"
+
+	<stdcall: bool GetProcessDEPPolicy handle dword dword>
+	^self invalidCall!
+
+getSystemDEPPolicy
+	"
+DEP_SYSTEM_POLICY_TYPE WINAPI GetSystemDEPPolicy(void);
+"
+
+	<stdcall: sword GetSystemDEPPolicy>
+	^self invalidCall!
+
+setProcessDEPPolicy: dwFlags 
+	"
+BOOL WINAPI SetProcessDEPPolicy(
+  _In_  DWORD dwFlags
+);
+"
+
+	<stdcall: bool SetPriorityClass dword>
+	^self invalidCall! !
+!KernelLibrary categoriesFor: #getProcessDEPPolicy:lpFlags:lpPermanent:!public! !
+!KernelLibrary categoriesFor: #getSystemDEPPolicy!public! !
+!KernelLibrary categoriesFor: #setProcessDEPPolicy:!public! !
+
 !SessionManager methodsFor!
 
 log: aMsg 
-	| aString |
+	"| aString |
 	aString := 'PROCESS %1 ---- %2 %3' 
 				formatWith: self processType
 				with: aMsg displayString
 				with: String lineDelimiter.
 	(SessionManager current stdout)
 		nextPutAll: aString;
-		flush
+		flush"
 	"
 (SessionManager current stdout)
 		nextPutAll: 'argv : ' , self argv displayString;
@@ -392,6 +493,14 @@ log: aMsg
 !CEFObject categoriesFor: #lib!public! !
 !CEFObject categoriesFor: #log:!public! !
 
+!CEFObject class methodsFor!
+
+new
+	^(super new)
+		initialize;
+		yourself! !
+!CEFObject class categoriesFor: #new!public! !
+
 CEFApp guid: (GUID fromString: '{6FE4CB1D-45AF-483B-A4E7-7DB1D0F51754}')!
 CEFApp comment: ''!
 !CEFApp categoriesForClass!Kernel-Objects! !
@@ -411,25 +520,7 @@ cb_create: this browser: browser frame: frame sheme_name: sheme_name request: aC
 "
 
 	self log: 'cb_create: ' , aCEF3RequestEx getUrl str asString.
-	^resourceHandler cefHandler yourAddress!
-
-cb_get_resource_handler: this browser: browser frame: frame request: aCEF3RequestEx 
-	"Private - 
-///
-  // Called on the IO thread before a resource is loaded. To allow the resource
-  // to load normally return NULL. To specify a handler for the resource return
-  // a cef_resource_handler_t object. The |request| object should not be
-  // modified in this callback.
-  ///
-  struct _cef_resource_handler_t* (CEF_CALLBACK *get_resource_handler)(
-      struct _cef_request_handler_t* self, struct _cef_browser_t* browser,
-      struct _cef_frame_t* frame, struct _cef_request_t* request);
-"
-
-	self log: 'cb_get_resource_handler: ' , aCEF3RequestEx getUrl str asString.
-	^aCEF3RequestEx getUrl str asString = 'http://myapp/' 
-		ifTrue: [resourceHandler cefHandler yourAddress]
-		ifFalse: [0]!
+	^0!
 
 cb_on_before_child_process_launch: c command: co 
 	self log: 'cb_on_before_child_process_launch:command:'!
@@ -441,22 +532,23 @@ cb_on_context_initialized: c
 cb_on_render_process_thread_created: c extra_info: e 
 	self log: 'cb_on_render_process_thread_created:extra_info:'!
 
-client
-	^client!
-
-client: anObject
-	client := anObject!
-
 freeCEF
 	self lib cef_shutdown!
 
+initialize
+	super initialize.
+	isInitialize := false.
+	
+	!
+
 main
 	| res |
-	SessionManager current openConsole.
+	isInitialize ifTrue: [Error signal: 'App already initialized'].
+	isInitialize := true.
+	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
 	self log: 'started '.
 	browserProcessHandler := CEF3BrowserProcessHandler new.
 	browserProcessHandler handler: self.
-	resourceHandler := CEFResourceHandler app: self.
 	args := CEF3MainArgs new.
 	args instance: VMLibrary default applicationHandle.
 	app := CEF3App new.
@@ -467,17 +559,16 @@ main
 				windows_sandbox_info: 0.
 	self log: 'cef_execute_process:   ' , res displayString.
 	res >= 0 ifTrue: [^SessionManager current exit: res].
-	client := CEF3Client new.
-	client requestHandler handler: self.
 	settings := CEF3Settings new.
-	"log_severity: 1;"
+	"SessionManager current isRuntime 
+		ifFalse: 
+			[settings 
+				browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString]."
+	settings 
+		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
 	settings
-		no_sandbox: 0;
-		log_severity: 1;
-		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString;
+		no_sandbox: 1;
 		multi_threaded_message_loop: 1.
-	";
-		no_sandbox: 0."
 	res := self lib 
 				cef_initialize: args
 				settings: settings
@@ -536,13 +627,11 @@ registerSchemeFactory
 scheme
 	^'client'! !
 !CEFApp categoriesFor: #cb_create:browser:frame:sheme_name:request:!**compiled accessors**!callback!must not strip!public! !
-!CEFApp categoriesFor: #cb_get_resource_handler:browser:frame:request:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #cb_on_before_child_process_launch:command:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #cb_on_context_initialized:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #cb_on_render_process_thread_created:extra_info:!**compiled accessors**!callback!must not strip!public! !
-!CEFApp categoriesFor: #client!accessing!private! !
-!CEFApp categoriesFor: #client:!accessing!private! !
 !CEFApp categoriesFor: #freeCEF!public! !
+!CEFApp categoriesFor: #initialize!public! !
 !CEFApp categoriesFor: #main!public! !
 !CEFApp categoriesFor: #onBeforeCommandLineProcessing:process_type:command_line:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #onGetBrowserProcessHandler:!**compiled accessors**!callback!must not strip!public! !
@@ -552,301 +641,181 @@ scheme
 !CEFApp categoriesFor: #registerSchemeFactory!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #scheme!**compiled accessors**!callback!must not strip!public! !
 
-CEFBrowserWindow guid: (GUID fromString: '{34AEAEC6-E40F-4182-92DC-39433C17262F}')!
-CEFBrowserWindow comment: ''!
-!CEFBrowserWindow categoriesForClass!Kernel-Objects! !
-!CEFBrowserWindow methodsFor!
+!CEFApp class methodsFor!
 
-addToCommandRoute: route
-	"Update the <OrderedCollection>, path, with the receiver's contribution to the command path
-	held by the <CommandPolicy>, route. Answer the next <Presenter> to visit.
-	The receiver is guaranteed not to be on the command path already."
+initialize
+	"
+self initialize. 
+ 
+"
 
-	^nil!
+	(SessionManager current)
+		when: #sessionStarted
+			send: #onStartup
+			to: self;
+		when: #sessionStopped
+			send: #onShutdown
+			to: self.
 
-asParameter
-	"Answer the receiver in a form suitable for passing to an external
-	function call (in this case the receiver's window handle).
-	N.B. It is important to implement this, even if we don't use it here, since
-	it is needed to pop up a walkback dialog modal to this window should
-	some error occur."
+	"We've missed the #onStartup event this time, so do it ourselves."
+	self onStartup!
 
-	^handle
-!
+new
+	Current 
+		ifNil: 
+			[Current := super new.
+			Current initialize.
+			Current main].
+	^Current!
 
-basicCreate
-	self log: 'basicCreate'.
-	windowInfo := (CEF3WindowInfo new)
-				window_name: 'CEF browser' asCefString;
-				style: self defaultWindowStyle;
-				ex_style: self defaultWindowExStyle;
-				x: 10;
-				y: 50;
-				width: 800;
-				height: 600;
-				yourself.
-	browserSettings := CEF3BrowserSettings new.
-	client := CEF3Client new.
-	url := 'http://mwm.zmantic.com' asCefString.
-	CEF3Library default 
-		cef_browser_host_create_browser: windowInfo
-		client: client
-		url: url
-		settings: browserSettings
-		request_context: 0!
-
-basicCreateChild
-	| aRect |
-	self log: 'basicCreateChild'.
-	shell := ShellView show.
-	aRect := shell clientRectangle.
-	windowInfo := (CEF3WindowInfo new)
-				window_name: 'CEF browser' asCefString;
-				style: self defaultChildWindowStyle;
-				ex_style: self defaultWindowExStyle;
-				parent_window: shell handle value;
-				x: aRect left;
-				y: aRect top;
-				width: aRect right - aRect left;
-				height: aRect bottom - aRect top;
-				yourself.
-	browserSettings := CEF3BrowserSettings new.
-	client := CEF3Client new.
-	url := 'http://mwm.zmantic.com' asCefString.
-	CEF3Library default 
-		cef_browser_host_create_browser: windowInfo
-		client: client
-		url: url
-		settings: browserSettings
-		request_context: 0
-	"	CEF3Library default 
-		cef_browser_host_create_browser: windowInfo
-		client: client
-		url: url
-		settings: browserSettings
-		request_context: 0"!
-
-defaultChildWindowStyle
-	"Private - Answer the default basic window creation style"
-
-	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE).
-	^Win32Constants.WS_OVERLAPPEDWINDOW | Win32Constants.WS_CLIPCHILDREN 
-		| Win32Constants.WS_CLIPSIBLINGS | Win32Constants.WS_VISIBLE.
-	^##(WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX)!
-
-defaultWindowExStyle
-	"Private - Answer the default extended window creation style.
-	We use the WS_EX_CONTROLPARENT style for ContainerViews, otherwise tabs only
-	work between siblings in a single level."
-
-	^0.
-	^WS_EX_CONTROLPARENT!
-
-defaultWindowProcessing: message wParam: wParam lParam: lParam 
-	"Private - Pass a message to the 'default' window procedure of the receiver."
-
-	self log: 'defaultWindowProcessing : ' , message displayString.
-	^UserLibrary default 
-		callWindowProc: oldWndProc
-		hWnd: self asParameter
-		msg: message
-		wParam: wParam
-		lParam: lParam!
-
-defaultWindowStyle
-	"Private - Answer the default basic window creation style"
-
-	^Win32Constants.WS_OVERLAPPEDWINDOW | Win32Constants.WS_CLIPCHILDREN 
-		| Win32Constants.WS_CLIPSIBLINGS | Win32Constants.WS_VISIBLE.
-	^##(WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX)!
-
-destroy
-	"Force the receiver closed. N.B. The receiver will receive WM_DESTROY
-	and WM_NCDESTROY messages, but not a WM_CLOSE (Default window processing
-	for WM_CLOSE is to call DestroyWindow)."
-
-	^UserLibrary default destroyWindow: handle!
-
-dispatchMessage: message wParam: wParam lParam: lParam 
-	"Private - Dispatch a Windows message or pass on for default processing."
-
-	| selector answer |
-	^self 
-		defaultWindowProcessing: message
-		wParam: wParam
-		lParam: lParam.
-	answer := (selector := MessageMap at: message ifAbsent: []) notNil 
-				ifTrue: 
-					[self 
-						perform: selector
-						with: message
-						with: wParam
-						with: lParam].
-
-	"We MUST answer an integer value. If one was not provided, then assume default
-	window processing is required."
-	^answer isInteger 
-		ifTrue: [answer]
-		ifFalse: 
-			[self 
-				defaultWindowProcessing: message
-				wParam: wParam
-				lParam: lParam]!
-
-enterIdle
-	^true!
-
-fontChanged
-	"Private - The desktop font has been changed (ignore it)."
-!
-
-forecolorChanged
-	"Private - The desktop foreground color has been changed (ignore it)."
-!
-
-isEnabled
-	"Private - Answer whether the receiver is enabled for input"
-
-	^UserLibrary default isWindowEnabled: self asParameter
-!
-
-isEnabled: aBoolean
-	"Set or reset whether the receiver is enabled for user input.
-	Sent to views when a modal dialog is opened on top of them."
-
-	UserLibrary default enableWindow: self asParameter bEnable: aBoolean
-!
-
-isPersistentView
-	"Answer whether the receiver has persistent state which can and should
-	be persistent in the image (i.e. top-level windows which answer true
-	to this will be sent #state and #state: messages by the 
-	SessionManager before the image is saved, and on session startup, respectively)."
-
-	^false!
-
-isWindowVisible
-	"Answer whether both the receiver and its parent have the WS_VISIBLE style,  it is therefore possible
-	that this method will answer true even if the receiver is totally obscured by other windows."
-
-	^UserLibrary default isWindowVisible: handle
-!
-
-log: aString 
-	[SessionManager current log: self class name , ' : ' , aString displayString] on: Error do: [:ex | ]!
+onShutdown
+	SessionManager current isRuntime ifFalse: [Current := nil]!
 
 onStartup
-	"Ensure that the handle of the receiver is set to nil at startup."
+	SessionManager current isRuntime ifFalse: [Current := nil]! !
+!CEFApp class categoriesFor: #initialize!public! !
+!CEFApp class categoriesFor: #new!public! !
+!CEFApp class categoriesFor: #onShutdown!public! !
+!CEFApp class categoriesFor: #onStartup!public! !
 
-	handle := nil!
+CEFClassCallbackRegistry guid: (GUID fromString: '{6A0F5BD1-67F0-40F3-B194-0DF432EB4579}')!
+CEFClassCallbackRegistry comment: ''!
+!CEFClassCallbackRegistry categoriesForClass!Kernel-Objects! !
+!CEFClassCallbackRegistry methodsFor!
 
-parentPresenter
-	"Answer the presenter that can be considered the parent of the receiver.
-	Part of the Presenter protocol used when the receiver is in fact its own presenter"
+at: aSymbol 
+	^callbacks at: aSymbol!
 
-	^nil!
+at: aSymbol put: aMessageCallback 
+	callbacks at: aSymbol put: aMessageCallback!
 
-presenter
-	"Answers the presenter for the receiver"
+callbacks
+	^callbacks!
 
-	^self!
+cefClass
+	^cefClass!
 
-preTranslateMessage: aMSG
-	"Answer whether the receiver would like to consume the argument aMSG."
+cefClass: anObject
+	cefClass := anObject!
 
-	^false!
+initialize
+	callbacks := LookupTable new!
 
-primHookWindowCreate: hookBoolean
-	"Private - Ask the VM to hook the first subsequent window creation event for the receiver.
-	When it receives such an event it will send a #subclassWindow: callback with the
-	handle of the newly created window to the receiver. This allows controls to be
-	subclassed BEFORE they return from the CreateWindowEx() call.
-	The VM uses a CBT hook to achieve this. The hook is implemented in the VM to
-	minimise the performance impact. The hook is automatically 'unhooked' by the VM
-	when it receive's the create notification before it sends the #subclassWindow:
-	callback.
-	Primitive failure reasons:
-		0 	- hookBoolean not a boolean
-		1	- already hooked by the view in the failure data
-	"
+initializeCallbacksForInstance: anInstance 
+	callbacks 
+		keysAndValuesDo: [:aSymbol :aCallback | anInstance perform: aSymbol asSymbol with: aCallback asParameter]! !
+!CEFClassCallbackRegistry categoriesFor: #at:!public! !
+!CEFClassCallbackRegistry categoriesFor: #at:put:!public! !
+!CEFClassCallbackRegistry categoriesFor: #callbacks!accessing!private! !
+!CEFClassCallbackRegistry categoriesFor: #cefClass!accessing!private! !
+!CEFClassCallbackRegistry categoriesFor: #cefClass:!accessing!private! !
+!CEFClassCallbackRegistry categoriesFor: #initialize!public! !
+!CEFClassCallbackRegistry categoriesFor: #initializeCallbacksForInstance:!public! !
 
-	<primitive: 108>
-	^self primitiveFailed!
+CEFClient guid: (GUID fromString: '{C161A348-20A1-4849-B43D-462336CD53BD}')!
+CEFClient comment: ''!
+!CEFClient categoriesForClass!Kernel-Objects! !
+!CEFClient methodsFor!
 
-show
-	self log: 'show'.
-	^self basicCreateChild.
-	self primHookWindowCreate: true.
-	self basicCreate.
-	self primHookWindowCreate: false
-	"aFlag ifFalse: [self error: 'Failed to create window']."
-	"UserLibrary default showWindow: handle nCmdShow: SW_SHOWNORMAL"!
+asCefClient
+	^client!
 
-subclassWindow: anIntegerOrHandle 
-	"Private - Subclass the receiver's associated Win32 window by substituting the VM's 
-	window procedure for the default dialog proc. Note that this is sent by the VM."
+initialize
+	client := CEF3Client new.
+	requestHandler := CEFRequestHandler new.
+	client requestHandler handler: requestHandler!
 
-	self log: 'subclassWindow:'.
-	handle := anIntegerOrHandle asExternalHandle.
-	SessionManager inputState windowAt: anIntegerOrHandle put: self.
-	oldWndProc := UserLibrary default 
-				setWindowDWORD: handle
-				nIndex: GWL_WNDPROC
-				dwNewDWORD: VMLibrary default getWndProc!
+lifeSpanHandler
+	client ifNil: [self initialize].
+	^client lifeSpanHandler!
 
-update
-	"Repaint the receiver as necessary, immediately.
-	N.B. This causes a callback as Windows sends a WM_PAINT directly."
+requestHandler
+	^requestHandler! !
+!CEFClient categoriesFor: #asCefClient!public! !
+!CEFClient categoriesFor: #initialize!private! !
+!CEFClient categoriesFor: #lifeSpanHandler!public! !
+!CEFClient categoriesFor: #requestHandler!accessing!public! !
 
-	UserLibrary default updateWindow: self asParameter!
+CEFRequestHandler guid: (GUID fromString: '{346A6E5A-01B6-49B6-920D-F388594278FE}')!
+CEFRequestHandler comment: ''!
+!CEFRequestHandler categoriesForClass!Kernel-Objects! !
+!CEFRequestHandler methodsFor!
 
-validateUserInterface
-	"Validates the user interface for the receiver. Usually performed at idle time
-	when the UI has been flagged as being invalid"
-! !
-!CEFBrowserWindow categoriesFor: #addToCommandRoute:!commands!public! !
-!CEFBrowserWindow categoriesFor: #asParameter!private! !
-!CEFBrowserWindow categoriesFor: #basicCreate!public! !
-!CEFBrowserWindow categoriesFor: #basicCreateChild!public! !
-!CEFBrowserWindow categoriesFor: #defaultChildWindowStyle!public! !
-!CEFBrowserWindow categoriesFor: #defaultWindowExStyle!public! !
-!CEFBrowserWindow categoriesFor: #defaultWindowProcessing:wParam:lParam:!private! !
-!CEFBrowserWindow categoriesFor: #defaultWindowStyle!public! !
-!CEFBrowserWindow categoriesFor: #destroy!public!realizing/unrealizing! !
-!CEFBrowserWindow categoriesFor: #dispatchMessage:wParam:lParam:!private! !
-!CEFBrowserWindow categoriesFor: #enterIdle!event handling-win32!private! !
-!CEFBrowserWindow categoriesFor: #fontChanged!private!updating! !
-!CEFBrowserWindow categoriesFor: #forecolorChanged!private!updating! !
-!CEFBrowserWindow categoriesFor: #isEnabled!private!testing! !
-!CEFBrowserWindow categoriesFor: #isEnabled:!accessing!public! !
-!CEFBrowserWindow categoriesFor: #isPersistentView!public!testing! !
-!CEFBrowserWindow categoriesFor: #isWindowVisible!public!testing! !
-!CEFBrowserWindow categoriesFor: #log:!private! !
-!CEFBrowserWindow categoriesFor: #onStartup!event handling!public! !
-!CEFBrowserWindow categoriesFor: #parentPresenter!presenter!public! !
-!CEFBrowserWindow categoriesFor: #presenter!accessing!public! !
-!CEFBrowserWindow categoriesFor: #preTranslateMessage:!private! !
-!CEFBrowserWindow categoriesFor: #primHookWindowCreate:!private! !
-!CEFBrowserWindow categoriesFor: #show!private! !
-!CEFBrowserWindow categoriesFor: #subclassWindow:!private! !
-!CEFBrowserWindow categoriesFor: #update!drawing!public! !
-!CEFBrowserWindow categoriesFor: #validateUserInterface!operations!public! !
+addPendingResourceHandler: aCEFResourceHandler 
+	pendingResourceHandlers add: aCEFResourceHandler!
 
-!CEFBrowserWindow class methodsFor!
+addResourceHandler: aCEFResourceHandler 
+	resourceHandlers add: aCEFResourceHandler!
 
-show
-	^(self new)
-		show;
-		yourself! !
-!CEFBrowserWindow class categoriesFor: #show!public! !
+cb_get_resource_handler: this browser: browser frame: frame request: aCEF3RequestEx 
+	"Private - 
+///
+  // Called on the IO thread before a resource is loaded. To allow the resource
+  // to load normally return NULL. To specify a handler for the resource return
+  // a cef_resource_handler_t object. The |request| object should not be
+  // modified in this callback.
+  ///
+  struct _cef_resource_handler_t* (CEF_CALLBACK *get_resource_handler)(
+      struct _cef_request_handler_t* self, struct _cef_browser_t* browser,
+      struct _cef_frame_t* frame, struct _cef_request_t* request);
+"
+
+	self log: 'cb_get_resource_handler: ' , aCEF3RequestEx getUrl str asString.
+	^(self findResourceHandler: aCEF3RequestEx getUrl str asString) 
+		ifNil: [0]
+		ifNotNil: [:aCEFResourceHandler | self serveRequest: aCEF3RequestEx with: aCEFResourceHandler]!
+
+findResourceHandler: aUrl 
+	^resourceHandlers detect: [:each | each acceptUrl: aUrl] ifNone: [nil]!
+
+initialize
+	super initialize.
+	resourceHandlers := OrderedCollection new.
+	pendingResourceHandlers := IdentitySet new!
+
+removeAllResourceHandlers
+	resourceHandlers removeAll!
+
+removePendingResourceHandler: aCEFResourceHandler 
+	pendingResourceHandlers remove: aCEFResourceHandler!
+
+removeResourceHandler: aCEFResourceHandler 
+	resourceHandlers remove: aCEFResourceHandler!
+
+resourceHandlers
+	^resourceHandlers!
+
+serveRequest: aCEF3RequestEx with: aCEFResourceHandler 
+	| aNewResourceHandler |
+	aNewResourceHandler := aCEFResourceHandler copy.
+	aNewResourceHandler requestHandler: self.
+	self addPendingResourceHandler: aNewResourceHandler.
+	^aNewResourceHandler cefHandler yourAddress! !
+!CEFRequestHandler categoriesFor: #addPendingResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #addResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #cb_get_resource_handler:browser:frame:request:!**compiled accessors**!callback!must not strip!public! !
+!CEFRequestHandler categoriesFor: #findResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #initialize!public! !
+!CEFRequestHandler categoriesFor: #removeAllResourceHandlers!public! !
+!CEFRequestHandler categoriesFor: #removePendingResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #removeResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #resourceHandlers!accessing!private! !
+!CEFRequestHandler categoriesFor: #serveRequest:with:!public! !
 
 CEFResourceHandler guid: (GUID fromString: '{ED4432F8-F976-4D6B-9945-C1B3917C5247}')!
 CEFResourceHandler comment: ''!
 !CEFResourceHandler categoriesForClass!Kernel-Objects! !
 !CEFResourceHandler methodsFor!
 
+acceptUrl: aUrl 
+	url := aUrl.
+	^self basicAcceptUrl: aUrl!
+
 asCefResourceHandler
 	^cefHandler!
+
+basicAcceptUrl: aUrl 
+	^Error notYetImplemented!
 
 cb_can_get_cookie: this cookie: cookie 
 	self log: 'cb_can_get_cookie: '.
@@ -857,7 +826,12 @@ cb_can_set_cookie: this cookie: cookie
 	^0!
 
 cb_cancel: this 
-	  self log: 'cb_cancel: '.!
+	self log: 'cb_cancel: '.
+	
+	[requestHandler 
+		ifNotNil: [:aCEFRequestHandler | aCEFRequestHandler removePendingResourceHandler: self]] 
+			on: Error
+			do: [:ex | self log: 'WARNING : cb_cancel not found ']!
 
 cb_get_response_headers: this response: aCEF3ResponseEx response_length: aLARGE_INTEGER redirectUrl: redirectUrl 
 	"Private - ///
@@ -895,6 +869,12 @@ cb_process_request: this request: aCEF3RequestEx callback: aCEF3CallbackEx
 "
 
 	self log: 'cb_process_request:'.
+	aCEF3RequestEx getPostData 
+		ifNotNil: 
+			[:value | 
+			| elements |
+			elements := value getElements.
+			elements isEmpty ifFalse: [self postData: elements first getBytes]].
 	aCEF3CallbackEx cont_ex.
 	^1!
 
@@ -912,36 +892,66 @@ cb_read_response: this data_out: data_out bytes_to_read: bytes_to_read bytes_rea
       struct _cef_callback_t* callback);
 "
 
-	| out aReadBytes aSDWORD |
+	| out aReadBytes aSDWORD aCount |
 	aSDWORD := SDWORD fromAddress: intpointer.
 	self stream atEnd 
 		ifTrue: 
 			[stream := nil.
 			aSDWORD value: 0.
+			self onDone.
 			^0].
-	self log: 'cb_read_response: ' , bytes_to_read displayString.
+	"self log: 'cb_read_response: ' , bytes_to_read displayString."
 	out := ExternalAddress fromInteger: data_out.
-	aReadBytes := 0.
-	[self stream atEnd not and: [aReadBytes < out size]] whileTrue: 
+	aReadBytes := self stream lastPosition - self stream position min: bytes_to_read.
+	self stream 
+		next: aReadBytes
+		into: out
+		startingAt: 1.
+	"[self stream atEnd not and: [aReadBytes < out size]] whileTrue: 
 			[aReadBytes := aReadBytes + 1.
-			out at: aReadBytes put: self stream next].
+			out at: aReadBytes put: self stream next]."
 	aSDWORD value: aReadBytes.
 	^1!
 
 cefHandler
-	^cefHandler!
+	^cefHandler 
+		ifNil: 
+			[cefHandler := CEF3ResourceHandler new.
+			cefHandler handler: self]!
 
-initialiseFromApp: anapp 
-	app := anapp.
-	cefHandler := CEF3ResourceHandler new.
-	cefHandler handler: self.
-	self stream!
+copy
+	| aCopy |
+	aCopy := super copy.
+	aCopy resetOnCopy.
+	^aCopy!
+
+initialize
+	!
+
+onDone
+	requestHandler 
+		ifNotNil: [:aCEFRequestHandler | aCEFRequestHandler removePendingResourceHandler: self]!
+
+postData
+	^postData!
+
+postData: anObject
+	postData := anObject!
+
+requestHandler
+	^requestHandler!
+
+requestHandler: anObject
+	requestHandler := anObject!
+
+resetOnCopy
+	cefHandler := stream := requestHandler := nil!
 
 stream
-	stream 
-		ifNil: [stream := '<html><body>hello</body></html>' asByteArray readStream].
-	^stream! !
-!CEFResourceHandler categoriesFor: #asCefResourceHandler!public! !
+	self subclassResponsibility! !
+!CEFResourceHandler categoriesFor: #acceptUrl:!public! !
+!CEFResourceHandler categoriesFor: #asCefResourceHandler!private! !
+!CEFResourceHandler categoriesFor: #basicAcceptUrl:!private! !
 !CEFResourceHandler categoriesFor: #cb_can_get_cookie:cookie:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_can_set_cookie:cookie:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_cancel:!**compiled accessors**!callback!must not strip!private! !
@@ -949,16 +959,112 @@ stream
 !CEFResourceHandler categoriesFor: #cb_process_request:request:callback:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cefHandler!accessing!private! !
-!CEFResourceHandler categoriesFor: #initialiseFromApp:!private! !
-!CEFResourceHandler categoriesFor: #stream!public! !
+!CEFResourceHandler categoriesFor: #copy!public! !
+!CEFResourceHandler categoriesFor: #initialize!private! !
+!CEFResourceHandler categoriesFor: #onDone!accessing!private! !
+!CEFResourceHandler categoriesFor: #postData!accessing!private! !
+!CEFResourceHandler categoriesFor: #postData:!accessing!private! !
+!CEFResourceHandler categoriesFor: #requestHandler!accessing!private! !
+!CEFResourceHandler categoriesFor: #requestHandler:!accessing!private! !
+!CEFResourceHandler categoriesFor: #resetOnCopy!private! !
+!CEFResourceHandler categoriesFor: #stream!private! !
 
 !CEFResourceHandler class methodsFor!
 
-app: app 
+onRequestHandler: aCEFRequestHandler 
 	^(self new)
-		initialiseFromApp: app;
+		requestHandler: aCEFRequestHandler;
 		yourself! !
-!CEFResourceHandler class categoriesFor: #app:!public! !
+!CEFResourceHandler class categoriesFor: #onRequestHandler:!public! !
+
+CEFClassCallbackRegistryEx guid: (GUID fromString: '{5F778CFD-39A7-42E8-9485-ADD7320244EA}')!
+CEFClassCallbackRegistryEx comment: ''!
+!CEFClassCallbackRegistryEx categoriesForClass!Kernel-Objects! !
+!CEFClassCallbackRegistryEx methodsFor!
+
+initializeCallbacksForInstance: anInstance 
+	super initializeCallbacksForInstance: anInstance.
+	cefClass superclass callbackRegistry initializeCallbacksForInstance: anInstance! !
+!CEFClassCallbackRegistryEx categoriesFor: #initializeCallbacksForInstance:!public! !
+
+CEFHtmlResourceHandler guid: (GUID fromString: '{B2363991-DDF1-43DB-8617-1678077D681D}')!
+CEFHtmlResourceHandler comment: ''!
+!CEFHtmlResourceHandler categoriesForClass!Kernel-Objects! !
+!CEFHtmlResourceHandler methodsFor!
+
+acceptUrlBlock
+	^acceptUrlBlock!
+
+acceptUrlBlock: anObject
+	acceptUrlBlock := anObject!
+
+basicAcceptUrl: aUrl 
+	^acceptUrlBlock ifNotNil: [:aBlock | aBlock value: aUrl] ifNil: [false]!
+
+html
+	^html!
+
+html: anObject
+	html := anObject!
+
+stream
+	stream 
+		ifNil: [stream := html asByteArray readStream].
+	^stream! !
+!CEFHtmlResourceHandler categoriesFor: #acceptUrlBlock!accessing!private! !
+!CEFHtmlResourceHandler categoriesFor: #acceptUrlBlock:!accessing!private! !
+!CEFHtmlResourceHandler categoriesFor: #basicAcceptUrl:!public! !
+!CEFHtmlResourceHandler categoriesFor: #html!accessing!private! !
+!CEFHtmlResourceHandler categoriesFor: #html:!accessing!private! !
+!CEFHtmlResourceHandler categoriesFor: #stream!private! !
+
+!CEFHtmlResourceHandler class methodsFor!
+
+html: aString 
+	^self html: aString acceptUrl: [:aUrl | true]!
+
+html: aString acceptUrl: aBlock 
+	^(self new)
+		acceptUrlBlock: aBlock;
+		html: aString;
+		yourself! !
+!CEFHtmlResourceHandler class categoriesFor: #html:!public! !
+!CEFHtmlResourceHandler class categoriesFor: #html:acceptUrl:!public! !
+
+CEFMessageCallback guid: (GUID fromString: '{8B73921A-FD8A-46D7-807A-D6644FCB98E4}')!
+CEFMessageCallback comment: ''!
+!CEFMessageCallback categoriesForClass!System-Support! !
+!CEFMessageCallback methodsFor!
+
+cefReceiver: anAddress 
+	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
+
+	| receiverAddress |
+	receiverAddress := (DWORD fromAddress: anAddress) value.
+	^receiver getInstance: receiverAddress!
+
+valueWithArgumentsAt: anAddress 
+	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
+
+	^(self cefReceiver: anAddress) 
+		perform: selector
+		withArgumentsAt: anAddress
+		descriptor: descriptor! !
+!CEFMessageCallback categoriesFor: #cefReceiver:!evaluating!private! !
+!CEFMessageCallback categoriesFor: #valueWithArgumentsAt:!evaluating!private! !
+
+!CEFMessageCallback class methodsFor!
+
+receiver: anObject selector: aSymbol descriptor: anExternalDescriptor 
+	"Answer a new instance of the receiver configured to send the <selector>, aSymbol,
+	to the <Object>, anObject, when invoked as a callback with descriptor, anExternalDescriptor."
+
+	^(CEFMessageCallback new)
+		receiver: anObject;
+		selector: aSymbol;
+		descriptor: anExternalDescriptor;
+		yourself! !
+!CEFMessageCallback class categoriesFor: #receiver:selector:descriptor:!instance creation!public! !
 
 TestMessageCallback guid: (GUID fromString: '{6E43C595-0FC9-4AAF-8589-46D4BD780232}')!
 TestMessageCallback comment: ''!
@@ -974,8 +1080,12 @@ logMsg: anObject
 valueWithArgumentsAt: anAddress 
 	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
 
+	| aDword |
+	aDword := DWORD fromAddress: anAddress.
 	(SessionManager current stdout)
-		nextPutAll: self class name , ' : ' , logMsg displayString;
+		nextPutAll: self class name , ' : ' , logMsg displayString , ' : address ' 
+					, anAddress class name displayString , ' aDword value : ' 
+					, aDword value displayString;
 		cr;
 		flush.
 	^super valueWithArgumentsAt: anAddress! !
@@ -996,6 +1106,66 @@ receiver: anObject selector: aSymbol descriptor: anExternalDescriptor logMsg: aM
 		logMsg: aMsg;
 		yourself! !
 !TestMessageCallback class categoriesFor: #receiver:selector:descriptor:logMsg:!instance creation!public! !
+
+CEFHandlerMessageCallback guid: (GUID fromString: '{433980EC-048C-4EAF-BF57-A5F895B0084F}')!
+CEFHandlerMessageCallback comment: ''!
+!CEFHandlerMessageCallback categoriesForClass!System-Support! !
+!CEFHandlerMessageCallback methodsFor!
+
+cefReceiver: anAddress 
+	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
+
+	| receiverAddress |
+	receiverAddress := (DWORD fromAddress: anAddress) value.
+	^(receiver getInstance: receiverAddress) handler! !
+!CEFHandlerMessageCallback categoriesFor: #cefReceiver:!evaluating!private! !
+
+!CEFHandlerMessageCallback class methodsFor!
+
+receiver: anObject selector: aSymbol descriptor: anExternalDescriptor 
+	"Answer a new instance of the receiver configured to send the <selector>, aSymbol,
+	to the <Object>, anObject, when invoked as a callback with descriptor, anExternalDescriptor."
+
+	^(CEFHandlerMessageCallback new)
+		receiver: anObject;
+		selector: aSymbol;
+		descriptor: anExternalDescriptor;
+		yourself! !
+!CEFHandlerMessageCallback class categoriesFor: #receiver:selector:descriptor:!instance creation!public! !
+
+CEFLogMessageCallback guid: (GUID fromString: '{C3B258AC-F82E-47E8-AD24-B52405ECC70E}')!
+CEFLogMessageCallback comment: ''!
+!CEFLogMessageCallback categoriesForClass!System-Support! !
+!CEFLogMessageCallback methodsFor!
+
+logMsg
+	^logMsg!
+
+logMsg: anObject
+	logMsg := anObject!
+
+valueWithArgumentsAt: anAddress 
+	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
+
+	SessionManager current log: logMsg.
+	^super valueWithArgumentsAt: anAddress! !
+!CEFLogMessageCallback categoriesFor: #logMsg!accessing!private! !
+!CEFLogMessageCallback categoriesFor: #logMsg:!accessing!private! !
+!CEFLogMessageCallback categoriesFor: #valueWithArgumentsAt:!evaluating!private! !
+
+!CEFLogMessageCallback class methodsFor!
+
+receiver: anObject selector: aSymbol descriptor: anExternalDescriptor logMsg: aMsg 
+	"Answer a new instance of the receiver configured to send the <selector>, aSymbol,
+	to the <Object>, anObject, when invoked as a callback with descriptor, anExternalDescriptor."
+
+	^(CEFLogMessageCallback new)
+		receiver: anObject;
+		selector: aSymbol;
+		descriptor: anExternalDescriptor;
+		logMsg: aMsg;
+		yourself! !
+!CEFLogMessageCallback class categoriesFor: #receiver:selector:descriptor:logMsg:!instance creation!public! !
 
 CEFLibrary guid: (GUID fromString: '{4EED1366-2797-4EDE-8957-D9629A1918C0}')!
 CEFLibrary comment: ''!
@@ -1037,6 +1207,17 @@ CEF_EXPORT cef_browser_t* cef_browser_host_create_browser_sync(
 "
 
 	<cdecl: sdword cef_browser_host_create_browser_sync CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
+	^self invalidCall!
+
+cef_build_revision
+	"
+///
+// Returns the CEF build revision for the libcef library.
+///
+
+"
+
+	<cdecl: sdword cef_build_revision>
 	^self invalidCall!
 
 cef_do_message_loop_work
@@ -1156,9 +1337,31 @@ CEF_EXPORT int cef_string_ascii_to_wide(const char* src, size_t src_len,
 "
 
 	<cdecl: sdword cef_string_ascii_to_utf16 char* dword CEFString*>
-	^self invalidCall! !
+	^self invalidCall!
+
+cef_version_info: entry
+	"
+///
+// Returns CEF version information for the libcef library. The |entry|
+// parameter describes which version component will be returned:
+// 0 - CEF_VERSION_MAJOR
+// 1 - CEF_REVISION
+// 2 - CHROME_VERSION_MAJOR
+// 3 - CHROME_VERSION_MINOR
+// 4 - CHROME_VERSION_BUILD
+// 5 - CHROME_VERSION_PATCH
+///
+
+"
+
+	<cdecl: sdword cef_version_info sdword>
+	^self invalidCall!
+
+cef_version_infos
+	^(0 to: 5) collect: [:each | self cef_version_info: each]! !
 !CEF3Library categoriesFor: #cef_browser_host_create_browser:client:url:settings:request_context:!public! !
 !CEF3Library categoriesFor: #cef_browser_host_create_browser_sync:client:url:settings:request_context:!public! !
+!CEF3Library categoriesFor: #cef_build_revision!public! !
 !CEF3Library categoriesFor: #cef_do_message_loop_work!public! !
 !CEF3Library categoriesFor: #cef_execute_process:application:windows_sandbox_info:!public! !
 !CEF3Library categoriesFor: #cef_initialize:settings:application:windows_sandbox_info:!public! !
@@ -1166,6 +1369,8 @@ CEF_EXPORT int cef_string_ascii_to_wide(const char* src, size_t src_len,
 !CEF3Library categoriesFor: #cef_run_message_loop!public! !
 !CEF3Library categoriesFor: #cef_shutdown!public! !
 !CEF3Library categoriesFor: #cef_string_from_ascii:src_len:output:!public! !
+!CEF3Library categoriesFor: #cef_version_info:!public! !
+!CEF3Library categoriesFor: #cef_version_infos!public! !
 
 !CEF3Library class methodsFor!
 
@@ -1179,18 +1384,56 @@ CEFExternalStructure comment: ''!
 !CEFExternalStructure methodsFor!
 
 getCompileMethod: aSymbol proc: proc 
-	| method |
-	method := (self class compiledMethodAt: aSymbol) copy.
-	method literalAt: 1
-		put: (((method literalAt: 1) copy)
-				dwordAtOffset: 0 put: proc;
-				yourself).
-	^method!
+	^self class getCEFCompileMethod: aSymbol proc: proc!
 
 log: aMsg 
 	SessionManager current log: self class name , ' : ' , aMsg! !
 !CEFExternalStructure categoriesFor: #getCompileMethod:proc:!must not strip!public! !
 !CEFExternalStructure categoriesFor: #log:!public! !
+
+!CEFExternalStructure class methodsFor!
+
+cefCompiledMethods
+	^CEFCompiledMethods ifNil: [CEFCompiledMethods := WeakLookupTable new]!
+
+getCEFCompileMethod: aSymbol proc: proc 
+	| method |
+	method := self cefCompiledMethods at: proc ifAbsent: [nil].
+	method 
+		ifNil: 
+			["self log: 'create CEFCompileMethod: ' , aSymbol displayString , ' proc: ' , proc displayString."
+			method := (self compiledMethodAt: aSymbol) copy.
+			method literalAt: 1
+				put: (((method literalAt: 1) copy)
+						dwordAtOffset: 0 put: proc;
+						yourself).
+			self cefCompiledMethods at: proc put: method].
+	^method!
+
+initialize
+	"
+self initialize. 
+ 
+"
+
+	(SessionManager current)
+		when: #sessionStarted
+			send: #onStartup
+			to: self;
+		when: #sessionStopped
+			send: #onShutdown
+			to: self!
+
+onShutdown
+	CEFCompiledMethods := nil!
+
+onStartup
+	CEFCompiledMethods := nil! !
+!CEFExternalStructure class categoriesFor: #cefCompiledMethods!private! !
+!CEFExternalStructure class categoriesFor: #getCEFCompileMethod:proc:!private! !
+!CEFExternalStructure class categoriesFor: #initialize!public! !
+!CEFExternalStructure class categoriesFor: #onShutdown!public! !
+!CEFExternalStructure class categoriesFor: #onStartup!public! !
 
 CEF3 guid: (GUID fromString: '{0C54D51C-5BA7-43BC-A8C7-7C8A0B0CB7C5}')!
 CEF3 comment: ''!
@@ -1293,7 +1536,7 @@ typedef struct _cef_base_t {
 		defineField: #cefSize type: DWORDField new;
 		defineField: #add_ref type: DWORDField new;
 		defineField: #release type: DWORDField new;
-		defineField: #get_refct type: DWORDField new;! !
+		defineField: #get_refct type: DWORDField new! !
 !CEFBase class categoriesFor: #defineFields!initializing!public! !
 
 CEFString guid: (GUID fromString: '{91997CC6-49E8-4B6D-B64D-AEF70840469F}')!
@@ -1358,7 +1601,7 @@ typedef struct _cef_string_wide_t {
 	self
 		defineField: #str type: (PointerField type: UnicodeString);
 		defineField: #length type: DWORDField new;
-		defineField: #dtor type: DWORDField new;
+		defineField: #dtor type: DWORDField new
 		 ! !
 !CEFString class categoriesFor: #defineFields!initializing!public! !
 
@@ -1367,9 +1610,8 @@ CEF3BaseObject comment: ''!
 !CEF3BaseObject categoriesForClass!External-Data-Structured! !
 !CEF3BaseObject methodsFor!
 
-addRef: aBase 
-	"self log: 'addRef: ' , refCount displayString."
-	^refCount := refCount + 1!
+add_ref: anObject 
+	self base add_ref: anObject!
 
 base
 	"Answer the receiver's base field as a Smalltalk object."
@@ -1381,52 +1623,82 @@ base: anObject
 
 	anObject replaceBytesOf: bytes from: 1 to: 16 startingAt: 1!
 
-getRefct: aBase 
-	self log: 'getRefct: ' , refCount displayString.
+cb_addRef: aBase 
+	"self log: 'cb_addRef: ' , refCount displayString."
+	^refCount := refCount + 1!
+
+cb_getRefct: aBase 
+	self log: 'cb_getRefct: ' , refCount displayString.
 	^refCount!
+
+cb_releaseRef: aBase 
+	"self log: 'cb_releaseRef: ' , refCount displayString."
+	^refCount := 0 max: (refCount - 1)!
+
+get_refct: anObject 
+	self base get_refct: anObject!
+
+handler
+	^handler ifNil: [self]!
+
+handler: anObject
+	handler := anObject!
 
 initialize
 	refCount := 1.
 	super initialize.
-	self base cefSize: self class byteSize.
-	self initializeCallbacks!
+	self base cefSize: self class byteSize!
 
-initializeCallbacks
-	| aBase |
-	self log: 'initializeCallbacks'.
-	baseCallbacks := LookupTable new.
-	baseCallbacks at: #add_ref
-		put: (MessageCallback 
-				receiver: self
-				selector: #addRef:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
-	baseCallbacks at: #release
-		put: (MessageCallback 
-				receiver: self
-				selector: #releaseRef:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
-	baseCallbacks at: #get_refct
-		put: (MessageCallback 
-				receiver: self
-				selector: #getRefct:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
-	aBase := self base.
-	aBase add_ref: (baseCallbacks at: #add_ref) asParameter.
-	aBase release: (baseCallbacks at: #release) asParameter.
-	aBase get_refct: (baseCallbacks at: #get_refct) asParameter!
-
-releaseRef: aBase 
-	"self log: 'releaseRef: ' , refCount displayString."
-	^refCount := 0 max: (refCount - 1)! !
-!CEF3BaseObject categoriesFor: #addRef:!**compiled accessors**!must not strip!public! !
+release: anObject 
+	self base release: anObject! !
+!CEF3BaseObject categoriesFor: #add_ref:!public! !
 !CEF3BaseObject categoriesFor: #base!**compiled accessors**!must not strip!public! !
 !CEF3BaseObject categoriesFor: #base:!**compiled accessors**!must not strip!public! !
-!CEF3BaseObject categoriesFor: #getRefct:!**compiled accessors**!must not strip!public! !
+!CEF3BaseObject categoriesFor: #cb_addRef:!must not strip!public! !
+!CEF3BaseObject categoriesFor: #cb_getRefct:!must not strip!public! !
+!CEF3BaseObject categoriesFor: #cb_releaseRef:!must not strip!public! !
+!CEF3BaseObject categoriesFor: #get_refct:!public! !
+!CEF3BaseObject categoriesFor: #handler!accessing!private! !
+!CEF3BaseObject categoriesFor: #handler:!accessing!private! !
 !CEF3BaseObject categoriesFor: #initialize!must not strip!public! !
-!CEF3BaseObject categoriesFor: #initializeCallbacks!**compiled accessors**!must not strip!public! !
-!CEF3BaseObject categoriesFor: #releaseRef:!**compiled accessors**!must not strip!public! !
+!CEF3BaseObject categoriesFor: #release:!public! !
 
 !CEF3BaseObject class methodsFor!
+
+addInstance: answer 
+	Instances ifNil: [self initalizeInstances].
+	Instances at: answer yourAddress put: answer!
+
+allCallbackSelectors
+	| aList |
+	aList := CEF3BaseObject allSubclasses.
+	aList add: self.
+	^aList inject: Set new
+		into: 
+			[:collection :each | 
+			collection addAll: (each callbackRegistry callbacks values collect: [:each2 | each2 selector]).
+			collection]!
+
+allRegisterdInstances
+	Instances ifNil: [self initalizeInstances].
+	^Instances values select: [:each | each class = self]!
+
+callbackRegistry
+	^CallbackRegistry 
+		ifNil: 
+			[self initalizeCallbacksRegistry.
+			CallbackRegistry]!
+
+createCallbackRegistry
+	^self = CEF3BaseObject 
+		ifFalse: 
+			[(CEFClassCallbackRegistryEx new)
+				cefClass: self;
+				yourself]
+		ifTrue: 
+			[(CEFClassCallbackRegistry new)
+				cefClass: self;
+				yourself]!
 
 defineFields
 	" 
@@ -1436,8 +1708,299 @@ defineFields
 
 "
 
-	self defineField: #base type: (StructureField type: CEFBase)! !
+	self defineField: #base type: (StructureField type: CEFBase)!
+
+doNotStrip
+	"
+self doNotStripSelectors
+"
+
+	self doNotStripClasses.
+	DeafObject current 
+		cb_on_render_process_terminated: nil
+		browser: nil
+		status: nil.
+	DeafObject current 
+		cb_on_before_browse: nil
+		browser: nil
+		frame: nil
+		request: nil
+		is_redirect: nil.
+	DeafObject current 
+		onBeforeCommandLineProcessing: nil
+		process_type: nil
+		command_line: nil.
+	DeafObject current cb_releaseRef: nil.
+	DeafObject current cb_on_before_close: nil browser: nil.
+	DeafObject current 
+		cb_create: nil
+		browser: nil
+		frame: nil
+		sheme_name: nil
+		request: nil.
+	DeafObject current 
+		cb_on_load_start: nil
+		browser: nil
+		frame: nil.
+	DeafObject current onGetBrowserProcessHandler: nil.
+	DeafObject current 
+		cb_on_certificate_error: nil
+		cert_error: nil
+		request_url: nil
+		callback: nil.
+	DeafObject current cb_getRefct: nil.
+	DeafObject current cb_addRef: nil.
+	DeafObject current 
+		cb_on_load_end: nil
+		browser: nil
+		frame: nil
+		httpStatusCode: nil.
+	DeafObject current cb_do_close: nil browser: nil.
+	DeafObject current 
+		cb_on_process_message_received: nil
+		browser: nil
+		source_process: nil
+		message: nil.
+	DeafObject current 
+		cb_on_resource_redirect: nil
+		browser: nil
+		frame: nil
+		old_url: nil
+		new_url: nil.
+	DeafObject current 
+		cb_on_plugin_crashed: nil
+		browser: nil
+		plugin_path: nil.
+	DeafObject current 
+		cb_on_protocol_execution: nil
+		browser: nil
+		url: nil
+		allow_os_execution: nil.
+	DeafObject current 
+		cb_on_before_resource_load: nil
+		browser: nil
+		frame: nil
+		request: nil.
+	DeafObject current 
+		cb_on_before_popup: nil
+		browser: nil
+		frame: nil
+		target_url: nil
+		target_frame_name: nil
+		popupFeatures: nil
+		windowInfo: nil
+		client: nil
+		settings: nil
+		no_javascript_access: nil.
+	DeafObject current 
+		cb_get_auth_credentials: nil
+		browser: nil
+		frame: nil
+		isProxy: nil
+		host: nil
+		port: nil
+		realm: nil
+		scheme: nil
+		callback: nil.
+	DeafObject current 
+		cb_on_load_error: nil
+		browser: nil
+		frame: nil
+		errorCode: nil
+		errorText: nil
+		failedUrl: nil.
+	DeafObject current cb_get_request_handler: nil.
+	DeafObject current onGetResourceBundleHandler: nil.
+	DeafObject current 
+		cb_on_quota_request: nil
+		browser: nil
+		origin_url: nil
+		new_size: nil
+		callback: nil.
+	DeafObject current 
+		cb_read_response: nil
+		data_out: nil
+		bytes_to_read: nil
+		bytes_read: nil
+		callback: nil.
+	DeafObject current 
+		cb_process_request: nil
+		request: nil
+		callback: nil.
+	DeafObject current 
+		cb_on_loading_state_change: nil
+		browser: nil
+		isLoading: nil
+		canGoBack: nil
+		canGoForward: nil.
+	DeafObject current 
+		cb_on_before_plugin_load: nil
+		browser: nil
+		url: nil
+		policy_url: nil
+		info: nil.
+	DeafObject current onGetRenderProcessHandler: nil.
+	DeafObject current cb_on_after_created: nil browser: nil.
+	DeafObject current 
+		cb_get_resource_handler: nil
+		browser: nil
+		frame: nil
+		request: nil.
+	DeafObject current cb_can_get_cookie: nil cookie: nil.
+	DeafObject current cb_run_modal: nil browser: nil.
+	DeafObject current cb_on_render_process_thread_created: nil extra_info: nil.
+	DeafObject current cb_on_context_initialized: nil.
+	DeafObject current cb_get_life_span_handler: nil.
+	DeafObject current 
+		cb_get_response_headers: nil
+		response: nil
+		response_length: nil
+		redirectUrl: nil.
+	DeafObject current onCallback: nil.
+	DeafObject current onRegisterCustomSchemes: nil registrar: nil.
+	DeafObject current cb_can_set_cookie: nil cookie: nil.
+	DeafObject current cb_cancel: nil.
+	DeafObject current cb_on_before_child_process_launch: nil command: nil!
+
+doNotStripClasses
+	CEF3.
+	CEFBase.
+	CEFString.
+	CEF3BaseObject.
+	CEF3BrowserSettings.
+	CEF3MainArgs.
+	CEF3Settings.
+	CEF3WindowInfo.
+	CEF3App.
+	CEF3Browser.
+	CEF3BrowserHost.
+	CEF3BrowserProcessHandler.
+	CEF3Callback.
+	CEF3Client.
+	CEF3CommandLine.
+	CEF3Frame.
+	CEF3LifeSpanHandler.
+	CEF3LoadHandler.
+	CEF3PostData.
+	CEF3PostDataElement.
+	CEF3ProcessMessage.
+	CEF3Request.
+	CEF3RequestHandler.
+	CEF3ResourceHandler.
+	CEF3Response.
+	CEF3SchemeHandlerFactory.
+	CEF3SchemeRegistrar.
+	CEF3BrowserEx.
+	CEF3BrowserHostEx.
+	CEF3CallbackEx.
+	CEF3FrameEx.
+	CEF3PostDataEx.
+	CEF3PostDataElementEx.
+	CEF3RequestEx.
+	CEF3ResponseEx.
+	CEF3SchemeRegistrarEx.
+	CEFStringUserFree!
+
+doNotStripSelectors
+	| stream |
+	stream := String writeStream.
+	CEF3BaseObject allCallbackSelectors do: 
+			[:each | 
+			stream 
+				nextPutAll: 'DeafObject current ' , (each displayString copyReplaceAll: ':' with: ': nil ') , '.']
+		separatedBy: [stream nextPutAll: String lineDelimiter].
+	^stream contents!
+
+getInstance: anInteger 
+	^Instances at: anInteger!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	self = CEF3BaseObject ifFalse: [^nil].
+	CallbackRegistry at: #add_ref:
+		put: (CEFMessageCallback 
+				receiver: self
+				selector: #cb_addRef:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
+	CallbackRegistry at: #release:
+		put: (CEFMessageCallback 
+				receiver: self
+				selector: #cb_releaseRef:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
+	CallbackRegistry at: #get_refct:
+		put: (CEFMessageCallback 
+				receiver: self
+				selector: #cb_getRefct:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
+	 !
+
+initalizeInstances
+	Instances := WeakLookupTable new!
+
+initialize
+	"
+self initialize. 
+ 
+"
+
+	(SessionManager current)
+		when: #sessionStarted
+			send: #onStartup
+			to: self;
+		when: #sessionStopped
+			send: #onShutdown
+			to: self!
+
+initializeInstanceCallbacks: anInstance 
+	anInstance class callbackRegistry initializeCallbacksForInstance: anInstance!
+
+newBuffer
+	| anInstance |
+	anInstance := self new: self byteSize.
+	self initializeInstanceCallbacks: anInstance.
+	self addInstance: anInstance.
+	^anInstance!
+
+onShutdown
+	Instances := nil.
+	self removeCallbackRegistry!
+
+onStartup
+	self initalizeInstances.
+	self removeCallbackRegistry!
+
+removeCallbackRegistry
+	CallbackRegistry := nil.
+	self subBehaviors do: [:each | each removeCallbackRegistry]!
+
+resetCallbackRegistry
+	CallbackRegistry := nil.
+	self initalizeCallbacksRegistry.
+	self allRegisterdInstances do: [:anInstance | self initializeInstanceCallbacks: anInstance].
+	self subBehaviors do: [:each | each resetCallbackRegistry]!
+
+test
+	self pgHalt! !
+!CEF3BaseObject class categoriesFor: #addInstance:!public! !
+!CEF3BaseObject class categoriesFor: #allCallbackSelectors!public! !
+!CEF3BaseObject class categoriesFor: #allRegisterdInstances!public! !
+!CEF3BaseObject class categoriesFor: #callbackRegistry!public! !
+!CEF3BaseObject class categoriesFor: #createCallbackRegistry!public! !
 !CEF3BaseObject class categoriesFor: #defineFields!initializing!public! !
+!CEF3BaseObject class categoriesFor: #doNotStrip!public! !
+!CEF3BaseObject class categoriesFor: #doNotStripClasses!public! !
+!CEF3BaseObject class categoriesFor: #doNotStripSelectors!public! !
+!CEF3BaseObject class categoriesFor: #getInstance:!public! !
+!CEF3BaseObject class categoriesFor: #initalizeCallbacksRegistry!public! !
+!CEF3BaseObject class categoriesFor: #initalizeInstances!public! !
+!CEF3BaseObject class categoriesFor: #initialize!public! !
+!CEF3BaseObject class categoriesFor: #initializeInstanceCallbacks:!public! !
+!CEF3BaseObject class categoriesFor: #newBuffer!public! !
+!CEF3BaseObject class categoriesFor: #onShutdown!public! !
+!CEF3BaseObject class categoriesFor: #onStartup!public! !
+!CEF3BaseObject class categoriesFor: #removeCallbackRegistry!public! !
+!CEF3BaseObject class categoriesFor: #resetCallbackRegistry!public! !
+!CEF3BaseObject class categoriesFor: #test!public! !
 
 CEF3BrowserSettings guid: (GUID fromString: '{1C88A2F0-94CF-4781-ACEE-A9E5BE4F684E}')!
 CEF3BrowserSettings comment: ''!
@@ -1463,6 +2026,16 @@ application_cache: anObject
 	"Set the receiver's application_cache field to the value of anObject."
 
 	bytes sdwordAtOffset: 176 put: anObject!
+
+background_color
+	"Answer the receiver's background_color field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 188)!
+
+background_color: anObject
+	"Set the receiver's background_color field to the value of anObject."
+
+	bytes dwordAtOffset: 188 put: anObject!
 
 caret_browsing
 	"Answer the receiver's caret_browsing field as a Smalltalk object."
@@ -1782,6 +2355,8 @@ webgl: anObject
 !CEF3BrowserSettings categoriesFor: #accelerated_compositing:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #application_cache!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #application_cache:!**compiled accessors**!public! !
+!CEF3BrowserSettings categoriesFor: #background_color!**compiled accessors**!public! !
+!CEF3BrowserSettings categoriesFor: #background_color:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #caret_browsing!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #caret_browsing:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #cefSize!**compiled accessors**!public! !
@@ -1889,7 +2464,8 @@ defineFields
 		defineField: #databases type: SDWORDField new;
 		defineField: #application_cache type: SDWORDField new;
 		defineField: #webgl type: SDWORDField new;
-		defineField: #accelerated_compositing type: SDWORDField new! !
+		defineField: #accelerated_compositing type: SDWORDField new;
+		defineField: #background_color type: DWORDField new! !
 !CEF3BrowserSettings class categoriesFor: #defineFields!initializing!public! !
 
 CEF3MainArgs guid: (GUID fromString: '{597B5352-55A0-4349-B9DF-AD1C789D730B}')!
@@ -1954,12 +2530,12 @@ browser_subprocess_path: anObject
 cache_path
 	"Answer the receiver's cache_path field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 32)!
+	^CEFString fromAddress: (bytes yourAddress + 36)!
 
 cache_path: anObject
 	"Set the receiver's cache_path field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 33 to: 44 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 37 to: 48 startingAt: 1!
 
 cefSize
 	"Answer the receiver's cefSize field as a Smalltalk object."
@@ -1974,12 +2550,12 @@ cefSize: anObject
 command_line_args_disabled
 	"Answer the receiver's command_line_args_disabled field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 28)!
+	^(bytes sdwordAtOffset: 32)!
 
 command_line_args_disabled: anObject
 	"Set the receiver's command_line_args_disabled field to the value of anObject."
 
-	bytes sdwordAtOffset: 28 put: anObject!
+	bytes sdwordAtOffset: 32 put: anObject!
 
 context_safety_implementation
 	"Answer the receiver's context_safety_implementation field as a Smalltalk object."
@@ -2004,20 +2580,7 @@ ignore_certificate_errors: anObject
 initialize
 	super initialize.
 	self cefSize: self class byteSize.
-	
-	"self browser_subprocess_path: 'C:\MyDolphin\cefclient.exe' asCefString.
-	self multi_threaded_message_loop: false.
-	self cache_path: '' asCefString.
-	self user_agent: '' asCefString.
-	self product_version: '' asCefString.
-	self locale: '' asCefString.
-	self log_file: 'C:\MyDolphin\cefDebug3.txt' asCefString.
-	self log_severity: -1.
-	self javascript_flags: '' asCefString.
-	self pack_file_path: 'C:\MyDolphin\cef.pak' asCefString.
-	self locales_dir_path: 'C:\MyDolphin\locales\' asCefString.
-	self pack_loading_disabled: false.
-	self remote_debugging_port: 8888"!
+	 !
 
 javascript_flags
 	"Answer the receiver's javascript_flags field as a Smalltalk object."
@@ -2032,12 +2595,12 @@ javascript_flags: anObject
 locale
 	"Answer the receiver's locale field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 72)!
+	^CEFString fromAddress: (bytes yourAddress + 76)!
 
 locale: anObject
 	"Set the receiver's locale field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 73 to: 84 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 77 to: 88 startingAt: 1!
 
 locales_dir_path
 	"Answer the receiver's locales_dir_path field as a Smalltalk object."
@@ -2052,22 +2615,22 @@ locales_dir_path: anObject
 log_file
 	"Answer the receiver's log_file field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 84)!
+	^CEFString fromAddress: (bytes yourAddress + 88)!
 
 log_file: anObject
 	"Set the receiver's log_file field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 85 to: 96 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 89 to: 100 startingAt: 1!
 
 log_severity
 	"Answer the receiver's log_severity field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 96)!
+	^(bytes sdwordAtOffset: 100)!
 
 log_severity: anObject
 	"Set the receiver's log_severity field to the value of anObject."
 
-	bytes sdwordAtOffset: 96 put: anObject!
+	bytes sdwordAtOffset: 100 put: anObject!
 
 multi_threaded_message_loop
 	"Answer the receiver's multi_threaded_message_loop field as a Smalltalk object."
@@ -2102,32 +2665,22 @@ pack_loading_disabled: anObject
 persist_session_cookies
 	"Answer the receiver's persist_session_cookies field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 44)!
+	^(bytes sdwordAtOffset: 48)!
 
 persist_session_cookies: anObject
 	"Set the receiver's persist_session_cookies field to the value of anObject."
 
-	bytes sdwordAtOffset: 44 put: anObject!
+	bytes sdwordAtOffset: 48 put: anObject!
 
 product_version
 	"Answer the receiver's product_version field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 60)!
+	^CEFString fromAddress: (bytes yourAddress + 64)!
 
 product_version: anObject
 	"Set the receiver's product_version field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 61 to: 72 startingAt: 1!
-
-release_dcheck_enabled
-	"Answer the receiver's release_dcheck_enabled field as a Smalltalk object."
-
-	^(bytes sdwordAtOffset: 100)!
-
-release_dcheck_enabled: anObject
-	"Set the receiver's release_dcheck_enabled field to the value of anObject."
-
-	bytes sdwordAtOffset: 100 put: anObject!
+	anObject replaceBytesOf: bytes from: 65 to: 76 startingAt: 1!
 
 remote_debugging_port
 	"Answer the receiver's remote_debugging_port field as a Smalltalk object."
@@ -2172,59 +2725,69 @@ uncaught_exception_stack_size: anObject
 user_agent
 	"Answer the receiver's user_agent field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 48)!
+	^CEFString fromAddress: (bytes yourAddress + 52)!
 
 user_agent: anObject
 	"Set the receiver's user_agent field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 49 to: 60 startingAt: 1! !
-!CEF3Settings categoriesFor: #background_color!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #background_color:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #browser_subprocess_path!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #browser_subprocess_path:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #cache_path!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #cache_path:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #cefSize!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #cefSize:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #command_line_args_disabled!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #command_line_args_disabled:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #context_safety_implementation!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #context_safety_implementation:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #ignore_certificate_errors!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #ignore_certificate_errors:!**compiled accessors**!must not strip!public! !
+	anObject replaceBytesOf: bytes from: 53 to: 64 startingAt: 1!
+
+windowless_rendering_enabled
+	"Answer the receiver's windowless_rendering_enabled field as a Smalltalk object."
+
+	^(bytes sdwordAtOffset: 28)!
+
+windowless_rendering_enabled: anObject
+	"Set the receiver's windowless_rendering_enabled field to the value of anObject."
+
+	bytes sdwordAtOffset: 28 put: anObject! !
+!CEF3Settings categoriesFor: #background_color!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #background_color:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #browser_subprocess_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #browser_subprocess_path:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #cache_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #cache_path:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #cefSize!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #cefSize:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #command_line_args_disabled!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #command_line_args_disabled:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #context_safety_implementation!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #context_safety_implementation:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #ignore_certificate_errors!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #ignore_certificate_errors:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #initialize!must not strip!public! !
-!CEF3Settings categoriesFor: #javascript_flags!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #javascript_flags:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #locale!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #locale:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #locales_dir_path!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #locales_dir_path:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #log_file!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #log_file:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #log_severity!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #log_severity:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #multi_threaded_message_loop!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #multi_threaded_message_loop:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #no_sandbox!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #no_sandbox:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #pack_loading_disabled!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #pack_loading_disabled:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #persist_session_cookies!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #persist_session_cookies:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #product_version!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #product_version:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #release_dcheck_enabled!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #release_dcheck_enabled:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #remote_debugging_port!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #remote_debugging_port:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #resources_dir_path!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #resources_dir_path:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #single_process!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #single_process:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #uncaught_exception_stack_size!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #uncaught_exception_stack_size:!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #user_agent!**compiled accessors**!must not strip!public! !
-!CEF3Settings categoriesFor: #user_agent:!**compiled accessors**!must not strip!public! !
+!CEF3Settings categoriesFor: #javascript_flags!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #javascript_flags:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #locale!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #locale:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #locales_dir_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #locales_dir_path:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #log_file!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #log_file:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #log_severity!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #log_severity:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #multi_threaded_message_loop!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #multi_threaded_message_loop:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #no_sandbox!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #no_sandbox:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #pack_loading_disabled!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #pack_loading_disabled:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #persist_session_cookies!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #persist_session_cookies:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #product_version!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #product_version:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #remote_debugging_port!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #remote_debugging_port:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #resources_dir_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #resources_dir_path:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #single_process!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #single_process:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #uncaught_exception_stack_size!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #uncaught_exception_stack_size:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #user_agent!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #user_agent:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #windowless_rendering_enabled!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #windowless_rendering_enabled:!**compiled accessors**!public! !
 
 !CEF3Settings class methodsFor!
 
@@ -2234,6 +2797,8 @@ defineFields
 	CEF3Settings  compileDefinition
 
 		cef_types.h
+
+defineField: #release_dcheck_enabled type: SDWORDField new;
  
 "
 
@@ -2243,6 +2808,7 @@ defineFields
 		defineField: #no_sandbox type: SDWORDField new;
 		defineField: #browser_subprocess_path type: (StructureField type: CEFString);
 		defineField: #multi_threaded_message_loop type: SDWORDField new;
+		defineField: #windowless_rendering_enabled type: SDWORDField new;
 		defineField: #command_line_args_disabled type: SDWORDField new;
 		defineField: #cache_path type: (StructureField type: CEFString);
 		defineField: #persist_session_cookies type: SDWORDField new;
@@ -2251,7 +2817,6 @@ defineFields
 		defineField: #locale type: (StructureField type: CEFString);
 		defineField: #log_file type: (StructureField type: CEFString);
 		defineField: #log_severity type: SDWORDField new;
-		defineField: #release_dcheck_enabled type: SDWORDField new;
 		defineField: #javascript_flags type: (StructureField type: CEFString);
 		defineField: #resources_dir_path type: (StructureField type: CEFString);
 		defineField: #locales_dir_path type: (StructureField type: CEFString);
@@ -2318,15 +2883,15 @@ style: anObject
 
 	bytes dwordAtOffset: 16 put: anObject!
 
-transparent_painting
-	"Answer the receiver's transparent_painting field as a Smalltalk object."
+transparent_painting_enabled
+	"Answer the receiver's transparent_painting_enabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asBoolean!
+	^(bytes sdwordAtOffset: 48)!
 
-transparent_painting: anObject
-	"Set the receiver's transparent_painting field to the value of anObject."
+transparent_painting_enabled: anObject
+	"Set the receiver's transparent_painting_enabled field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject asParameter!
+	bytes sdwordAtOffset: 48 put: anObject!
 
 width
 	"Answer the receiver's width field as a Smalltalk object."
@@ -2358,15 +2923,15 @@ window_name: anObject
 
 	anObject replaceBytesOf: bytes from: 5 to: 16 startingAt: 1!
 
-window_rendering_disabled
-	"Answer the receiver's window_rendering_disabled field as a Smalltalk object."
+windowless_rendering_enabled
+	"Answer the receiver's windowless_rendering_enabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asBoolean!
+	^(bytes sdwordAtOffset: 44)!
 
-window_rendering_disabled: anObject
-	"Set the receiver's window_rendering_disabled field to the value of anObject."
+windowless_rendering_enabled: anObject
+	"Set the receiver's windowless_rendering_enabled field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject asParameter!
+	bytes sdwordAtOffset: 44 put: anObject!
 
 x
 	"Answer the receiver's x field as a Smalltalk object."
@@ -2397,16 +2962,16 @@ y: anObject
 !CEF3WindowInfo categoriesFor: #parent_window:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #style!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #style:!**compiled accessors**!public! !
-!CEF3WindowInfo categoriesFor: #transparent_painting!**compiled accessors**!public! !
-!CEF3WindowInfo categoriesFor: #transparent_painting:!**compiled accessors**!public! !
+!CEF3WindowInfo categoriesFor: #transparent_painting_enabled!**compiled accessors**!public! !
+!CEF3WindowInfo categoriesFor: #transparent_painting_enabled:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #width!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #width:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #window!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #window:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #window_name!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #window_name:!**compiled accessors**!public! !
-!CEF3WindowInfo categoriesFor: #window_rendering_disabled!**compiled accessors**!public! !
-!CEF3WindowInfo categoriesFor: #window_rendering_disabled:!**compiled accessors**!public! !
+!CEF3WindowInfo categoriesFor: #windowless_rendering_enabled!**compiled accessors**!public! !
+!CEF3WindowInfo categoriesFor: #windowless_rendering_enabled:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #x!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #x:!**compiled accessors**!public! !
 !CEF3WindowInfo categoriesFor: #y!**compiled accessors**!public! !
@@ -2460,8 +3025,8 @@ typedef struct _cef_window_info_t {
 		defineField: #height type: SDWORDField new;
 		defineField: #parent_window type: HANDLEField new;
 		defineField: #menu type: HANDLEField new;
-		defineField: #window_rendering_disabled type: BOOLField new;
-		defineField: #transparent_painting type: BOOLField new;
+		defineField: #windowless_rendering_enabled type: SDWORDField new;
+		defineField: #transparent_painting_enabled type: SDWORDField new;
 		defineField: #window type: HANDLEField new! !
 !CEF3WindowInfo class categoriesFor: #defineFields!initializing!public! !
 
@@ -2499,111 +3064,6 @@ get_resource_bundle_handler: anObject
 	"Set the receiver's get_resource_bundle_handler field to the value of anObject."
 
 	bytes dwordAtOffset: 24 put: anObject!
-
-handler
-	^handler!
-
-handler: anObject 
-	handler := anObject.
-	callbacks values do: [:each | each receiver: handler]!
-
-initializeCallbacks
-	"
-///
-// Implement this structure to provide handler implementations. Methods will be
-// called by the process and/or thread indicated.
-///
- 
-"
-
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	"
-///
-// Provides an opportunity to view and/or modify command-line arguments before
-// processing by CEF and Chromium. The |process_type| value will be NULL for
-// the browser process. Do not keep a reference to the cef_command_line_t
-// object passed to this function. The CefSettings.command_line_args_disabled
-// value can be used to start with an NULL command-line object. Any values
-// specified in CefSettings that equate to command-line arguments will be set
-// before this function is called. Be cautious when using this function to
-// modify command-line arguments for non-browser processes as this may result
-// in undefined behavior including crashes.
-///
-"
-	callbacks at: #on_before_command_line_processing
-		put: (MessageCallback 
-				receiver: self
-				selector: #onBeforeCommandLineProcessing:process_type:command_line:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword')).
-	"
-(ExternalDescriptor fromString: 'stdcall: void CEF3App* CEFString* CEF3CommandLine*')
-"
-
-	"
-///
-// Provides an opportunity to register custom schemes. Do not keep a reference
-// to the |registrar| object. This function is called on the main thread for
-// each process and the registered schemes should be the same across all
-// processes.
-///
-"
-	callbacks at: #on_register_custom_schemes
-		put: (MessageCallback 
-				receiver: self
-				selector: #onRegisterCustomSchemes:registrar:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void  dword CEF3SchemeRegistrarEx*')).
-	"
- (ExternalDescriptor fromString: 'stdcall: void CEF3App* CEF3SchemeRegistrar*')
-"
-
-	"
-///
-// Return the handler for resource bundle events. If
-// CefSettings.pack_loading_disabled is true (1) a handler must be returned.
-// If no handler is returned resources will be loaded from pack files. This
-// function is called by the browser and render processes on multiple threads.
-///
-"
-	callbacks at: #get_resource_bundle_handler
-		put: (MessageCallback 
-				receiver: self
-				selector: #onGetResourceBundleHandler:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword')).
-	"
-descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
-"
-
-	"///
-// Return the handler for functionality specific to the browser process. This
-// function is called on multiple threads in the browser process.
-///
-"
-	callbacks at: #get_browser_process_handler
-		put: (MessageCallback 
-				receiver: self
-				selector: #onGetBrowserProcessHandler:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword')).
-	"
-(ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
-"
-
-	"
-///
-// Return the handler for functionality specific to the render process. This
-// function is called on the render process main thread.
-///
-"
-	callbacks at: #get_render_process_handler
-		put: (MessageCallback 
-				receiver: self
-				selector: #onGetRenderProcessHandler:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]
-	"
-(ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
-"!
 
 on_before_command_line_processing
 	"Answer the receiver's on_before_command_line_processing field as a Smalltalk object."
@@ -2661,9 +3121,6 @@ onRegisterCustomSchemes: cefapp registrar: registrar
 !CEF3App categoriesFor: #get_render_process_handler:!**compiled accessors**!must not strip!public! !
 !CEF3App categoriesFor: #get_resource_bundle_handler!**compiled accessors**!must not strip!public! !
 !CEF3App categoriesFor: #get_resource_bundle_handler:!**compiled accessors**!must not strip!public! !
-!CEF3App categoriesFor: #handler!accessing!private! !
-!CEF3App categoriesFor: #handler:!accessing!private! !
-!CEF3App categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 !CEF3App categoriesFor: #on_before_command_line_processing!**compiled accessors**!must not strip!public! !
 !CEF3App categoriesFor: #on_before_command_line_processing:!**compiled accessors**!must not strip!public! !
 !CEF3App categoriesFor: #on_register_custom_schemes!**compiled accessors**!must not strip!public! !
@@ -2689,8 +3146,103 @@ defineFields
 		defineField: #on_register_custom_schemes type: LPVOIDField new;
 		defineField: #get_resource_bundle_handler type: LPVOIDField new;
 		defineField: #get_browser_process_handler type: LPVOIDField new;
-		defineField: #get_render_process_handler type: LPVOIDField new! !
+		defineField: #get_render_process_handler type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+
+
+	"
+///
+// Implement this structure to provide handler implementations. Methods will be
+// called by the process and/or thread indicated.
+///
+ 
+"
+
+	"
+///
+// Provides an opportunity to view and/or modify command-line arguments before
+// processing by CEF and Chromium. The |process_type| value will be NULL for
+// the browser process. Do not keep a reference to the cef_command_line_t
+// object passed to this function. The CefSettings.command_line_args_disabled
+// value can be used to start with an NULL command-line object. Any values
+// specified in CefSettings that equate to command-line arguments will be set
+// before this function is called. Be cautious when using this function to
+// modify command-line arguments for non-browser processes as this may result
+// in undefined behavior including crashes.
+///
+"
+	CallbackRegistry at: #on_before_command_line_processing:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #onBeforeCommandLineProcessing:process_type:command_line:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword')).
+	"
+(ExternalDescriptor fromString: 'stdcall: void CEF3App* CEFString* CEF3CommandLine*')
+"
+
+	"
+///
+// Provides an opportunity to register custom schemes. Do not keep a reference
+// to the |registrar| object. This function is called on the main thread for
+// each process and the registered schemes should be the same across all
+// processes.
+///
+"
+	CallbackRegistry at: #on_register_custom_schemes:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #onRegisterCustomSchemes:registrar:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void  dword CEF3SchemeRegistrarEx*')).
+	"
+ (ExternalDescriptor fromString: 'stdcall: void CEF3App* CEF3SchemeRegistrar*')
+"
+
+	"
+///
+// Return the handler for resource bundle events. If
+// CefSettings.pack_loading_disabled is true (1) a handler must be returned.
+// If no handler is returned resources will be loaded from pack files. This
+// function is called by the browser and render processes on multiple threads.
+///
+"
+	CallbackRegistry at: #get_resource_bundle_handler:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #onGetResourceBundleHandler:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword')).
+	"
+descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
+"
+
+	"///
+// Return the handler for functionality specific to the browser process. This
+// function is called on multiple threads in the browser process.
+///
+"
+	CallbackRegistry at: #get_browser_process_handler:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #onGetBrowserProcessHandler:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword')).
+	"
+(ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
+"
+
+	"
+///
+// Return the handler for functionality specific to the render process. This
+// function is called on the render process main thread.
+///
+"
+	CallbackRegistry at: #get_render_process_handler:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #onGetRenderProcessHandler:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword'))! !
 !CEF3App class categoriesFor: #defineFields!initializing!public! !
+!CEF3App class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3Browser guid: (GUID fromString: '{C9010A4D-A65C-4314-8FF6-01054F0A24FB}')!
 CEF3Browser comment: ''!
@@ -3434,43 +3986,6 @@ cb_on_context_initialized: c
 cb_on_render_process_thread_created: c extra_info: e 
 	self log: 'cb_on_render_process_thread_created:extra_info:'!
 
-handler
-	^handler!
-
-handler: anObject 
-	handler := anObject.
-	callbacks values do: [:each | each receiver: handler]!
-
-initializeCallbacks
-	"
-///
-// Implement this structure to provide handler implementations. Methods will be
-// called by the process and/or thread indicated.
-///
- 
-"
-
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #on_context_initialized
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_context_initialized:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword')).
-	callbacks at: #on_before_child_process_launch
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_child_process_launch:command:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: void dword dword')).
-	callbacks at: #on_render_process_thread_created
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_render_process_thread_created:extra_info:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
-
 on_before_child_process_launch
 	"Answer the receiver's on_before_child_process_launch field as a Smalltalk object."
 
@@ -3500,12 +4015,9 @@ on_render_process_thread_created: anObject
 	"Set the receiver's on_render_process_thread_created field to the value of anObject."
 
 	bytes dwordAtOffset: 24 put: anObject! !
-!CEF3BrowserProcessHandler categoriesFor: #cb_on_before_child_process_launch:command:!**compiled accessors**!callback!must not strip!public! !
-!CEF3BrowserProcessHandler categoriesFor: #cb_on_context_initialized:!**compiled accessors**!callback!must not strip!public! !
-!CEF3BrowserProcessHandler categoriesFor: #cb_on_render_process_thread_created:extra_info:!**compiled accessors**!callback!must not strip!public! !
-!CEF3BrowserProcessHandler categoriesFor: #handler!accessing!private! !
-!CEF3BrowserProcessHandler categoriesFor: #handler:!accessing!private! !
-!CEF3BrowserProcessHandler categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
+!CEF3BrowserProcessHandler categoriesFor: #cb_on_before_child_process_launch:command:!callback!must not strip!public! !
+!CEF3BrowserProcessHandler categoriesFor: #cb_on_context_initialized:!callback!must not strip!public! !
+!CEF3BrowserProcessHandler categoriesFor: #cb_on_render_process_thread_created:extra_info:!callback!must not strip!public! !
 !CEF3BrowserProcessHandler categoriesFor: #on_before_child_process_launch!**compiled accessors**!must not strip!public! !
 !CEF3BrowserProcessHandler categoriesFor: #on_before_child_process_launch:!**compiled accessors**!must not strip!public! !
 !CEF3BrowserProcessHandler categoriesFor: #on_context_initialized!**compiled accessors**!must not strip!public! !
@@ -3526,8 +4038,27 @@ defineFields
 	self
 		defineField: #on_context_initialized type: LPVOIDField new;
 		defineField: #on_before_child_process_launch type: LPVOIDField new;
-		defineField: #on_render_process_thread_created type: LPVOIDField new ! !
+		defineField: #on_render_process_thread_created type: LPVOIDField new !
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_context_initialized:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_context_initialized:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword')).
+	CallbackRegistry at: #on_before_child_process_launch:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_child_process_launch:command:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword')).
+	CallbackRegistry at: #on_render_process_thread_created:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_render_process_thread_created:extra_info:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword'))! !
 !CEF3BrowserProcessHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3BrowserProcessHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3Callback guid: (GUID fromString: '{D4580B0E-E515-4AC2-A177-AFD626317935}')!
 CEF3Callback comment: ''!
@@ -3750,38 +4281,6 @@ initialize
 	requestHandler := CEF3RequestHandler new.
 	super initialize!
 
-initializeCallbacks
-	"
-///
-// Implement this structure to provide handler implementations. Methods will be
-// called by the process and/or thread indicated.
-///
-
-selector: ('cb_' , handler_name , ':') asSymbol
- 
-"
-
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	#('get_context_menu_handler' 'get_dialog_handler' 'get_display_handler' 'get_download_handler' 'get_drag_handler' 'get_focus_handler' 'get_geolocation_handler' 'get_jsdialog_handler' 'get_keyboard_handler' 'get_life_span_handler' 'get_load_handler' 'get_render_handler' 'get_request_handler') 
-		do: 
-			[:handler_name | 
-			callbacks at: handler_name asSymbol
-				put: (TestMessageCallback 
-						receiver: self
-						selector: #onCallback:
-						descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3Client*')
-						logMsg: handler_name)].
-	(callbacks at: #get_life_span_handler) selector: #cb_get_life_span_handler:.
-	(callbacks at: #get_request_handler) selector: #cb_get_request_handler:.
-	callbacks at: #on_process_message_received
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_process_message_received:browser:source_process:message:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
-
 lifeSpanHandler
 	^lifeSpanHandler!
 
@@ -3809,7 +4308,7 @@ requestHandler
 !CEF3Client categoriesFor: #cb_get_life_span_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_load_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_request_handler:!must not strip!public! !
-!CEF3Client categoriesFor: #cb_on_process_message_received:browser:source_process:message:!**compiled accessors**!callback!must not strip!public! !
+!CEF3Client categoriesFor: #cb_on_process_message_received:browser:source_process:message:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #get_context_menu_handler!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_context_menu_handler:!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_dialog_handler!**compiled accessors**!must not strip!public! !
@@ -3837,11 +4336,10 @@ requestHandler
 !CEF3Client categoriesFor: #get_request_handler!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_request_handler:!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #initialize!must not strip!public! !
-!CEF3Client categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 !CEF3Client categoriesFor: #lifeSpanHandler!accessing!private! !
 !CEF3Client categoriesFor: #on_process_message_received!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #on_process_message_received:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #onCallback:!**compiled accessors**!callback!must not strip!public! !
+!CEF3Client categoriesFor: #onCallback:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #requestHandler!accessing!private! !
 
 !CEF3Client class methodsFor!
@@ -3868,8 +4366,28 @@ defineFields
 		defineField: #get_load_handler type: LPVOIDField new;
 		defineField: #get_render_handler type: LPVOIDField new;
 		defineField: #get_request_handler type: LPVOIDField new;
-		defineField: #on_process_message_received type: LPVOIDField new! !
+		defineField: #on_process_message_received type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	#('get_context_menu_handler' 'get_dialog_handler' 'get_display_handler' 'get_download_handler' 'get_drag_handler' 'get_focus_handler' 'get_geolocation_handler' 'get_jsdialog_handler' 'get_keyboard_handler' 'get_life_span_handler' 'get_load_handler' 'get_render_handler' 'get_request_handler') 
+		do: 
+			[:handler_name | 
+			CallbackRegistry at: (handler_name , ':') asSymbol
+				put: (CEFLogMessageCallback 
+						receiver: self
+						selector: #onCallback:
+						descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3Client*')
+						logMsg: handler_name)].
+	(CallbackRegistry at: #get_life_span_handler:) selector: #cb_get_life_span_handler:.
+	(CallbackRegistry at: #get_request_handler:) selector: #cb_get_request_handler:.
+	CallbackRegistry at: #on_process_message_received:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_process_message_received:browser:source_process:message:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword'))! !
 !CEF3Client class categoriesFor: #defineFields!initializing!public! !
+!CEF3Client class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3CommandLine guid: (GUID fromString: '{AC25E456-4E30-48D3-AA02-B6831402200E}')!
 CEF3CommandLine comment: ''!
@@ -4606,9 +5124,8 @@ CEF3LifeSpanHandler comment: ''!
 cb_do_close: this browser: browser 
 	^0!
 
-cb_on_after_created: this browser: browser 
-	handler 
-		ifNotNil: [:value | value on_after_created: self browser: (CEF3BrowserEx fromAddress: browser)]!
+cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
+	 !
 
 cb_on_before_close: this browser: browser 
 	!
@@ -4628,44 +5145,6 @@ do_close: anObject
 	"Set the receiver's do_close field to the value of anObject."
 
 	bytes dwordAtOffset: 28 put: anObject!
-
-handler
-	^handler!
-
-handler: anObject
-	handler := anObject!
-
-initializeCallbacks
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #on_before_popup
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: sdword dword dword dword dword dword dword dword dword dword dword')).
-	callbacks at: #on_after_created
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_after_created:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword')).
-	callbacks at: #run_modal
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_run_modal:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
-	callbacks at: #do_close
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_do_close:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
-	callbacks at: #on_before_close
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_close:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
 
 on_after_created
 	"Answer the receiver's on_after_created field as a Smalltalk object."
@@ -4713,9 +5192,6 @@ run_modal: anObject
 !CEF3LifeSpanHandler categoriesFor: #cb_run_modal:browser:!public! !
 !CEF3LifeSpanHandler categoriesFor: #do_close!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #do_close:!**compiled accessors**!public! !
-!CEF3LifeSpanHandler categoriesFor: #handler!accessing!private! !
-!CEF3LifeSpanHandler categoriesFor: #handler:!accessing!private! !
-!CEF3LifeSpanHandler categoriesFor: #initializeCallbacks!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_after_created!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_after_created:!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_before_close!**compiled accessors**!public! !
@@ -4740,8 +5216,38 @@ defineFields
 		defineField: #on_after_created type: LPVOIDField new;
 		defineField: #run_modal type: LPVOIDField new;
 		defineField: #do_close type: LPVOIDField new;
-		defineField: #on_before_close type: LPVOIDField new! !
+		defineField: #on_before_close type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_before_popup:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: sdword dword dword dword dword dword dword dword dword dword dword')).
+	CallbackRegistry at: #on_after_created:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_after_created:browser:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEF3BrowserEx*')).
+	CallbackRegistry at: #run_modal:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_run_modal:browser:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
+	CallbackRegistry at: #do_close:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_do_close:browser:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
+	CallbackRegistry at: #on_before_close:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_close:browser:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword'))! !
 !CEF3LifeSpanHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3LifeSpanHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3LoadHandler guid: (GUID fromString: '{BE96A39F-3733-4F3A-8DE6-50CD03A612FA}')!
 CEF3LoadHandler comment: ''!
@@ -4752,6 +5258,9 @@ cb_on_load_end: aCEF3LoadHandler browser: aCEF3Browser frame: anInteger httpStat
 	self log: 'cb_on_load_end:'.
 	^0!
 
+cb_on_load_error: this browser: b frame: f errorCode: c errorText: t failedUrl: u 
+	self log: 'cb_on_load_error:'.!
+
 cb_on_load_start: aCEF3LoadHandler browser: aCEF3Browser frame: anInteger 
 	self log: 'cb_on_load_start:'.
 	^0!
@@ -4761,35 +5270,6 @@ cb_on_loading_state_change: aCEF3LoadHandler browser: aCEF3Browser isLoading: an
 		log: 'on_loading_state_change: isLoading:  ' , anInteger displayString , '  canGoBack:  ' 
 				, anInteger2 displayString , '  canGoForward: ' 
 				, anInteger3 displayString!
-
-initializeCallbacks
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #on_loading_state_change
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_loading_state_change:browser:isLoading:canGoBack:canGoForward:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* sdword  sdword sdword')).
-	callbacks at: #on_load_start
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_load_start:browser:frame:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword')).
-	callbacks at: #on_load_end
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_load_end:browser:frame:httpStatusCode:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword sdword')).
-	callbacks at: #on_load_error
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_load_error:browser:frame:errorCode:errorText:failedUrl:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword sdword CEFString* CEFString*')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
 
 on_load_end
 	"Answer the receiver's on_load_end field as a Smalltalk object."
@@ -4831,9 +5311,9 @@ on_loading_state_change: anObject
 
 	bytes dwordAtOffset: 16 put: anObject! !
 !CEF3LoadHandler categoriesFor: #cb_on_load_end:browser:frame:httpStatusCode:!must not strip!public! !
+!CEF3LoadHandler categoriesFor: #cb_on_load_error:browser:frame:errorCode:errorText:failedUrl:!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #cb_on_load_start:browser:frame:!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #cb_on_loading_state_change:browser:isLoading:canGoBack:canGoForward:!must not strip!public! !
-!CEF3LoadHandler categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #on_load_end!**compiled accessors**!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #on_load_end:!**compiled accessors**!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #on_load_error!**compiled accessors**!must not strip!public! !
@@ -4858,8 +5338,253 @@ defineFields
 		defineField: #on_load_start type: LPVOIDField new;
 		defineField: #on_load_end type: LPVOIDField new;
 		defineField: #on_load_error type: LPVOIDField new
-		 ! !
+		 !
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_loading_state_change:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_loading_state_change:browser:isLoading:canGoBack:canGoForward:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* sdword  sdword sdword')).
+	CallbackRegistry at: #on_load_start:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_load_start:browser:frame:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword')).
+	CallbackRegistry at: #on_load_end:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_load_end:browser:frame:httpStatusCode:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword sdword')).
+	CallbackRegistry at: #on_load_error:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_load_error:browser:frame:errorCode:errorText:failedUrl:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword sdword CEFString* CEFString*'))! !
 !CEF3LoadHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3LoadHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
+
+CEF3PostData guid: (GUID fromString: '{EEE72B27-4C4D-49AE-B500-0D0FD7C2B101}')!
+CEF3PostData comment: ''!
+!CEF3PostData categoriesForClass!External-Data-Structured! !
+!CEF3PostData methodsFor!
+
+add_element
+	"Answer the receiver's add_element field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 32) asExternalAddress!
+
+add_element: anObject
+	"Set the receiver's add_element field to the value of anObject."
+
+	bytes dwordAtOffset: 32 put: anObject!
+
+get_element_count
+	"Answer the receiver's get_element_count field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+get_element_count: anObject
+	"Set the receiver's get_element_count field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+get_elements
+	"Answer the receiver's get_elements field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+get_elements: anObject
+	"Set the receiver's get_elements field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject!
+
+is_read_only
+	"Answer the receiver's is_read_only field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+is_read_only: anObject
+	"Set the receiver's is_read_only field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+remove_element
+	"Answer the receiver's remove_element field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 28) asExternalAddress!
+
+remove_element: anObject
+	"Set the receiver's remove_element field to the value of anObject."
+
+	bytes dwordAtOffset: 28 put: anObject!
+
+remove_elements
+	"Answer the receiver's remove_elements field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 36) asExternalAddress!
+
+remove_elements: anObject
+	"Set the receiver's remove_elements field to the value of anObject."
+
+	bytes dwordAtOffset: 36 put: anObject! !
+!CEF3PostData categoriesFor: #add_element!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #add_element:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #get_element_count!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #get_element_count:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #get_elements!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #get_elements:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #is_read_only!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #is_read_only:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #remove_element!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #remove_element:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #remove_elements!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #remove_elements:!**compiled accessors**!public! !
+
+!CEF3PostData class methodsFor!
+
+defineFields
+	" 
+
+	CEF3PostData  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #is_read_only type: LPVOIDField new;
+		defineField: #get_element_count type: LPVOIDField new;
+		defineField: #get_elements type: LPVOIDField new;
+		defineField: #remove_element type: LPVOIDField new;
+		defineField: #add_element type: LPVOIDField new;
+		defineField: #remove_elements type: LPVOIDField new! !
+!CEF3PostData class categoriesFor: #defineFields!initializing!public! !
+
+CEF3PostDataElement guid: (GUID fromString: '{B39E2489-E0A6-421A-930A-453D5CF0E293}')!
+CEF3PostDataElement comment: ''!
+!CEF3PostDataElement categoriesForClass!External-Data-Structured! !
+!CEF3PostDataElement methodsFor!
+
+get_bytes
+	"Answer the receiver's get_bytes field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 44) asExternalAddress!
+
+get_bytes: anObject
+	"Set the receiver's get_bytes field to the value of anObject."
+
+	bytes dwordAtOffset: 44 put: anObject!
+
+get_bytes_count
+	"Answer the receiver's get_bytes_count field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 40) asExternalAddress!
+
+get_bytes_count: anObject
+	"Set the receiver's get_bytes_count field to the value of anObject."
+
+	bytes dwordAtOffset: 40 put: anObject!
+
+get_file
+	"Answer the receiver's get_file field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 36) asExternalAddress!
+
+get_file: anObject
+	"Set the receiver's get_file field to the value of anObject."
+
+	bytes dwordAtOffset: 36 put: anObject!
+
+get_type
+	"Answer the receiver's get_type field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 32) asExternalAddress!
+
+get_type: anObject
+	"Set the receiver's get_type field to the value of anObject."
+
+	bytes dwordAtOffset: 32 put: anObject!
+
+is_read_only
+	"Answer the receiver's is_read_only field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+is_read_only: anObject
+	"Set the receiver's is_read_only field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+set_to_bytes
+	"Answer the receiver's set_to_bytes field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 28) asExternalAddress!
+
+set_to_bytes: anObject
+	"Set the receiver's set_to_bytes field to the value of anObject."
+
+	bytes dwordAtOffset: 28 put: anObject!
+
+set_to_empty
+	"Answer the receiver's set_to_empty field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+set_to_empty: anObject
+	"Set the receiver's set_to_empty field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+set_to_file
+	"Answer the receiver's set_to_file field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+set_to_file: anObject
+	"Set the receiver's set_to_file field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject! !
+!CEF3PostDataElement categoriesFor: #get_bytes!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_bytes:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_bytes_count!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_bytes_count:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_file!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_file:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_type!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #get_type:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #is_read_only!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #is_read_only:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_bytes!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_bytes:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_empty!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_empty:!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_file!**compiled accessors**!public! !
+!CEF3PostDataElement categoriesFor: #set_to_file:!**compiled accessors**!public! !
+
+!CEF3PostDataElement class methodsFor!
+
+defineFields
+	" 
+
+	CEF3PostDataElement  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #is_read_only type: LPVOIDField new;
+		defineField: #set_to_empty type: LPVOIDField new;
+		defineField: #set_to_file type: LPVOIDField new;
+		defineField: #set_to_bytes type: LPVOIDField new;
+		defineField: #get_type type: LPVOIDField new;
+		defineField: #get_file type: LPVOIDField new;
+		defineField: #get_bytes_count type: LPVOIDField new;
+		defineField: #get_bytes type: LPVOIDField new! !
+!CEF3PostDataElement class categoriesFor: #defineFields!initializing!public! !
 
 CEF3ProcessMessage guid: (GUID fromString: '{B3F02C82-8A1B-494B-87D2-F16CDAD4321D}')!
 CEF3ProcessMessage comment: ''!
@@ -5350,73 +6075,11 @@ get_resource_handler: anObject
 	bytes dwordAtOffset: 24 put: anObject!
 
 handler
-	^handler!
+	^self!
 
 handler: anObject 
 	handler := anObject.
 	"callbacks values do: [:each | each receiver: handler]"!
-
-initializeCallbacks
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #on_before_browse
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_browse:browser:frame:request:is_redirect:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword sdword')).
-	callbacks at: #on_before_resource_load
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_resource_load:browser:frame:request:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword')).
-	callbacks at: #get_resource_handler
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_get_resource_handler:browser:frame:request:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword dword dword CEF3RequestEx*')).
-	callbacks at: #on_resource_redirect
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_resource_redirect:browser:frame:old_url:new_url:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword dword dword')).
-	callbacks at: #get_auth_credentials
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_get_auth_credentials:browser:frame:isProxy:host:port:realm:scheme:callback:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: sdword dword dword dword sdword dword sdword dword dword dword')).
-	callbacks at: #on_quota_request
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_quota_request:browser:origin_url:new_size:callback:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword sqword dword')).
-	callbacks at: #on_protocol_execution
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_protocol_execution:browser:url:allow_os_execution:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword dword')).
-	callbacks at: #on_certificate_error
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_certificate_error:cert_error:request_url:callback:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword sdword dword dword')).
-	callbacks at: #on_before_plugin_load
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_before_plugin_load:browser:url:policy_url:info:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword dword')).
-	callbacks at: #on_plugin_crashed
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_plugin_crashed:browser:plugin_path:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword')).
-	callbacks at: #on_render_process_terminated
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_on_render_process_terminated:browser:status:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword sdword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
 
 on_before_browse
 	"Answer the receiver's on_before_browse field as a Smalltalk object."
@@ -5507,24 +6170,23 @@ on_resource_redirect: anObject
 	"Set the receiver's on_resource_redirect field to the value of anObject."
 
 	bytes dwordAtOffset: 28 put: anObject! !
-!CEF3RequestHandler categoriesFor: #cb_get_auth_credentials:browser:frame:isProxy:host:port:realm:scheme:callback:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_get_resource_handler:browser:frame:request:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_before_browse:browser:frame:request:is_redirect:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_before_plugin_load:browser:url:policy_url:info:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_before_resource_load:browser:frame:request:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_certificate_error:cert_error:request_url:callback:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_plugin_crashed:browser:plugin_path:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_protocol_execution:browser:url:allow_os_execution:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_quota_request:browser:origin_url:new_size:callback:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_render_process_terminated:browser:status:!**compiled accessors**!callback!must not strip!public! !
-!CEF3RequestHandler categoriesFor: #cb_on_resource_redirect:browser:frame:old_url:new_url:!**compiled accessors**!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_get_auth_credentials:browser:frame:isProxy:host:port:realm:scheme:callback:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_get_resource_handler:browser:frame:request:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_before_browse:browser:frame:request:is_redirect:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_before_plugin_load:browser:url:policy_url:info:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_before_resource_load:browser:frame:request:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_certificate_error:cert_error:request_url:callback:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_plugin_crashed:browser:plugin_path:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_protocol_execution:browser:url:allow_os_execution:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_quota_request:browser:origin_url:new_size:callback:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_render_process_terminated:browser:status:!callback!must not strip!public! !
+!CEF3RequestHandler categoriesFor: #cb_on_resource_redirect:browser:frame:old_url:new_url:!callback!must not strip!public! !
 !CEF3RequestHandler categoriesFor: #get_auth_credentials!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #get_auth_credentials:!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #get_resource_handler!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #get_resource_handler:!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #handler!accessing!private! !
 !CEF3RequestHandler categoriesFor: #handler:!accessing!private! !
-!CEF3RequestHandler categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 !CEF3RequestHandler categoriesFor: #on_before_browse!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #on_before_browse:!**compiled accessors**!public! !
 !CEF3RequestHandler categoriesFor: #on_before_plugin_load!**compiled accessors**!public! !
@@ -5546,6 +6208,9 @@ on_resource_redirect: anObject
 
 !CEF3RequestHandler class methodsFor!
 
+cb_on_before_resource_load: anInteger browser: anInteger2 frame: anInteger3 request: anInteger4 
+	^0!
+
 defineFields
 	" 
 
@@ -5565,8 +6230,69 @@ defineFields
 		defineField: #on_certificate_error type: LPVOIDField new;
 		defineField: #on_before_plugin_load type: LPVOIDField new;
 		defineField: #on_plugin_crashed type: LPVOIDField new;
-		defineField: #on_render_process_terminated type: LPVOIDField new! !
+		defineField: #on_render_process_terminated type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_before_browse:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_browse:browser:frame:request:is_redirect:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword sdword')).
+	CallbackRegistry at: #on_before_resource_load:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_resource_load:browser:frame:request:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword')).
+	CallbackRegistry at: #get_resource_handler:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_get_resource_handler:browser:frame:request:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword dword dword CEF3RequestEx*')).
+	CallbackRegistry at: #on_resource_redirect:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_resource_redirect:browser:frame:old_url:new_url:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword dword dword')).
+	CallbackRegistry at: #get_auth_credentials:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_get_auth_credentials:browser:frame:isProxy:host:port:realm:scheme:callback:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: sdword dword dword dword sdword dword sdword dword dword dword')).
+	CallbackRegistry at: #on_quota_request:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_quota_request:browser:origin_url:new_size:callback:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword sqword dword')).
+	CallbackRegistry at: #on_protocol_execution:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_protocol_execution:browser:url:allow_os_execution:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword dword')).
+	CallbackRegistry at: #on_certificate_error:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_certificate_error:cert_error:request_url:callback:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword sdword dword dword')).
+	CallbackRegistry at: #on_before_plugin_load:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_plugin_load:browser:url:policy_url:info:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword dword')).
+	CallbackRegistry at: #on_plugin_crashed:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_plugin_crashed:browser:plugin_path:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword')).
+	CallbackRegistry at: #on_render_process_terminated:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_render_process_terminated:browser:status:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword sdword'))! !
+!CEF3RequestHandler class categoriesFor: #cb_on_before_resource_load:browser:frame:request:!public! !
 !CEF3RequestHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3RequestHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3ResourceHandler guid: (GUID fromString: '{D1DB8B16-1B62-4B74-9FD4-7E9FC2A6AA76}')!
 CEF3ResourceHandler comment: ''!
@@ -5686,50 +6412,6 @@ get_response_headers: anObject
 
 	bytes dwordAtOffset: 20 put: anObject!
 
-handler
-	^handler!
-
-handler: anObject 
-	handler := anObject.
-	callbacks values do: [:each | each receiver: handler]!
-
-initializeCallbacks
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #process_request
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_process_request:request:callback:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword CEF3RequestEx* CEF3CallbackEx*')).
-	callbacks at: #get_response_headers
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_get_response_headers:response:response_length:redirectUrl:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEF3ResponseEx* sqword* CEFString*')).
-	callbacks at: #read_response
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:
-				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: sdword dword dword sdword  dword CEF3CallbackEx*')).
-	callbacks at: #can_get_cookie
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_can_get_cookie:cookie:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
-	callbacks at: #can_set_cookie
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_can_set_cookie:cookie:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
-	callbacks at: #cancel
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_cancel:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]!
-
 process_request
 	"Answer the receiver's process_request field as a Smalltalk object."
 
@@ -5756,17 +6438,14 @@ read_response: anObject
 !CEF3ResourceHandler categoriesFor: #can_set_cookie:!**compiled accessors**!public! !
 !CEF3ResourceHandler categoriesFor: #cancel!**compiled accessors**!public! !
 !CEF3ResourceHandler categoriesFor: #cancel:!**compiled accessors**!public! !
-!CEF3ResourceHandler categoriesFor: #cb_can_get_cookie:cookie:!**compiled accessors**!callback!must not strip!public! !
-!CEF3ResourceHandler categoriesFor: #cb_can_set_cookie:cookie:!**compiled accessors**!callback!must not strip!public! !
-!CEF3ResourceHandler categoriesFor: #cb_cancel:!**compiled accessors**!callback!must not strip!public! !
-!CEF3ResourceHandler categoriesFor: #cb_get_response_headers:response:response_length:redirectUrl:!**compiled accessors**!callback!must not strip!public! !
-!CEF3ResourceHandler categoriesFor: #cb_process_request:request:callback:!**compiled accessors**!callback!must not strip!public! !
-!CEF3ResourceHandler categoriesFor: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:!**compiled accessors**!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_can_get_cookie:cookie:!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_can_set_cookie:cookie:!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_cancel:!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_get_response_headers:response:response_length:redirectUrl:!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_process_request:request:callback:!callback!must not strip!public! !
+!CEF3ResourceHandler categoriesFor: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:!callback!must not strip!public! !
 !CEF3ResourceHandler categoriesFor: #get_response_headers!**compiled accessors**!public! !
 !CEF3ResourceHandler categoriesFor: #get_response_headers:!**compiled accessors**!public! !
-!CEF3ResourceHandler categoriesFor: #handler!accessing!private! !
-!CEF3ResourceHandler categoriesFor: #handler:!accessing!private! !
-!CEF3ResourceHandler categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 !CEF3ResourceHandler categoriesFor: #process_request!**compiled accessors**!public! !
 !CEF3ResourceHandler categoriesFor: #process_request:!**compiled accessors**!public! !
 !CEF3ResourceHandler categoriesFor: #read_response!**compiled accessors**!public! !
@@ -5788,8 +6467,44 @@ defineFields
 		defineField: #read_response type: LPVOIDField new;
 		defineField: #can_get_cookie type: LPVOIDField new;
 		defineField: #can_set_cookie type: LPVOIDField new;
-		defineField: #cancel type: LPVOIDField new! !
+		defineField: #cancel type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #process_request:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_process_request:request:callback:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword CEF3RequestEx* CEF3CallbackEx*')).
+	CallbackRegistry at: #get_response_headers:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_get_response_headers:response:response_length:redirectUrl:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEF3ResponseEx* sqword* CEFString*')).
+	CallbackRegistry at: #read_response:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: sdword dword dword sdword  dword CEF3CallbackEx*')).
+	CallbackRegistry at: #can_get_cookie:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_can_get_cookie:cookie:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
+	CallbackRegistry at: #can_set_cookie:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_can_set_cookie:cookie:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
+	CallbackRegistry at: #cancel:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_cancel:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword')).
+	 ! !
 !CEF3ResourceHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3ResourceHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3Response guid: (GUID fromString: '{8EFC8A2E-EEF8-4259-95EA-D1DE5FE05A31}')!
 CEF3Response comment: ''!
@@ -5955,31 +6670,10 @@ create
 create: anObject
 	"Set the receiver's create field to the value of anObject."
 
-	bytes dwordAtOffset: 16 put: anObject!
-
-handler
-	^handler!
-
-handler: anObject 
-	handler := anObject.
-	callbacks values do: [:each | each receiver: handler]!
-
-initializeCallbacks
-	super initializeCallbacks.
-	callbacks := LookupTable new.
-	callbacks at: #create
-		put: (MessageCallback 
-				receiver: self
-				selector: #cb_create:browser:frame:sheme_name:request:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3SchemeHandlerFactory* CEF3BrowserEx* CEF3FrameEx* CEFString* CEF3RequestEx*')).
-	callbacks 
-		keysAndValuesDo: [:aSymbol :aCallback | self perform: (aSymbol displayString , ':') asSymbol with: aCallback asParameter]! !
-!CEF3SchemeHandlerFactory categoriesFor: #cb_create:browser:frame:sheme_name:request:!**compiled accessors**!callback!must not strip!public! !
+	bytes dwordAtOffset: 16 put: anObject! !
+!CEF3SchemeHandlerFactory categoriesFor: #cb_create:browser:frame:sheme_name:request:!callback!must not strip!public! !
 !CEF3SchemeHandlerFactory categoriesFor: #create!**compiled accessors**!public! !
 !CEF3SchemeHandlerFactory categoriesFor: #create:!**compiled accessors**!public! !
-!CEF3SchemeHandlerFactory categoriesFor: #handler!accessing!private! !
-!CEF3SchemeHandlerFactory categoriesFor: #handler:!accessing!private! !
-!CEF3SchemeHandlerFactory categoriesFor: #initializeCallbacks!**compiled accessors**!callback!must not strip!public! !
 
 !CEF3SchemeHandlerFactory class methodsFor!
 
@@ -5991,8 +6685,18 @@ defineFields
 "
 
 	super defineFields.
-	self defineField: #create type: LPVOIDField new! !
+	self defineField: #create type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #create:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_create:browser:frame:sheme_name:request:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: dword CEF3SchemeHandlerFactory* CEF3BrowserEx* CEF3FrameEx* CEFString* CEF3RequestEx*'))! !
 !CEF3SchemeHandlerFactory class categoriesFor: #defineFields!initializing!public! !
+!CEF3SchemeHandlerFactory class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3SchemeRegistrar guid: (GUID fromString: '{7972B582-B84E-49AB-8D61-0A47A6A2FE8B}')!
 CEF3SchemeRegistrar comment: ''!
@@ -6013,8 +6717,7 @@ initialize
 	^self.
 	refCount := 1.
 	super initialize.
-	self base cefSize: self class byteSize.
-	self initializeCallbacks! !
+	self base cefSize: self class byteSize! !
 !CEF3SchemeRegistrar categoriesFor: #add_custom_scheme!**compiled accessors**!must not strip!public! !
 !CEF3SchemeRegistrar categoriesFor: #add_custom_scheme:!**compiled accessors**!must not strip!public! !
 !CEF3SchemeRegistrar categoriesFor: #initialize!must not strip!public! !
@@ -6143,24 +6846,119 @@ loadUrl: aString
 !CEF3FrameEx categoriesFor: #load_url_ex:url:!must not strip!public! !
 !CEF3FrameEx categoriesFor: #loadUrl:!must not strip!public! !
 
+CEF3PostDataEx guid: (GUID fromString: '{06E22F92-841A-4D11-A70D-7766BDBB6C2E}')!
+CEF3PostDataEx comment: ''!
+!CEF3PostDataEx categoriesForClass!External-Data-Structured! !
+!CEF3PostDataEx methodsFor!
+
+get_element_count_ex: this 
+	<stdcall: dword get_element_count dword>
+	^self invalidCall!
+
+get_elements_ex: this elementsCount: elementsCount  elements: elements
+	<stdcall: void get_elements dword dword dword>
+	^self invalidCall!
+
+getElementCount
+	get_element_count_ex ifNil: [self initializeExternalMethods].
+	^get_element_count_ex value: self withArguments: (Array with: self yourAddress)!
+
+getElements
+	| elementsCount elements |
+	get_elements_ex ifNil: [self initializeExternalMethods].
+	elementsCount := DWORD fromInteger: self getElementCount.
+	elements := DWORD new.
+	get_elements_ex value: self
+		withArguments: (Array 
+				with: self yourAddress
+				with: elementsCount yourAddress
+				with: elements yourAddress).
+	^StructureArray 
+		fromAddress: elements value
+		length: elementsCount value
+		elementClass: CEF3PostDataElementEx!
+
+initializeExternalMethods
+	get_elements_ex := self getCompileMethod: #get_elements_ex:elementsCount:elements:
+				proc: self get_elements.
+	get_element_count_ex := self getCompileMethod: #get_element_count_ex: proc: self get_element_count! !
+!CEF3PostDataEx categoriesFor: #get_element_count_ex:!must not strip!private! !
+!CEF3PostDataEx categoriesFor: #get_elements_ex:elementsCount:elements:!must not strip!private! !
+!CEF3PostDataEx categoriesFor: #getElementCount!must not strip!public! !
+!CEF3PostDataEx categoriesFor: #getElements!must not strip!public! !
+!CEF3PostDataEx categoriesFor: #initializeExternalMethods!must not strip!private! !
+
+CEF3PostDataElementEx guid: (GUID fromString: '{9A1C59F5-FD78-40B0-8664-AE3114FDF7F5}')!
+CEF3PostDataElementEx comment: ''!
+!CEF3PostDataElementEx categoriesForClass!External-Data-Structured! !
+!CEF3PostDataElementEx methodsFor!
+
+get_bytes_count_ex: this 
+	<stdcall: dword get_bytes_count dword>
+	^self invalidCall!
+
+get_bytes_ex: this size: s bytes: byts
+	<stdcall: dword get_bytes dword dword dword>
+	^self invalidCall!
+
+getBytes
+	| buff |
+	buff := ByteArray newFixed: self getBytesCount.
+	self getBytes: buff.
+	^buff!
+
+getBytes: aBuffer 
+	get_bytes_ex ifNil: [self initializeExternalMethods].
+	^get_bytes_ex value: self
+		withArguments: (Array 
+				with: self yourAddress
+				with: aBuffer size
+				with: aBuffer yourAddress)!
+
+getBytesCount
+	get_bytes_count_ex ifNil: [self initializeExternalMethods].
+	^get_bytes_count_ex value: self withArguments: (Array with: self yourAddress)!
+
+initializeExternalMethods
+	get_bytes_ex := self getCompileMethod: #get_bytes_ex:size:bytes: proc: self get_bytes.
+	get_bytes_count_ex := self getCompileMethod: #get_bytes_count_ex: proc: self get_bytes_count! !
+!CEF3PostDataElementEx categoriesFor: #get_bytes_count_ex:!must not strip!private! !
+!CEF3PostDataElementEx categoriesFor: #get_bytes_ex:size:bytes:!must not strip!private! !
+!CEF3PostDataElementEx categoriesFor: #getBytes!must not strip!public! !
+!CEF3PostDataElementEx categoriesFor: #getBytes:!must not strip!public! !
+!CEF3PostDataElementEx categoriesFor: #getBytesCount!must not strip!public! !
+!CEF3PostDataElementEx categoriesFor: #initializeExternalMethods!must not strip!private! !
+
 CEF3RequestEx guid: (GUID fromString: '{3FBF8598-2250-405C-A928-B7753BBF5421}')!
 CEF3RequestEx comment: ''!
 !CEF3RequestEx categoriesForClass!External-Data-Structured! !
 !CEF3RequestEx methodsFor!
 
+get_post_data_ex: this 
+	<stdcall: dword get_post_data dword>
+	^self invalidCall!
+
 get_url_ex: this 
 	<stdcall: CEFStringUserFree* get_url CEF3Request*>
 	^self invalidCall!
+
+getPostData
+	get_post_data_ex ifNil: [self initializeExternalMethods].
+	^CEF3PostDataEx
+		fromAddress: (get_post_data_ex value: self withArguments: (Array with: self yourAddress))!
 
 getUrl
 	get_url_ex ifNil: [self initializeExternalMethods].
 	^get_url_ex value: self withArguments: (Array with: self)!
 
 initializeExternalMethods
-	get_url_ex := self getCompileMethod: #get_url_ex: proc: self get_url! !
-!CEF3RequestEx categoriesFor: #get_url_ex:!must not strip!public! !
+	get_url_ex := self getCompileMethod: #get_url_ex: proc: self get_url.
+	get_post_data_ex := self getCompileMethod: #get_post_data_ex: proc: self get_post_data! !
+!CEF3RequestEx categoriesFor: #get_post_data_ex:!must not strip!private! !
+!CEF3RequestEx categoriesFor: #get_url_ex:!must not strip!private! !
+!CEF3RequestEx categoriesFor: #getPostData!must not strip!public! !
 !CEF3RequestEx categoriesFor: #getUrl!must not strip!public! !
-!CEF3RequestEx categoriesFor: #initializeExternalMethods!must not strip!public! !
+!CEF3RequestEx categoriesFor: #initializeExternalMethods!must not strip!private! !
 
 CEF3ResponseEx guid: (GUID fromString: '{AE3DDD24-5019-4AC1-96EE-E8BA362314CF}')!
 CEF3ResponseEx comment: ''!
@@ -6274,22 +7072,7 @@ logError: anException
 main
 	self initializeProcessInfo.
 	app := CEFApp new.
-	^app main
-	"args := CEF3MainArgs new.
-	args instance: VMLibrary default applicationHandle.
-	app := CEF3App new.
-	res := CEF3Library default 
-				cef_execute_process: args
-				application: app
-				windows_sandbox_info: 0.
-	res >= 0 ifTrue: [^self exit: res].
-	settings := CEF3Settings new.
-	res := CEF3Library default 
-				cef_initialize: args
-				settings: settings
-				application: app
-				windows_sandbox_info: 0.
-	self log: 'cef_initialize:   ' , res displayString"!
+	 !
 
 processType
 	^processType! !
@@ -6303,6 +7086,27 @@ CEFView comment: ''!
 !CEFView categoriesForClass!MVP-Resources-Misc! !
 !CEFView methodsFor!
 
+addResourceHandler: aResourceHandler 
+	self client requestHandler addResourceHandler: aResourceHandler!
+
+cb_do_close: this browser: browser 
+	^0!
+
+cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
+	cefBrowser := aCEF3BrowserEx.
+	cefHandle := cefBrowser host windowHandle.
+	self setCefPosition.
+	self onCefBrowserCreated!
+
+cb_on_before_close: this browser: browser 
+	!
+
+cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: windowInfo client: client settings: settings no_javascript_access: no_javascript_access 
+	^0!
+
+cb_run_modal: this browser: browser 
+	!
+
 cefBrowser
 	^cefBrowser!
 
@@ -6310,27 +7114,53 @@ cefWindowExStyle
 	^0!
 
 cefWindowStyle
-	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE).!
+	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE ).!
 
 client
-	^client ifNil: [client := CEF3Client new]!
+	^client 
+		ifNil: 
+			[client := self createClient.
+			self registerResourceHandlers.
+			client]!
 
-client: anObject
-	client := anObject!
+createClient
+	| aClient |
+	aClient := CEFClient new.
+	aClient lifeSpanHandler handler: self.
+	^aClient!
 
-on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	cefBrowser := aCEF3BrowserEx.
-	cefHandle := cefBrowser host windowHandle.
-	self setCefPosition!
+defaultUrl
+	^'about:blank'!
+
+ensureCefInit
+	CEFApp new!
+
+executeJavascript: aString 
+	self cefBrowser mainFrame executeJavascript: aString!
+
+onCefBrowserCreated
+	self setUrl: self defaultUrl.
+!
+
+onModelChanged
+	self registerResourceHandlers.
+	self client requestHandler resourceHandlers do: [:each | each crossTabModel: model].
+	self onCefBrowserCreated!
 
 onPositionChanged: aPositionEvent 
 	"Private - Handle a window position change event (move or resize)."
 
-	aPositionEvent isResize ifTrue: [self setCefPosition].
-	^super onPositionChanged: aPositionEvent!
+	"self doLog."
+	super onPositionChanged: aPositionEvent.
+	aPositionEvent isResize 
+		ifTrue: 
+			[self setCefPosition
+			"[self setCefPosition] postToInputQueue
+"]!
 
 onViewCreated
 	| aRect |
+	self ensureCefInit.
 	aRect := self clientRectangle.
 	windowInfo := (CEF3WindowInfo new)
 				window_name: 'CEF browser' asCefString;
@@ -6342,14 +7172,23 @@ onViewCreated
 				width: aRect right - aRect left;
 				height: aRect bottom - aRect top;
 				yourself.
-	client lifeSpanHandler handler: self.
 	browserSettings := CEF3BrowserSettings new.
+	browserSettings
+		universal_access_from_file_urls: 1;
+		file_access_from_file_urls: 1;
+		web_security: 2.
 	CEF3Library default 
 		cef_browser_host_create_browser: windowInfo
-		client: client asCefClient
-		url: self url
+		client: self client asCefClient
+		url: self url asCefString
 		settings: browserSettings
 		request_context: 0!
+
+registerResourceHandlers
+	 !
+
+removeAllResourceHandlers
+	self client requestHandler removeAllResourceHandlers!
 
 setCefPosition
 	| hdwp rect aFlag |
@@ -6367,29 +7206,40 @@ setCefPosition
 				uFlags: aFlag.
 	UserLibrary default endDeferWindowPos: hdwp!
 
+setUrl: aUrl 
+	url := aUrl.
+	cefBrowser ifNil: [^nil].
+	cefBrowser mainFrame loadUrl: aUrl!
+
 url
-	^url ifNil: [url := 'http://cefbuilds.com/' asCefString]!
+	^url ifNil: [url := self defaultUrl]!
 
 url: aCEFString 
-	url := aCEFString!
-
-wmWindowPosChanged: message wParam: wParam lParam: lParam 
-	^super 
-		wmWindowPosChanged: message
-		wParam: wParam
-		lParam: lParam! !
+	url := aCEFString! !
+!CEFView categoriesFor: #addResourceHandler:!private! !
+!CEFView categoriesFor: #cb_do_close:browser:!private! !
+!CEFView categoriesFor: #cb_on_after_created:browser:!event handling!private! !
+!CEFView categoriesFor: #cb_on_before_close:browser:!private! !
+!CEFView categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!private! !
+!CEFView categoriesFor: #cb_run_modal:browser:!private! !
 !CEFView categoriesFor: #cefBrowser!accessing!private! !
-!CEFView categoriesFor: #cefWindowExStyle!public! !
-!CEFView categoriesFor: #cefWindowStyle!public! !
+!CEFView categoriesFor: #cefWindowExStyle!private! !
+!CEFView categoriesFor: #cefWindowStyle!private! !
 !CEFView categoriesFor: #client!accessing!private! !
-!CEFView categoriesFor: #client:!accessing!private! !
-!CEFView categoriesFor: #on_after_created:browser:!event handling!public! !
+!CEFView categoriesFor: #createClient!accessing!private! !
+!CEFView categoriesFor: #defaultUrl!private! !
+!CEFView categoriesFor: #ensureCefInit!private! !
+!CEFView categoriesFor: #executeJavascript:!public! !
+!CEFView categoriesFor: #onCefBrowserCreated!public! !
+!CEFView categoriesFor: #onModelChanged!public! !
 !CEFView categoriesFor: #onPositionChanged:!event handling!private! !
-!CEFView categoriesFor: #onViewCreated!event handling!public! !
+!CEFView categoriesFor: #onViewCreated!event handling!private! !
+!CEFView categoriesFor: #registerResourceHandlers!private! !
+!CEFView categoriesFor: #removeAllResourceHandlers!private! !
 !CEFView categoriesFor: #setCefPosition!event handling!private! !
-!CEFView categoriesFor: #url!public! !
-!CEFView categoriesFor: #url:!public! !
-!CEFView categoriesFor: #wmWindowPosChanged:wParam:lParam:!event handling-win32!private! !
+!CEFView categoriesFor: #setUrl:!public! !
+!CEFView categoriesFor: #url!private! !
+!CEFView categoriesFor: #url:!private! !
 
 "Binary Globals"!
 
