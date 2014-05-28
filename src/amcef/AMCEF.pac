@@ -1,7 +1,7 @@
 | package |
 package := Package name: 'AMCEF'.
 package paxVersion: 1;
-	basicComment: 'CEF3Library default cef_version_infos. #(3 1706 35 0 1916 86)
+	basicComment: 'CEF3Library default cef_version_infos. #(3 1706 35 0 1916 0)
 CEF3Library default cef_build_revision. 1706
 
 shell := ShellView new 
@@ -22,10 +22,30 @@ view executeJavascript: ''alert("hello")''.
 view setUrl: ''chrome://chrome-urls/''.
   
 view addResourceHandler: (CEFHtmlResourceHandler html: ''<html><body bgcolor="white">Hello from Dolphin</body></html>'' acceptUrl: [:aUrl |  aUrl = ''http://hello-from-dolphin/'' ] ).
-view setUrl: ''http://hello-from-dolphin/''.
+view setUrl: ''http://hello-from-dolphin''.
+
+"Dart script"
+view addResourceHandler: (CEFHtmlResourceHandler html: ''
+<!!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Dart App</title>
+  </head>
+  <body>
+    <h1>Hello, Dart!!</h1>
+    <script type="application/dart">
+	import "dart:html";
+	main(){
+		window.alert("hello from dart");
+	}
+    </script>
+  </body>
+</html>
+'' acceptUrl: [:aUrl |  aUrl = ''http://dart-from-dolphin/'' ]).
+
+view setUrl: ''http://dart-from-dolphin''.
  
- 
-  '.
+'.
 
 package imageStripperBytes: (ByteArray fromBase64String: 'IVNUQiAzIEYPDQAEAAAASW1hZ2VTdHJpcHBlcgAAAABSAAAABQAAAEFNQ0VGUgAAAA8AAABkb2xw
 aGluLWNlZi5leGWaAAAAUgAAAAUAAABBTUNFRlIAAAAZAAAAQ0VGM1J1bnRpbWVTZXNzaW9uTWFu
@@ -105,10 +125,14 @@ package globalAliases: (Set new
 	yourself).
 
 package setPrerequisites: (IdentitySet new
+	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
 	add: '..\..\bin\Object Arts\Dolphin\Base\Dolphin';
 	add: '..\..\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
 	yourself).
+
+package setManualPrerequisites: #(
+	'AMCyclicPrerequisities').
 
 package!
 
@@ -542,7 +566,7 @@ initialize
 	!
 
 main
-	| res |
+	| res cacheFolder |
 	isInitialize ifTrue: [Error signal: 'App already initialized'].
 	isInitialize := true.
 	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
@@ -564,9 +588,13 @@ main
 		ifFalse: 
 			[settings 
 				browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString]."
+	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
+	File createDirectoryPath: cacheFolder.
+	settings cache_path: cacheFolder asCefString.
 	settings 
 		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
 	settings
+		remote_debugging_port: 9222;
 		no_sandbox: 1;
 		multi_threaded_message_loop: 1.
 	res := self lib 
@@ -7159,7 +7187,7 @@ onPositionChanged: aPositionEvent
 "]!
 
 onViewCreated
-	| aRect |
+	| aRect cacheFolder |
 	self ensureCefInit.
 	aRect := self clientRectangle.
 	windowInfo := (CEF3WindowInfo new)
@@ -7173,6 +7201,7 @@ onViewCreated
 				height: aRect bottom - aRect top;
 				yourself.
 	browserSettings := CEF3BrowserSettings new.
+	browserSettings application_cache: 1.
 	browserSettings
 		universal_access_from_file_urls: 1;
 		file_access_from_file_urls: 1;
