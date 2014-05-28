@@ -13,7 +13,7 @@ Setup:
 
 - browse package amcef
 
-Note : cef runtime is provided for a quick startup, it is based on Dartium  
+Note : cef runtime is provided for a quick startup, it is based on Dartium with DEP policy disabled  
  
 
 ```
