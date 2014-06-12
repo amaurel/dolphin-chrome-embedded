@@ -126,9 +126,9 @@ package globalAliases: (Set new
 
 package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
-	add: '..\..\bin\Object Arts\Dolphin\Base\Dolphin';
-	add: '..\..\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
-	add: '..\..\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
+	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
+	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
+	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
 	yourself).
 
 package setManualPrerequisites: #(
