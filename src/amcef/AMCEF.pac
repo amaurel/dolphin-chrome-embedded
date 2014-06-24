@@ -21,6 +21,10 @@ view executeJavascript: ''alert("hello")''.
 
 view setUrl: ''chrome://chrome-urls/''.
   
+view addResourceHandler: (CEFDirectoryResourceHandler directory:''D:\MyDolphin\bntribe\bn\bin\config\html\pathways'' domain:''http://m/'').
+view setUrl: ''http://m/main.html''.
+view setUrl: ''http://m/test.html''.
+  
 view addResourceHandler: (CEFHtmlResourceHandler html: ''<html><body bgcolor="white">Hello from Dolphin</body></html>'' acceptUrl: [:aUrl |  aUrl = ''http://hello-from-dolphin/'' ] ).
 view setUrl: ''http://hello-from-dolphin''.
 
@@ -55,6 +59,8 @@ package classNames
 	add: #CEF3;
 	add: #CEF3App;
 	add: #CEF3BaseObject;
+	add: #CEF3BeforeDownloadCallback;
+	add: #CEF3BeforeDownloadCallbackEx;
 	add: #CEF3Browser;
 	add: #CEF3BrowserEx;
 	add: #CEF3BrowserHost;
@@ -65,6 +71,7 @@ package classNames
 	add: #CEF3CallbackEx;
 	add: #CEF3Client;
 	add: #CEF3CommandLine;
+	add: #CEF3DownloadHandler;
 	add: #CEF3Frame;
 	add: #CEF3FrameEx;
 	add: #CEF3Library;
@@ -76,6 +83,8 @@ package classNames
 	add: #CEF3PostDataElementEx;
 	add: #CEF3PostDataEx;
 	add: #CEF3ProcessMessage;
+	add: #CEF3QuotaCallback;
+	add: #CEF3QuotaCallbackEx;
 	add: #CEF3Request;
 	add: #CEF3RequestEx;
 	add: #CEF3RequestHandler;
@@ -93,6 +102,8 @@ package classNames
 	add: #CEFClassCallbackRegistry;
 	add: #CEFClassCallbackRegistryEx;
 	add: #CEFClient;
+	add: #CEFDirectoryResourceHandler;
+	add: #CEFDownloadHandler;
 	add: #CEFExternalStructure;
 	add: #CEFHandlerMessageCallback;
 	add: #CEFHtmlResourceHandler;
@@ -126,6 +137,7 @@ package globalAliases: (Set new
 
 package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
+	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\Util\AMUtil';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
@@ -154,7 +166,12 @@ CEFObject subclass: #CEFClassCallbackRegistry
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFClient
-	instanceVariableNames: 'client requestHandler'
+	instanceVariableNames: 'client requestHandler downloadHandler'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFObject subclass: #CEFDownloadHandler
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -165,11 +182,16 @@ CEFObject subclass: #CEFRequestHandler
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFResourceHandler
 	instanceVariableNames: 'requestHandler cefHandler stream postData url'
-	classVariableNames: ''
+	classVariableNames: 'MIMETYPES'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFClassCallbackRegistry subclass: #CEFClassCallbackRegistryEx
 	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFResourceHandler subclass: #CEFDirectoryResourceHandler
+	instanceVariableNames: 'directory domain'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -258,6 +280,11 @@ CEF3BaseObject subclass: #CEF3App
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3BeforeDownloadCallback
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3Browser
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -279,11 +306,16 @@ CEF3BaseObject subclass: #CEF3Callback
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3Client
-	instanceVariableNames: 'callbacks loadHandler lifeSpanHandler requestHandler'
+	instanceVariableNames: 'callbacks loadHandler lifeSpanHandler requestHandler downloadHandler'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3CommandLine
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3DownloadHandler
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -318,6 +350,11 @@ CEF3BaseObject subclass: #CEF3ProcessMessage
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3QuotaCallback
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3Request
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -345,6 +382,11 @@ CEF3BaseObject subclass: #CEF3SchemeHandlerFactory
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3SchemeRegistrar
 	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BeforeDownloadCallback subclass: #CEF3BeforeDownloadCallbackEx
+	instanceVariableNames: 'cont_ex'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -378,8 +420,13 @@ CEF3PostDataElement subclass: #CEF3PostDataElementEx
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEF3QuotaCallback subclass: #CEF3QuotaCallbackEx
+	instanceVariableNames: 'cont_ex cancel_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEF3Request subclass: #CEF3RequestEx
-	instanceVariableNames: 'get_url_ex get_post_data_ex'
+	instanceVariableNames: 'get_url_ex get_post_data_ex get_method_ex'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -403,8 +450,8 @@ RuntimeSessionManager subclass: #CEF3RuntimeSessionManager
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-ContainerView subclass: #CEFView
-	instanceVariableNames: 'windowInfo browserSettings client url cefHandle cefBrowser'
+View subclass: #CEFView
+	instanceVariableNames: 'windowInfo browserSettings client url cefHandle cefBrowser childBrowserView parentBrowserView'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -595,7 +642,7 @@ main
 		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
 	settings
 		remote_debugging_port: 9222;
-		no_sandbox: 1;
+		"no_sandbox: 1;"
 		multi_threaded_message_loop: 1.
 	res := self lib 
 				cef_initialize: args
@@ -748,10 +795,15 @@ CEFClient comment: ''!
 asCefClient
 	^client!
 
+downloadHandler
+	^downloadHandler!
+
 initialize
 	client := CEF3Client new.
 	requestHandler := CEFRequestHandler new.
-	client requestHandler handler: requestHandler!
+	client requestHandler handler: requestHandler.
+	downloadHandler := CEFDownloadHandler new.
+	client downloadHandler handler: downloadHandler!
 
 lifeSpanHandler
 	client ifNil: [self initialize].
@@ -760,9 +812,24 @@ lifeSpanHandler
 requestHandler
 	^requestHandler! !
 !CEFClient categoriesFor: #asCefClient!public! !
+!CEFClient categoriesFor: #downloadHandler!accessing!private! !
 !CEFClient categoriesFor: #initialize!private! !
 !CEFClient categoriesFor: #lifeSpanHandler!public! !
 !CEFClient categoriesFor: #requestHandler!accessing!public! !
+
+CEFDownloadHandler guid: (GUID fromString: '{0867C359-4E06-4550-B315-D8DB6819EAAE}')!
+CEFDownloadHandler comment: ''!
+!CEFDownloadHandler categoriesForClass!Kernel-Objects! !
+!CEFDownloadHandler methodsFor!
+
+cb_on_before_download: this browser: browser download_item: download_item suggested_name: suggested_name callback: callback 
+	self log: 'cb_on_before_download:'.
+	callback continue_download_path: '' asCefString show_dialog: 1 !
+
+cb_on_download_updated: this browser: browser download_item: download_item callback: callback 
+	 self log: 'cb_on_download_updated:'! !
+!CEFDownloadHandler categoriesFor: #cb_on_before_download:browser:download_item:suggested_name:callback:!**compiled accessors**!public! !
+!CEFDownloadHandler categoriesFor: #cb_on_download_updated:browser:download_item:callback:!**compiled accessors**!public! !
 
 CEFRequestHandler guid: (GUID fromString: '{346A6E5A-01B6-49B6-920D-F388594278FE}')!
 CEFRequestHandler comment: ''!
@@ -880,7 +947,7 @@ void (CEF_CALLBACK *get_response_headers)(
 	self log: 'cb_get_response_headers: ' , aLARGE_INTEGER displayString.
 	aCEF3ResponseEx setStatus: 200.
 	aCEF3ResponseEx setStatusText: 'OK' asCefString.
-	aCEF3ResponseEx setMimeType: 'text/html' asCefString .
+	aCEF3ResponseEx setMimeType: self mimeType asCefString.
 	self log: 'cb_get_response_headers: ' , aCEF3ResponseEx getMimeType str asString.
 	aLARGE_INTEGER value: -1!
 
@@ -920,24 +987,21 @@ cb_read_response: this data_out: data_out bytes_to_read: bytes_to_read bytes_rea
       struct _cef_callback_t* callback);
 "
 
-	| out aReadBytes aSDWORD aCount |
+	| out aReadBytes aSDWORD |
 	aSDWORD := SDWORD fromAddress: intpointer.
 	self stream atEnd 
 		ifTrue: 
-			[stream := nil.
+			[self closeStream.
 			aSDWORD value: 0.
 			self onDone.
 			^0].
-	"self log: 'cb_read_response: ' , bytes_to_read displayString."
 	out := ExternalAddress fromInteger: data_out.
-	aReadBytes := self stream lastPosition - self stream position min: bytes_to_read.
+	aReadBytes := self stream lastPosition - self stream position.
+	aReadBytes := aReadBytes min: bytes_to_read.
 	self stream 
 		next: aReadBytes
 		into: out
 		startingAt: 1.
-	"[self stream atEnd not and: [aReadBytes < out size]] whileTrue: 
-			[aReadBytes := aReadBytes + 1.
-			out at: aReadBytes put: self stream next]."
 	aSDWORD value: aReadBytes.
 	^1!
 
@@ -947,6 +1011,10 @@ cefHandler
 			[cefHandler := CEF3ResourceHandler new.
 			cefHandler handler: self]!
 
+closeStream
+	stream close.
+	stream := nil!
+
 copy
 	| aCopy |
 	aCopy := super copy.
@@ -955,6 +1023,12 @@ copy
 
 initialize
 	!
+
+mimeType
+	| aExt aMimeType |
+	aExt := File splitExtensionFrom: url.
+	aMimeType := self class mimeTypes at: aExt ifAbsent: ['application/octet-stream'].
+	^aMimeType!
 
 onDone
 	requestHandler 
@@ -987,8 +1061,10 @@ stream
 !CEFResourceHandler categoriesFor: #cb_process_request:request:callback:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_read_response:data_out:bytes_to_read:bytes_read:callback:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cefHandler!accessing!private! !
+!CEFResourceHandler categoriesFor: #closeStream!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #copy!public! !
 !CEFResourceHandler categoriesFor: #initialize!private! !
+!CEFResourceHandler categoriesFor: #mimeType!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #onDone!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData:!accessing!private! !
@@ -999,10 +1075,216 @@ stream
 
 !CEFResourceHandler class methodsFor!
 
+mimeTypes
+	"
+MIMETYPES := nil.
+"
+
+	MIMETYPES 
+		ifNil: 
+			[| mineTypes |
+			mineTypes := Dictionary new.
+			mineTypes
+				at: 'dart' put: 'application/vnd.dart';
+				at: '323' put: 'text/h323';
+				at: '*' put: 'application/octet-stream';
+				at: 'acx' put: 'application/internet-property-stream';
+				at: 'ai' put: 'application/postscript';
+				at: 'aif' put: 'audio/x-aiff';
+				at: 'aifc' put: 'audio/x-aiff';
+				at: 'aiff' put: 'audio/x-aiff';
+				at: 'asf' put: 'video/x-ms-asf';
+				at: 'asr' put: 'video/x-ms-asf';
+				at: 'asx' put: 'video/x-ms-asf';
+				at: 'au' put: 'audio/basic';
+				at: 'avi' put: 'video/x-msvideo';
+				at: 'axs' put: 'application/olescript';
+				at: 'bas' put: 'text/plain';
+				at: 'bcpio' put: 'application/x-bcpio';
+				at: 'bin' put: 'application/octet-stream';
+				at: 'bmp' put: 'image/bmp';
+				at: 'c' put: 'text/plain';
+				at: 'cat' put: 'application/vnd.ms-pkiseccat';
+				at: 'cdf' put: 'application/x-cdf';
+				at: 'cdf' put: 'application/x-netcdf';
+				at: 'cer' put: 'application/x-x509-ca-cert';
+				at: 'class' put: 'application/octet-stream';
+				at: 'clp' put: 'application/x-msclip';
+				at: 'cmx' put: 'image/x-cmx';
+				at: 'cod' put: 'image/cis-cod';
+				at: 'cpio' put: 'application/x-cpio';
+				at: 'crd' put: 'application/x-mscardfile';
+				at: 'crl' put: 'application/pkix-crl';
+				at: 'crt' put: 'application/x-x509-ca-cert';
+				at: 'csh' put: 'application/x-csh';
+				at: 'css' put: 'text/css';
+				at: 'dcr' put: 'application/x-director';
+				at: 'der' put: 'application/x-x509-ca-cert';
+				at: 'dir' put: 'application/x-director';
+				at: 'dll' put: 'application/x-msdownload';
+				at: 'dms' put: 'application/octet-stream';
+				at: 'doc' put: 'application/msword';
+				at: 'dot' put: 'application/msword';
+				at: 'dvi' put: 'application/x-dvi';
+				at: 'dxr' put: 'application/x-director';
+				at: 'eps' put: 'application/postscript';
+				at: 'etx' put: 'text/x-setext';
+				at: 'evy' put: 'application/envoy';
+				at: 'exe' put: 'application/octet-stream';
+				at: 'fif' put: 'application/fractals';
+				at: 'flr' put: 'x-world/x-vrml';
+				at: 'gif' put: 'image/gif';
+				at: 'gtar' put: 'application/x-gtar';
+				at: 'gz' put: 'application/x-gzip';
+				at: 'h' put: 'text/plain';
+				at: 'hdf' put: 'application/x-hdf';
+				at: 'hlp' put: 'application/winhlp';
+				at: 'hqx' put: 'application/mac-binhex40';
+				at: 'hta' put: 'application/hta';
+				at: 'htc' put: 'text/x-component';
+				at: 'htm' put: 'text/html';
+				at: 'html' put: 'text/html';
+				at: 'htt' put: 'text/webviewhtml';
+				at: 'ico' put: 'image/x-icon';
+				at: 'ief' put: 'image/ief';
+				at: 'iii' put: 'application/x-iphone';
+				at: 'ins' put: 'application/x-internet-signup';
+				at: 'isp' put: 'application/x-internet-signup';
+				at: 'jfif' put: 'image/pipeg';
+				at: 'jpe' put: 'image/jpeg';
+				at: 'jpeg' put: 'image/jpeg';
+				at: 'jpg' put: 'image/jpeg';
+				at: 'js' put: 'application/x-javascript';
+				at: 'latex' put: 'application/x-latex';
+				at: 'lha' put: 'application/octet-stream';
+				at: 'lsf' put: 'video/x-la-asf';
+				at: 'lsx' put: 'video/x-la-asf';
+				at: 'lzh' put: 'application/octet-stream';
+				at: 'm13' put: 'application/x-msmediaview';
+				at: 'm14' put: 'application/x-msmediaview';
+				at: 'm3u' put: 'audio/x-mpegurl';
+				at: 'man' put: 'application/x-troff-man';
+				at: 'mdb' put: 'application/x-msaccess';
+				at: 'me' put: 'application/x-troff-me';
+				at: 'mht' put: 'message/rfc822';
+				at: 'mhtml' put: 'message/rfc822';
+				at: 'mid' put: 'audio/mid';
+				at: 'mny' put: 'application/x-msmoney';
+				at: 'mov' put: 'video/quicktime';
+				at: 'movie' put: 'video/x-sgi-movie';
+				at: 'mp2' put: 'video/mpeg';
+				at: 'mp3' put: 'audio/mpeg';
+				at: 'mpa' put: 'video/mpeg';
+				at: 'mpe' put: 'video/mpeg';
+				at: 'mpeg' put: 'video/mpeg';
+				at: 'mpg' put: 'video/mpeg';
+				at: 'mpp' put: 'application/vnd.ms-project';
+				at: 'mpv2' put: 'video/mpeg';
+				at: 'ms' put: 'application/x-troff-ms';
+				at: 'msg' put: 'application/vnd.ms-outlook';
+				at: 'mvb' put: 'application/x-msmediaview';
+				at: 'nc' put: 'application/x-netcdf';
+				at: 'nws' put: 'message/rfc822';
+				at: 'oda' put: 'application/oda';
+				at: 'p10' put: 'application/pkcs10';
+				at: 'p12' put: 'application/x-pkcs12';
+				at: 'p7b' put: 'application/x-pkcs7-certificates';
+				at: 'p7c' put: 'application/x-pkcs7-mime';
+				at: 'p7m' put: 'application/x-pkcs7-mime';
+				at: 'p7r' put: 'application/x-pkcs7-certreqresp';
+				at: 'p7s' put: 'application/x-pkcs7-signature';
+				at: 'pbm' put: 'image/x-portable-bitmap';
+				at: 'pdf' put: 'application/pdf';
+				at: 'pfx' put: 'application/x-pkcs12';
+				at: 'pgm' put: 'image/x-portable-graymap';
+				at: 'pko' put: 'application/ynd.ms-pkipko';
+				at: 'pma' put: 'application/x-perfmon';
+				at: 'pmc' put: 'application/x-perfmon';
+				at: 'pml' put: 'application/x-perfmon';
+				at: 'pmr' put: 'application/x-perfmon';
+				at: 'pmw' put: 'application/x-perfmon';
+				at: 'pnm' put: 'image/x-portable-anymap';
+				at: 'pot' put: 'application/vnd.ms-powerpoint';
+				at: 'ppm' put: 'image/x-portable-pixmap';
+				at: 'pps' put: 'application/vnd.ms-powerpoint';
+				at: 'ppt' put: 'application/vnd.ms-powerpoint';
+				at: 'prf' put: 'application/pics-rules';
+				at: 'ps' put: 'application/postscript';
+				at: 'pub' put: 'application/x-mspublisher';
+				at: 'qt' put: 'video/quicktime';
+				at: 'ra' put: 'audio/x-pn-realaudio';
+				at: 'ram' put: 'audio/x-pn-realaudio';
+				at: 'ras' put: 'image/x-cmu-raster';
+				at: 'rgb' put: 'image/x-rgb';
+				at: 'rmi' put: 'audio/mid';
+				at: 'roff' put: 'application/x-troff';
+				at: 'rtf' put: 'application/rtf';
+				at: 'rtx' put: 'text/richtext';
+				at: 'scd' put: 'application/x-msschedule';
+				at: 'sct' put: 'text/scriptlet';
+				at: 'setpay' put: 'application/set-payment-initiation';
+				at: 'setreg' put: 'application/set-registration-initiation';
+				at: 'sh' put: 'application/x-sh';
+				at: 'shar' put: 'application/x-shar';
+				at: 'sit' put: 'application/x-stuffit';
+				at: 'snd' put: 'audio/basic';
+				at: 'spc' put: 'application/x-pkcs7-certificates';
+				at: 'spl' put: 'application/futuresplash';
+				at: 'src' put: 'application/x-wais-source';
+				at: 'sst' put: 'application/vnd.ms-pkicertstore';
+				at: 'stl' put: 'application/vnd.ms-pkistl';
+				at: 'stm' put: 'text/html';
+				at: 'sv4cpio' put: 'application/x-sv4cpio';
+				at: 'sv4crc' put: 'application/x-sv4crc';
+				at: 'svg' put: 'image/svg+xml';
+				at: 'swf' put: 'application/x-shockwave-flash';
+				at: 't' put: 'application/x-troff';
+				at: 'tar' put: 'application/x-tar';
+				at: 'tcl' put: 'application/x-tcl';
+				at: 'tex' put: 'application/x-tex';
+				at: 'texi' put: 'application/x-texinfo';
+				at: 'texinfo' put: 'application/x-texinfo';
+				at: 'tgz' put: 'application/x-compressed';
+				at: 'tif' put: 'image/tiff';
+				at: 'tiff' put: 'image/tiff';
+				at: 'tr' put: 'application/x-troff';
+				at: 'trm' put: 'application/x-msterminal';
+				at: 'tsv' put: 'text/tab-separated-values';
+				at: 'txt' put: 'text/plain';
+				at: 'uls' put: 'text/iuls';
+				at: 'ustar' put: 'application/x-ustar';
+				at: 'vcf' put: 'text/x-vcard';
+				at: 'vrml' put: 'x-world/x-vrml';
+				at: 'wav' put: 'audio/x-wav';
+				at: 'wcm' put: 'application/vnd.ms-works';
+				at: 'wdb' put: 'application/vnd.ms-works';
+				at: 'wks' put: 'application/vnd.ms-works';
+				at: 'wmf' put: 'application/x-msmetafile';
+				at: 'wps' put: 'application/vnd.ms-works';
+				at: 'wri' put: 'application/x-mswrite';
+				at: 'wrl' put: 'x-world/x-vrml';
+				at: 'wrz' put: 'x-world/x-vrml';
+				at: 'xaf' put: 'x-world/x-vrml';
+				at: 'xbm' put: 'image/x-xbitmap';
+				at: 'xla' put: 'application/vnd.ms-excel';
+				at: 'xlc' put: 'application/vnd.ms-excel';
+				at: 'xlm' put: 'application/vnd.ms-excel';
+				at: 'xls' put: 'application/vnd.ms-excel';
+				at: 'xlt' put: 'application/vnd.ms-excel';
+				at: 'xlw' put: 'application/vnd.ms-excel';
+				at: 'xof' put: 'x-world/x-vrml';
+				at: 'xpm' put: 'image/x-xpixmap';
+				at: 'xwd' put: 'image/x-xwindowdump';
+				at: 'z' put: 'application/x-compress';
+				at: 'zip' put: 'application/zip'.
+			MIMETYPES := mineTypes].
+	^MIMETYPES!
+
 onRequestHandler: aCEFRequestHandler 
 	^(self new)
 		requestHandler: aCEFRequestHandler;
 		yourself! !
+!CEFResourceHandler class categoriesFor: #mimeTypes!public! !
 !CEFResourceHandler class categoriesFor: #onRequestHandler:!public! !
 
 CEFClassCallbackRegistryEx guid: (GUID fromString: '{5F778CFD-39A7-42E8-9485-ADD7320244EA}')!
@@ -1014,6 +1296,56 @@ initializeCallbacksForInstance: anInstance
 	super initializeCallbacksForInstance: anInstance.
 	cefClass superclass callbackRegistry initializeCallbacksForInstance: anInstance! !
 !CEFClassCallbackRegistryEx categoriesFor: #initializeCallbacksForInstance:!public! !
+
+CEFDirectoryResourceHandler guid: (GUID fromString: '{A86F72EC-D415-4EC7-84AB-7313B5984378}')!
+CEFDirectoryResourceHandler comment: ''!
+!CEFDirectoryResourceHandler categoriesForClass!Kernel-Objects! !
+!CEFDirectoryResourceHandler methodsFor!
+
+basicAcceptUrl: aUrl 
+	| answer |
+	answer := (aUrl beginsWith: domain) 
+				ifTrue: [File exists: (self filenameFromUrl: aUrl)]
+				ifFalse: [false].
+	^answer!
+
+directory
+	^directory!
+
+directory: anObject
+	directory := anObject!
+
+domain
+	^domain!
+
+domain: anObject
+	domain := anObject!
+
+filenameFromUrl: aUrl 
+	| aPath answer |
+	aPath := aUrl copyFrom: domain size + 1.
+	answer := File composePath: self directory subPath: aPath.
+	^answer!
+
+stream
+	stream ifNil: [stream := FileStream read: (self filenameFromUrl: url) text: false].
+	^stream! !
+!CEFDirectoryResourceHandler categoriesFor: #basicAcceptUrl:!public! !
+!CEFDirectoryResourceHandler categoriesFor: #directory!accessing!private! !
+!CEFDirectoryResourceHandler categoriesFor: #directory:!accessing!private! !
+!CEFDirectoryResourceHandler categoriesFor: #domain!accessing!private! !
+!CEFDirectoryResourceHandler categoriesFor: #domain:!accessing!private! !
+!CEFDirectoryResourceHandler categoriesFor: #filenameFromUrl:!public! !
+!CEFDirectoryResourceHandler categoriesFor: #stream!private! !
+
+!CEFDirectoryResourceHandler class methodsFor!
+
+directory: aDir domain: aDomain 
+	^(self new)
+		domain: aDomain;
+		directory: aDir;
+		yourself! !
+!CEFDirectoryResourceHandler class categoriesFor: #directory:domain:!public! !
 
 CEFHtmlResourceHandler guid: (GUID fromString: '{B2363991-DDF1-43DB-8617-1678077D681D}')!
 CEFHtmlResourceHandler comment: ''!
@@ -1071,6 +1403,9 @@ cefReceiver: anAddress
 	receiverAddress := (DWORD fromAddress: anAddress) value.
 	^receiver getInstance: receiverAddress!
 
+selector
+	^selector!
+
 valueWithArgumentsAt: anAddress 
 	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
 
@@ -1079,6 +1414,7 @@ valueWithArgumentsAt: anAddress
 		withArgumentsAt: anAddress
 		descriptor: descriptor! !
 !CEFMessageCallback categoriesFor: #cefReceiver:!evaluating!private! !
+!CEFMessageCallback categoriesFor: #selector!accessing!private! !
 !CEFMessageCallback categoriesFor: #valueWithArgumentsAt:!evaluating!private! !
 
 !CEFMessageCallback class methodsFor!
@@ -1453,7 +1789,7 @@ self initialize.
 			to: self!
 
 onShutdown
-	CEFCompiledMethods := nil!
+	"CEFCompiledMethods := nil"!
 
 onStartup
 	CEFCompiledMethods := nil! !
@@ -1745,81 +2081,27 @@ self doNotStripSelectors
 
 	self doNotStripClasses.
 	DeafObject current 
-		cb_on_render_process_terminated: nil
+		cb_on_quota_request: nil
 		browser: nil
-		status: nil.
+		origin_url: nil
+		new_size: nil
+		callback: nil.
+	DeafObject current 
+		cb_on_before_resource_load: nil
+		browser: nil
+		frame: nil
+		request: nil.
+	DeafObject current cb_on_after_created: nil browser: nil.
+	DeafObject current cb_do_close: nil browser: nil.
+	DeafObject current onGetBrowserProcessHandler: nil.
+	DeafObject current cb_get_request_handler: nil.
 	DeafObject current 
 		cb_on_before_browse: nil
 		browser: nil
 		frame: nil
 		request: nil
 		is_redirect: nil.
-	DeafObject current 
-		onBeforeCommandLineProcessing: nil
-		process_type: nil
-		command_line: nil.
-	DeafObject current cb_releaseRef: nil.
-	DeafObject current cb_on_before_close: nil browser: nil.
-	DeafObject current 
-		cb_create: nil
-		browser: nil
-		frame: nil
-		sheme_name: nil
-		request: nil.
-	DeafObject current 
-		cb_on_load_start: nil
-		browser: nil
-		frame: nil.
-	DeafObject current onGetBrowserProcessHandler: nil.
-	DeafObject current 
-		cb_on_certificate_error: nil
-		cert_error: nil
-		request_url: nil
-		callback: nil.
-	DeafObject current cb_getRefct: nil.
-	DeafObject current cb_addRef: nil.
-	DeafObject current 
-		cb_on_load_end: nil
-		browser: nil
-		frame: nil
-		httpStatusCode: nil.
-	DeafObject current cb_do_close: nil browser: nil.
-	DeafObject current 
-		cb_on_process_message_received: nil
-		browser: nil
-		source_process: nil
-		message: nil.
-	DeafObject current 
-		cb_on_resource_redirect: nil
-		browser: nil
-		frame: nil
-		old_url: nil
-		new_url: nil.
-	DeafObject current 
-		cb_on_plugin_crashed: nil
-		browser: nil
-		plugin_path: nil.
-	DeafObject current 
-		cb_on_protocol_execution: nil
-		browser: nil
-		url: nil
-		allow_os_execution: nil.
-	DeafObject current 
-		cb_on_before_resource_load: nil
-		browser: nil
-		frame: nil
-		request: nil.
-	DeafObject current 
-		cb_on_before_popup: nil
-		browser: nil
-		frame: nil
-		target_url: nil
-		target_frame_name: nil
-		popupFeatures: nil
-		windowInfo: nil
-		client: nil
-		settings: nil
-		no_javascript_access: nil.
+	DeafObject current onGetResourceBundleHandler: nil.
 	DeafObject current 
 		cb_get_auth_credentials: nil
 		browser: nil
@@ -1837,14 +2119,72 @@ self doNotStripSelectors
 		errorCode: nil
 		errorText: nil
 		failedUrl: nil.
-	DeafObject current cb_get_request_handler: nil.
-	DeafObject current onGetResourceBundleHandler: nil.
+	DeafObject current cb_get_life_span_handler: nil.
+	DeafObject current cb_releaseRef: nil.
 	DeafObject current 
-		cb_on_quota_request: nil
-		browser: nil
-		origin_url: nil
-		new_size: nil
+		cb_on_certificate_error: nil
+		cert_error: nil
+		request_url: nil
 		callback: nil.
+	DeafObject current onRegisterCustomSchemes: nil registrar: nil.
+	DeafObject current 
+		cb_on_protocol_execution: nil
+		browser: nil
+		url: nil
+		allow_os_execution: nil.
+	DeafObject current 
+		cb_on_plugin_crashed: nil
+		browser: nil
+		plugin_path: nil.
+	DeafObject current 
+		cb_on_load_start: nil
+		browser: nil
+		frame: nil.
+	DeafObject current 
+		cb_get_response_headers: nil
+		response: nil
+		response_length: nil
+		redirectUrl: nil.
+	DeafObject current cb_cancel: nil.
+	DeafObject current 
+		cb_get_resource_handler: nil
+		browser: nil
+		frame: nil
+		request: nil.
+	DeafObject current cb_run_modal: nil browser: nil.
+	DeafObject current cb_addRef: nil.
+	DeafObject current 
+		cb_on_resource_redirect: nil
+		browser: nil
+		frame: nil
+		old_url: nil
+		new_url: nil.
+	DeafObject current cb_can_get_cookie: nil cookie: nil.
+	DeafObject current 
+		cb_on_before_plugin_load: nil
+		browser: nil
+		url: nil
+		policy_url: nil
+		info: nil.
+	DeafObject current cb_can_set_cookie: nil cookie: nil.
+	DeafObject current onCallback: nil.
+	DeafObject current 
+		onBeforeCommandLineProcessing: nil
+		process_type: nil
+		command_line: nil.
+	DeafObject current cb_on_before_child_process_launch: nil command: nil.
+	DeafObject current cb_get_download_handler: nil.
+	DeafObject current 
+		cb_create: nil
+		browser: nil
+		frame: nil
+		sheme_name: nil
+		request: nil.
+	DeafObject current 
+		cb_on_render_process_terminated: nil
+		browser: nil
+		status: nil.
+	DeafObject current cb_on_before_close: nil browser: nil.
 	DeafObject current 
 		cb_read_response: nil
 		data_out: nil
@@ -1856,39 +2196,47 @@ self doNotStripSelectors
 		request: nil
 		callback: nil.
 	DeafObject current 
+		cb_on_load_end: nil
+		browser: nil
+		frame: nil
+		httpStatusCode: nil.
+	DeafObject current onGetRenderProcessHandler: nil.
+	DeafObject current 
+		cb_on_before_popup: nil
+		browser: nil
+		frame: nil
+		target_url: nil
+		target_frame_name: nil
+		popupFeatures: nil
+		windowInfo: nil
+		client: nil
+		settings: nil
+		no_javascript_access: nil.
+	DeafObject current cb_getRefct: nil.
+	DeafObject current 
+		cb_on_process_message_received: nil
+		browser: nil
+		source_process: nil
+		message: nil.
+	DeafObject current 
 		cb_on_loading_state_change: nil
 		browser: nil
 		isLoading: nil
 		canGoBack: nil
 		canGoForward: nil.
-	DeafObject current 
-		cb_on_before_plugin_load: nil
-		browser: nil
-		url: nil
-		policy_url: nil
-		info: nil.
-	DeafObject current onGetRenderProcessHandler: nil.
-	DeafObject current cb_on_after_created: nil browser: nil.
-	DeafObject current 
-		cb_get_resource_handler: nil
-		browser: nil
-		frame: nil
-		request: nil.
-	DeafObject current cb_can_get_cookie: nil cookie: nil.
-	DeafObject current cb_run_modal: nil browser: nil.
-	DeafObject current cb_on_render_process_thread_created: nil extra_info: nil.
 	DeafObject current cb_on_context_initialized: nil.
-	DeafObject current cb_get_life_span_handler: nil.
 	DeafObject current 
-		cb_get_response_headers: nil
-		response: nil
-		response_length: nil
-		redirectUrl: nil.
-	DeafObject current onCallback: nil.
-	DeafObject current onRegisterCustomSchemes: nil registrar: nil.
-	DeafObject current cb_can_set_cookie: nil cookie: nil.
-	DeafObject current cb_cancel: nil.
-	DeafObject current cb_on_before_child_process_launch: nil command: nil!
+		cb_on_before_download: nil
+		browser: nil
+		download_item: nil
+		suggested_name: nil
+		callback: nil.
+	DeafObject current cb_on_render_process_thread_created: nil extra_info: nil.
+	DeafObject current 
+		cb_on_download_updated: nil
+		browser: nil
+		download_item: nil
+		callback: nil!
 
 doNotStripClasses
 	CEF3.
@@ -1927,7 +2275,9 @@ doNotStripClasses
 	CEF3RequestEx.
 	CEF3ResponseEx.
 	CEF3SchemeRegistrarEx.
-	CEFStringUserFree!
+	CEFStringUserFree.
+	CEF3BeforeDownloadCallbackEx.
+	CEF3QuotaCallbackEx!
 
 doNotStripSelectors
 	| stream |
@@ -1990,8 +2340,8 @@ newBuffer
 	^anInstance!
 
 onShutdown
-	Instances := nil.
-	self removeCallbackRegistry!
+"	Instances := nil.
+	self removeCallbackRegistry"!
 
 onStartup
 	self initalizeInstances.
@@ -3272,6 +3622,37 @@ descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
 !CEF3App class categoriesFor: #defineFields!initializing!public! !
 !CEF3App class categoriesFor: #initalizeCallbacksRegistry!public! !
 
+CEF3BeforeDownloadCallback guid: (GUID fromString: '{3C38FD0F-EE9F-407F-B75C-52741F135038}')!
+CEF3BeforeDownloadCallback comment: ''!
+!CEF3BeforeDownloadCallback categoriesForClass!External-Data-Structured! !
+!CEF3BeforeDownloadCallback methodsFor!
+
+cont
+	"Answer the receiver's cont field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+cont: anObject
+	"Set the receiver's cont field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject! !
+!CEF3BeforeDownloadCallback categoriesFor: #cont!**compiled accessors**!public! !
+!CEF3BeforeDownloadCallback categoriesFor: #cont:!**compiled accessors**!public! !
+
+!CEF3BeforeDownloadCallback class methodsFor!
+
+defineFields
+	" 
+
+	CEF3BeforeDownloadCallback  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #cont type: LPVOIDField new ! !
+!CEF3BeforeDownloadCallback class categoriesFor: #defineFields!initializing!public! !
+
 CEF3Browser guid: (GUID fromString: '{C9010A4D-A65C-4314-8FF6-01054F0A24FB}')!
 CEF3Browser comment: ''!
 !CEF3Browser categoriesForClass!External-Data-Structured! !
@@ -4147,6 +4528,13 @@ cb_get_display_handler: aCEF3Client
 	self log: 'cb_get_display_handler:'.
 	^0!
 
+cb_get_download_handler: aCEF3Client 
+	PGTranscript
+		display: 'cb_get_download_handler:';
+		cr.
+	downloadHandler handler isNil ifTrue: [^0].
+	^downloadHandler yourAddress!
+
 cb_get_focus_handler: aCEF3Client 
 	self log: 'cb_get_focus_handler:'.
 	^0!
@@ -4172,6 +4560,9 @@ cb_get_request_handler: aCEF3Client
 cb_on_process_message_received: aCEF3Client browser: aCEF3Browser source_process: asdword message: aCEF3ProcessMessage 
 	self log: 'cb_on_process_message_received:'.
 	^0!
+
+downloadHandler
+	^downloadHandler!
 
 get_context_menu_handler
 	"Answer the receiver's get_context_menu_handler field as a Smalltalk object."
@@ -4307,6 +4698,7 @@ initialize
 	loadHandler := CEF3LoadHandler new.
 	lifeSpanHandler := CEF3LifeSpanHandler new.
 	requestHandler := CEF3RequestHandler new.
+	downloadHandler := CEF3DownloadHandler new.
 	super initialize!
 
 lifeSpanHandler
@@ -4331,12 +4723,14 @@ requestHandler
 !CEF3Client categoriesFor: #asCefClient!public! !
 !CEF3Client categoriesFor: #cb_get_context_menu_handler:!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_display_handler:!must not strip!public! !
+!CEF3Client categoriesFor: #cb_get_download_handler:!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_focus_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_keyboard_handler:!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_life_span_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_load_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_request_handler:!must not strip!public! !
 !CEF3Client categoriesFor: #cb_on_process_message_received:browser:source_process:message:!callback!must not strip!public! !
+!CEF3Client categoriesFor: #downloadHandler!accessing!private! !
 !CEF3Client categoriesFor: #get_context_menu_handler!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_context_menu_handler:!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_dialog_handler!**compiled accessors**!must not strip!public! !
@@ -4409,6 +4803,7 @@ initalizeCallbacksRegistry
 						logMsg: handler_name)].
 	(CallbackRegistry at: #get_life_span_handler:) selector: #cb_get_life_span_handler:.
 	(CallbackRegistry at: #get_request_handler:) selector: #cb_get_request_handler:.
+	(CallbackRegistry at: #get_download_handler:) selector: #cb_get_download_handler:.
 	CallbackRegistry at: #on_process_message_received:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -4826,6 +5221,91 @@ typedef struct _cef_command_line_t {
 		defineField: #append_argument type: LPVOIDField new;
 		defineField: #prepend_wrapper type: LPVOIDField new! !
 !CEF3CommandLine class categoriesFor: #defineFields!initializing!public! !
+
+CEF3DownloadHandler guid: (GUID fromString: '{36CA71C4-4240-4D44-B5A5-B9555C41B01A}')!
+CEF3DownloadHandler comment: ''!
+!CEF3DownloadHandler categoriesForClass!External-Data-Structured! !
+!CEF3DownloadHandler methodsFor!
+
+cb_on_before_download: this browser: browser download_item: download_item suggested_name: suggested_name callback: callback 
+	self log: 'cb_on_before_download:'.
+	handler 
+		ifNotNil: 
+			[:value | 
+			value 
+				cb_on_before_download: this
+				browser: browser
+				download_item: download_item
+				suggested_name: suggested_name
+				callback: callback]!
+
+cb_on_download_updated: this browser: browser download_item: download_item callback: callback 
+	self log: 'cb_on_before_download:'.
+	handler 
+		ifNotNil: 
+			[:value | 
+			value 
+				cb_on_download_updated: this
+				browser: browser
+				download_item: download_item
+				callback: callback]!
+
+on_before_download
+	"Answer the receiver's on_before_download field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+on_before_download: anObject
+	"Set the receiver's on_before_download field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+on_download_updated
+	"Answer the receiver's on_download_updated field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+on_download_updated: anObject
+	"Set the receiver's on_download_updated field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject! !
+!CEF3DownloadHandler categoriesFor: #cb_on_before_download:browser:download_item:suggested_name:callback:!**compiled accessors**!public! !
+!CEF3DownloadHandler categoriesFor: #cb_on_download_updated:browser:download_item:callback:!**compiled accessors**!public! !
+!CEF3DownloadHandler categoriesFor: #on_before_download!**compiled accessors**!public! !
+!CEF3DownloadHandler categoriesFor: #on_before_download:!**compiled accessors**!public! !
+!CEF3DownloadHandler categoriesFor: #on_download_updated!**compiled accessors**!public! !
+!CEF3DownloadHandler categoriesFor: #on_download_updated:!**compiled accessors**!public! !
+
+!CEF3DownloadHandler class methodsFor!
+
+defineFields
+	" 
+
+	CEF3DownloadHandler  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #on_before_download type: LPVOIDField new;
+		defineField: #on_download_updated type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_download_updated:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_download_updated:browser:download_item:callback:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void dword dword dword CEF3BeforeDownloadCallbackEx*')).
+	CallbackRegistry at: #on_before_download:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_download:browser:download_item:suggested_name:callback:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void dword dword dword CEFString* CEF3BeforeDownloadCallbackEx*'))! !
+!CEF3DownloadHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3DownloadHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
 CEF3Frame guid: (GUID fromString: '{ACDD9CCF-EF77-471E-A388-732A5BCC5C92}')!
 CEF3Frame comment: ''!
@@ -5253,7 +5733,7 @@ initalizeCallbacksRegistry
 				receiver: self
 				selector: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:
 				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: sdword dword dword dword dword dword dword dword dword dword dword')).
+						fromString: 'stdcall: sdword dword CEF3BrowserEx* dword CEFString* CEFString* dword CEF3WindowInfo* dword CEF3BrowserSettings* dword')).
 	CallbackRegistry at: #on_after_created:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -5673,6 +6153,50 @@ typedef struct _cef_process_message_t {
 		defineField: #get_dialog_handler type: LPVOIDField new;"! !
 !CEF3ProcessMessage class categoriesFor: #defineFields!public! !
 
+CEF3QuotaCallback guid: (GUID fromString: '{24B90A7F-3962-420F-934D-CB3DDA57DFF7}')!
+CEF3QuotaCallback comment: ''!
+!CEF3QuotaCallback categoriesForClass!External-Data-Structured! !
+!CEF3QuotaCallback methodsFor!
+
+cancel
+	"Answer the receiver's cancel field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+cancel: anObject
+	"Set the receiver's cancel field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+cont
+	"Answer the receiver's cont field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+cont: anObject
+	"Set the receiver's cont field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject! !
+!CEF3QuotaCallback categoriesFor: #cancel!**compiled accessors**!public! !
+!CEF3QuotaCallback categoriesFor: #cancel:!**compiled accessors**!public! !
+!CEF3QuotaCallback categoriesFor: #cont!**compiled accessors**!public! !
+!CEF3QuotaCallback categoriesFor: #cont:!**compiled accessors**!public! !
+
+!CEF3QuotaCallback class methodsFor!
+
+defineFields
+	" 
+
+	CEF3QuotaCallback  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #cont type: LPVOIDField new;
+		defineField: #cancel type: LPVOIDField new ! !
+!CEF3QuotaCallback class categoriesFor: #defineFields!initializing!public! !
+
 CEF3Request guid: (GUID fromString: '{BEE8D3F3-7FC4-4BB2-A969-10A70E861BBD}')!
 CEF3Request comment: ''!
 !CEF3Request categoriesForClass!External-Data-Structured! !
@@ -6042,6 +6566,7 @@ self log: 'cb_on_protocol_execution:'.
 
 cb_on_quota_request: this browser: browser origin_url: origin_url new_size: new_size callback: callback 
 	self log: 'cb_on_quota_request:'.
+	callback continue.
 	"
 ///
   // Called on the IO thread when JavaScript requests a specific storage quota
@@ -6055,7 +6580,7 @@ cb_on_quota_request: this browser: browser origin_url: origin_url new_size: new_
       struct _cef_browser_t* browser, const cef_string_t* origin_url,
       int64 new_size, struct _cef_quota_callback_t* callback);
 "
-	^0!
+	^1!
 
 cb_on_render_process_terminated: this browser: browser status: status 
 	self log: 'cb_on_render_process_terminated:'.
@@ -6292,7 +6817,7 @@ initalizeCallbacksRegistry
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_on_quota_request:browser:origin_url:new_size:callback:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword sqword dword')).
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword sqword CEF3QuotaCallbackEx*')).
 	CallbackRegistry at: #on_protocol_execution:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -6763,6 +7288,34 @@ defineFields
 	self defineField: #add_custom_scheme type: LPVOIDField new! !
 !CEF3SchemeRegistrar class categoriesFor: #defineFields!initializing!public! !
 
+CEF3BeforeDownloadCallbackEx guid: (GUID fromString: '{2BDA23BD-E19A-4174-A529-09F8CCD700F8}')!
+CEF3BeforeDownloadCallbackEx comment: ''!
+!CEF3BeforeDownloadCallbackEx categoriesForClass!External-Data-Structured! !
+!CEF3BeforeDownloadCallbackEx methodsFor!
+
+cont_ex
+	cont_ex ifNil: [self initializeExternalMethods].
+	^cont_ex value: self withArguments: (Array with: self yourAddress )!
+
+cont_ex: this download_path: download_path show_dialog: show_dialog
+	<stdcall: void cont dword dword sdword>
+	^self invalidCall!
+
+continue_download_path: download_path show_dialog: show_dialog 
+	cont_ex ifNil: [self initializeExternalMethods].
+	^cont_ex value: self
+		withArguments: (Array 
+				with: self yourAddress
+				with: download_path asCefString yourAddress
+				with: show_dialog)!
+
+initializeExternalMethods
+	cont_ex := self getCompileMethod: #cont_ex:download_path:show_dialog: proc: self cont! !
+!CEF3BeforeDownloadCallbackEx categoriesFor: #cont_ex!must not strip!private! !
+!CEF3BeforeDownloadCallbackEx categoriesFor: #cont_ex:download_path:show_dialog:!must not strip!public! !
+!CEF3BeforeDownloadCallbackEx categoriesFor: #continue_download_path:show_dialog:!must not strip!public! !
+!CEF3BeforeDownloadCallbackEx categoriesFor: #initializeExternalMethods!must not strip!private! !
+
 CEF3BrowserEx guid: (GUID fromString: '{D7693FA5-780D-41B7-A5A9-D8F17AEB9F7A}')!
 CEF3BrowserEx comment: ''!
 !CEF3BrowserEx categoriesForClass!External-Data-Structured! !
@@ -6957,10 +7510,48 @@ initializeExternalMethods
 !CEF3PostDataElementEx categoriesFor: #getBytesCount!must not strip!public! !
 !CEF3PostDataElementEx categoriesFor: #initializeExternalMethods!must not strip!private! !
 
+CEF3QuotaCallbackEx guid: (GUID fromString: '{C02601F9-C5EC-4E25-B7D2-57A78722A958}')!
+CEF3QuotaCallbackEx comment: ''!
+!CEF3QuotaCallbackEx categoriesForClass!External-Data-Structured! !
+!CEF3QuotaCallbackEx methodsFor!
+
+cancel_ex
+	cancel_ex ifNil: [self initializeExternalMethods].
+	^cancel_ex value: self withArguments: (Array with: self yourAddress)!
+
+cancel_ex: this 
+	<stdcall: void cancel dword>
+	^self invalidCall!
+
+cont_ex: this allow: allow
+	<stdcall: void cont dword sdword>
+	^self invalidCall!
+
+cont_ex_allow: allow 
+	cont_ex ifNil: [self initializeExternalMethods].
+	^cont_ex value: self withArguments: (Array with: self yourAddress with: allow)!
+
+continue
+	self cont_ex_allow: 1!
+
+initializeExternalMethods
+	cont_ex := self getCompileMethod: #cont_ex:allow: proc: self cont.
+	cancel_ex := self getCompileMethod: #cancel_ex: proc: self cancel! !
+!CEF3QuotaCallbackEx categoriesFor: #cancel_ex!must not strip!public! !
+!CEF3QuotaCallbackEx categoriesFor: #cancel_ex:!must not strip!public! !
+!CEF3QuotaCallbackEx categoriesFor: #cont_ex:allow:!must not strip!public! !
+!CEF3QuotaCallbackEx categoriesFor: #cont_ex_allow:!must not strip!public! !
+!CEF3QuotaCallbackEx categoriesFor: #continue!must not strip!public! !
+!CEF3QuotaCallbackEx categoriesFor: #initializeExternalMethods!must not strip!public! !
+
 CEF3RequestEx guid: (GUID fromString: '{3FBF8598-2250-405C-A928-B7753BBF5421}')!
 CEF3RequestEx comment: ''!
 !CEF3RequestEx categoriesForClass!External-Data-Structured! !
 !CEF3RequestEx methodsFor!
+
+get_method_ex: this 
+	<stdcall: CEFStringUserFree* get_method CEF3Request*>
+	^self invalidCall!
 
 get_post_data_ex: this 
 	<stdcall: dword get_post_data dword>
@@ -6969,6 +7560,10 @@ get_post_data_ex: this
 get_url_ex: this 
 	<stdcall: CEFStringUserFree* get_url CEF3Request*>
 	^self invalidCall!
+
+getMethod
+	get_method_ex ifNil: [self initializeExternalMethods].
+	^get_method_ex value: self withArguments: (Array with: self)!
 
 getPostData
 	get_post_data_ex ifNil: [self initializeExternalMethods].
@@ -6981,9 +7576,12 @@ getUrl
 
 initializeExternalMethods
 	get_url_ex := self getCompileMethod: #get_url_ex: proc: self get_url.
-	get_post_data_ex := self getCompileMethod: #get_post_data_ex: proc: self get_post_data! !
+	get_post_data_ex := self getCompileMethod: #get_post_data_ex: proc: self get_post_data.
+	get_method_ex := self getCompileMethod: #get_method_ex: proc: self get_method! !
+!CEF3RequestEx categoriesFor: #get_method_ex:!must not strip!private! !
 !CEF3RequestEx categoriesFor: #get_post_data_ex:!must not strip!private! !
 !CEF3RequestEx categoriesFor: #get_url_ex:!must not strip!private! !
+!CEF3RequestEx categoriesFor: #getMethod!must not strip!public! !
 !CEF3RequestEx categoriesFor: #getPostData!must not strip!public! !
 !CEF3RequestEx categoriesFor: #getUrl!must not strip!public! !
 !CEF3RequestEx categoriesFor: #initializeExternalMethods!must not strip!private! !
@@ -7121,15 +7719,19 @@ cb_do_close: this browser: browser
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	cefBrowser := aCEF3BrowserEx.
-	cefHandle := cefBrowser host windowHandle.
-	self setCefPosition.
-	self onCefBrowserCreated!
+	cefBrowser isNil 
+		ifTrue: 
+			[cefBrowser := aCEF3BrowserEx.
+			cefHandle := cefBrowser host windowHandle.
+			self setCefPosition.
+			self onCefBrowserCreated]
+		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
 
 cb_on_before_close: this browser: browser 
 	!
 
-cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: windowInfo client: client settings: settings no_javascript_access: no_javascript_access 
+cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
+	self doLog.
 	^0!
 
 cb_run_modal: this browser: browser 
@@ -7161,19 +7763,38 @@ defaultUrl
 	^'about:blank'!
 
 ensureCefInit
+	client := nil.
 	CEFApp new!
 
 executeJavascript: aString 
 	self cefBrowser mainFrame executeJavascript: aString!
 
+initialize
+	super initialize.
+	childBrowserView := OrderedCollection new!
+
+intializeFromParent: aCEFView browser: aCEF3BrowserEx 
+	parentBrowserView := aCEFView.
+	cefBrowser := aCEF3BrowserEx.
+	cefHandle := cefBrowser host windowHandle!
+
+isCefReady
+	^cefBrowser isNil not!
+
 onCefBrowserCreated
-	self setUrl: self defaultUrl.
-!
+	url ifNil: [self setUrl: self defaultUrl] ifNotNil: [:value | self setUrl: value].
+	self isManaged: true.
+	self trigger: #cefBrowserCreated!
 
 onModelChanged
 	self registerResourceHandlers.
 	self client requestHandler resourceHandlers do: [:each | each crossTabModel: model].
 	self onCefBrowserCreated!
+
+onNewChildBrowser: aCEF3BrowserEx 
+	| aChild |
+	aChild := CEFView parentBrowserView: self browser: aCEF3BrowserEx.
+	childBrowserView add: aChild!
 
 onPositionChanged: aPositionEvent 
 	"Private - Handle a window position change event (move or resize)."
@@ -7187,7 +7808,7 @@ onPositionChanged: aPositionEvent
 "]!
 
 onViewCreated
-	| aRect cacheFolder |
+	| aRect |
 	self ensureCefInit.
 	aRect := self clientRectangle.
 	windowInfo := (CEF3WindowInfo new)
@@ -7203,6 +7824,12 @@ onViewCreated
 	browserSettings := CEF3BrowserSettings new.
 	browserSettings application_cache: 1.
 	browserSettings
+		local_storage: 1;
+		databases: 1;
+		javascript_open_windows: 1;
+		javascript_close_windows: 1;
+		javascript_access_clipboard: 1;
+		javascript_dom_paste: 1;
 		universal_access_from_file_urls: 1;
 		file_access_from_file_urls: 1;
 		web_security: 2.
@@ -7211,16 +7838,23 @@ onViewCreated
 		client: self client asCefClient
 		url: self url asCefString
 		settings: browserSettings
-		request_context: 0!
+		request_context: 0.
+	!
 
 registerResourceHandlers
 	 !
+
+releaseCefLifeSpanHandler
+	client ifNotNil: [:value | value lifeSpanHandler handler: nil]!
 
 removeAllResourceHandlers
 	self client requestHandler removeAllResourceHandlers!
 
 setCefPosition
 	| hdwp rect aFlag |
+	PGTranscript
+		display: 'setCefPosition';
+		cr.
 	rect := self clientRectangle.
 	hdwp := UserLibrary default beginDeferWindowPos: 1.
 	aFlag := flags := ##(SWP_NOZORDER | SWP_NOACTIVATE).
@@ -7259,16 +7893,29 @@ url: aCEFString
 !CEFView categoriesFor: #defaultUrl!private! !
 !CEFView categoriesFor: #ensureCefInit!private! !
 !CEFView categoriesFor: #executeJavascript:!public! !
-!CEFView categoriesFor: #onCefBrowserCreated!public! !
+!CEFView categoriesFor: #initialize!private! !
+!CEFView categoriesFor: #intializeFromParent:browser:!private! !
+!CEFView categoriesFor: #isCefReady!public! !
+!CEFView categoriesFor: #onCefBrowserCreated!private! !
 !CEFView categoriesFor: #onModelChanged!public! !
+!CEFView categoriesFor: #onNewChildBrowser:!private! !
 !CEFView categoriesFor: #onPositionChanged:!event handling!private! !
 !CEFView categoriesFor: #onViewCreated!event handling!private! !
 !CEFView categoriesFor: #registerResourceHandlers!private! !
+!CEFView categoriesFor: #releaseCefLifeSpanHandler!accessing!private! !
 !CEFView categoriesFor: #removeAllResourceHandlers!private! !
 !CEFView categoriesFor: #setCefPosition!event handling!private! !
 !CEFView categoriesFor: #setUrl:!public! !
 !CEFView categoriesFor: #url!private! !
 !CEFView categoriesFor: #url:!private! !
+
+!CEFView class methodsFor!
+
+parentBrowserView: aCEFView browser: aCEF3BrowserEx 
+	^(self new)
+		intializeFromParent: aCEFView browser: aCEF3BrowserEx;
+		yourself! !
+!CEFView class categoriesFor: #parentBrowserView:browser:!public! !
 
 "Binary Globals"!
 
