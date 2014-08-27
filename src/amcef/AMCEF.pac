@@ -1,23 +1,30 @@
 | package |
 package := Package name: 'AMCEF'.
 package paxVersion: 1;
-	basicComment: 'CEF3Library default cef_version_infos. #(3 1706 35 0 1916 0)
-CEF3Library default cef_build_revision. 1706
+	basicComment: 'CEF3Library default cef_version_infos. 
+ #(3 1706 35 0 1916 0)
+CEF3Library default cef_build_revision.  
+1706
+
+ 
 
 shell := ShellView new 
-			layoutManager: BorderLayout new;
+			layoutManager: ProportionalLayout new;
 			create; 
 			extent: 800@600;
 			yourself.
 view := CEFView new
 			parentView: shell;
-			arrangement: #center;
+			arrangement: 1;
 			create; show;
 			yourself.
-shell show.
+shell show. 
+
  
 view setUrl: ''http://www.google.com''.
 view executeJavascript: ''alert("hello")''.
+view setUrl: ''http://127.0.0.1:8080/am_crosstab_view.html''.
+view setUrl: ''http://127.0.0.1:8080/test2.html''.
 
 view setUrl: ''chrome://chrome-urls/''.
   
@@ -45,10 +52,42 @@ view addResourceHandler: (CEFHtmlResourceHandler html: ''
     </script>
   </body>
 </html>
-'' acceptUrl: [:aUrl |  aUrl = ''http://dart-from-dolphin/'' ]).
+'' acceptUrl: [:aUrl |  aUrl = ''http://dart-from-dolphin/index.html'' ]).
 
-view setUrl: ''http://dart-from-dolphin''.
+view setUrl: ''http://dart-from-dolphin/index.html''.
  
+
+
+
+"Experimental : not yet working"
+
+ 
+ shell := ShellView new 
+			layoutManager: ProportionalLayout new;
+			create; 
+			extent: 800@600;
+			yourself. 
+
+shell show.
+
+view := CEFWindowView new.
+shell addSubView: view.
+view arrangement: 1.
+
+view create.
+view arrangement: 1.
+view show.
+
+
+view := CEFWindow new
+			parentView: shell;
+			 
+			 
+			yourself.
+view show.
+ 
+view setUrl: ''http://www.google.com''.
+
 '.
 
 package imageStripperBytes: (ByteArray fromBase64String: 'IVNUQiAzIEYPDQAEAAAASW1hZ2VTdHJpcHBlcgAAAABSAAAABQAAAEFNQ0VGUgAAAA8AAABkb2xw
@@ -110,12 +149,16 @@ package classNames
 	add: #CEFLibrary;
 	add: #CEFLogMessageCallback;
 	add: #CEFMessageCallback;
+	add: #CEFMessageResourceHandler;
 	add: #CEFObject;
 	add: #CEFRequestHandler;
 	add: #CEFResourceHandler;
 	add: #CEFString;
 	add: #CEFStringUserFree;
 	add: #CEFView;
+	add: #CEFViewHandle;
+	add: #CEFWindow;
+	add: #CEFWindowView;
 	add: #TestMessageCallback;
 	yourself.
 
@@ -140,6 +183,7 @@ package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\Util\AMUtil';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
+	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\JSON\JSON';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
 	yourself).
 
@@ -155,8 +199,13 @@ Object subclass: #CEFObject
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+Object subclass: #CEFWindow
+	instanceVariableNames: 'handle oldWndProc creationParent windowInfo browserSettings client url cefHandle cefBrowser childBrowserView parentBrowserView'
+	classVariableNames: ''
+	poolDictionaries: 'Win32Constants Win32Errors'
+	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFApp
-	instanceVariableNames: 'isInitialize args app settings logStream browserWindow shemeHandlerFactory browserProcessHandler'
+	instanceVariableNames: 'isInitialize args app settings logStream browserWindow shemeHandlerFactory browserProcessHandler isMultiThreadLoop'
 	classVariableNames: 'Current'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -197,6 +246,11 @@ CEFResourceHandler subclass: #CEFDirectoryResourceHandler
 	classInstanceVariableNames: ''!
 CEFResourceHandler subclass: #CEFHtmlResourceHandler
 	instanceVariableNames: 'html acceptUrlBlock'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFResourceHandler subclass: #CEFMessageResourceHandler
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -450,8 +504,18 @@ RuntimeSessionManager subclass: #CEF3RuntimeSessionManager
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-View subclass: #CEFView
-	instanceVariableNames: 'windowInfo browserSettings client url cefHandle cefBrowser childBrowserView parentBrowserView'
+View subclass: #CEFViewHandle
+	instanceVariableNames: 'oldWndProc'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+View subclass: #CEFWindowView
+	instanceVariableNames: 'oldWndProc windowInfo browserSettings client url cefHandle cefBrowser childBrowserView parentBrowserView'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+ContainerView subclass: #CEFView
+	instanceVariableNames: 'windowInfo browserSettings client url cefHandle cefBrowser childBrowserView parentBrowserView cefview'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -508,6 +572,9 @@ BOOL WINAPI SetProcessDEPPolicy(
 !SessionManager methodsFor!
 
 log: aMsg 
+	PGTranscript
+		display: aMsg;
+		cr
 	"| aString |
 	aString := 'PROCESS %1 ---- %2 %3' 
 				formatWith: self processType
@@ -560,7 +627,8 @@ lib
 	^CEF3Library default!
 
 log: aMsg 
-	SessionManager current log: self class name , ' : ' , aMsg! !
+	self doLog
+	"SessionManager current log: self class name , ' : ' , aMsg"! !
 !CEFObject categoriesFor: #lib!public! !
 !CEFObject categoriesFor: #log:!public! !
 
@@ -571,6 +639,378 @@ new
 		initialize;
 		yourself! !
 !CEFObject class categoriesFor: #new!public! !
+
+CEFWindow guid: (GUID fromString: '{C291ACF8-51EC-4431-9CDE-7B74635CDD68}')!
+CEFWindow comment: ''!
+!CEFWindow categoriesForClass!Kernel-Objects! !
+!CEFWindow methodsFor!
+
+allSubViewsDo: aBlock!
+
+asParameter
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^handle
+!
+
+attachHandle: anIntegerOrHandle 
+	"Private - Set the handle for this View and ensure that it is registered in our
+	AllViews collection. Note that though the View (sub)instance itself
+	holds its handle as an instance of ExternalHandle, AllViews is an 
+	IdentityDictionary keyed by an Integer (which will be a SmallInteger since 
+	window handles are typically small positive numbers). This arrangement
+	permits AllViews to be an IdentityDictionary, and a faster lookup results
+	for the critical message dispatching."
+
+	self handle: anIntegerOrHandle asExternalHandle.
+	SessionManager inputState windowAt: anIntegerOrHandle put: self!
+
+cb_do_close: this browser: browser 
+	^0!
+
+cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
+	self doLog.
+	cefBrowser isNil 
+		ifTrue: 
+			[cefBrowser := aCEF3BrowserEx.
+			cefHandle := cefBrowser host windowHandle.
+			"cefview := CEFViewHandle fromHandle: cefHandle.
+			cefview subclassWindow: cefHandle.
+			self addSubView: cefview.
+			cefview arrangement: 1.
+			self setCefPosition.
+			self onCefBrowserCreated"]
+		ifFalse: ["self onNewChildBrowser: aCEF3BrowserEx"]!
+
+cb_on_before_close: this browser: browser 
+	!
+
+cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
+	self doLog.
+	^0!
+
+cb_run_modal: this browser: browser 
+	!
+
+cefWindowExStyle
+	^0!
+
+cefWindowStyle
+	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE | WS_OVERLAPPED).!
+
+client
+	^client 
+		ifNil: 
+			[client := self createClient.
+			self registerResourceHandlers.
+			client]!
+
+create
+	self ensureCefInit.
+	"aRect := self clientRectangle."
+	windowInfo := (CEF3WindowInfo new)
+				window_name: 'CEF browser' asCefString;
+				style: self cefWindowStyle;
+				ex_style: self cefWindowExStyle;
+				parent_window: self parentView handle value;
+				x: 10;
+				y: 10;
+				width: 800;
+				height: 600;
+				yourself.
+	browserSettings := CEF3BrowserSettings new.
+	browserSettings application_cache: 1.
+	browserSettings
+		local_storage: 1;
+		databases: 1;
+		javascript_open_windows: 1;
+		javascript_close_windows: 1;
+		javascript_access_clipboard: 1;
+		javascript_dom_paste: 1;
+		universal_access_from_file_urls: 1;
+		file_access_from_file_urls: 1;
+		web_security: 2.
+	CEF3Library default 
+		cef_browser_host_create_browser_sync: windowInfo
+		client: self client asCefClient
+		url: self url asCefString
+		settings: browserSettings
+		request_context: 0.
+	^windowInfo window!
+
+createClient
+	| aClient |
+	aClient := CEFClient new.
+	aClient lifeSpanHandler handler: self.
+	^aClient!
+
+defaultUrl
+	^'about:blank'!
+
+defaultWindowProcessing: message wParam: wParam lParam: lParam 
+	"Private - Pass a message to the 'default' window procedure of the receiver."
+
+	self doLog.
+	^UserLibrary default 
+		callWindowProc: self oldWndProc
+		hWnd: self asParameter
+		msg: message
+		wParam: wParam
+		lParam: lParam!
+
+destroy
+	^UserLibrary default destroyWindow: handle!
+
+dispatchMessage: message wParam: wParam lParam: lParam 
+	WM_NCDESTROY = message 
+		ifTrue: 
+			[^self 
+				wmNcDestroy: message
+				wParam: wParam
+				lParam: lParam].
+	^self 
+		defaultWindowProcessing: message
+		wParam: wParam
+		lParam: lParam!
+
+ensureCefInit
+	client := nil.
+	CEFApp new!
+
+enterIdle
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^Error notYetImplemented!
+
+executeJavascript: aString 
+	self cefBrowser mainFrame executeJavascript: aString!
+
+handle
+	^handle!
+
+handle: aHandleOrNil
+	"Private - Set the handle for the receiver. N.B. This is a simple
+	accessor method; set the handle of a View with #attachHandle:"
+
+	handle := aHandleOrNil!
+
+hasVisibleStyle
+	^true!
+
+invalidateLayout!
+
+isManaged
+	^true!
+
+isPersistentView
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^false!
+
+isPopup
+	^false!
+
+isTabStop
+	^false!
+
+isTopView
+	^false!
+
+isWindowVisible
+	^UserLibrary default isWindowVisible: self asParameter!
+
+oldWndProc
+	^oldWndProc!
+
+oldWndProc: anInteger 
+	oldWndProc := anInteger!
+
+onStartup
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	handle := nil!
+
+parentView
+	"Answer the parent View of the receiver assigned before creation,
+	or nil if none."
+
+	^creationParent!
+
+parentView: aView 
+	"Private - Sets the parent of the receiver to aView. Can only be used when the
+	receiver is not yet realized since Windows has a bug when reparenting"
+
+	creationParent := aView.
+ !
+
+placement
+	^nil!
+
+presenter
+	^self!
+
+preTranslateMessage: arg1
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^false!
+
+primHookWindowCreate: hookBoolean
+	"Private - Ask the VM to hook the first subsequent window creation event for the receiver.
+	When it receives such an event it will send a #subclassWindow: callback with the
+	handle of the newly created window to the receiver. This allows controls to be
+	subclassed BEFORE they return from the CreateWindowEx() call.
+	The VM uses a CBT hook to achieve this. The hook is implemented in the VM to
+	minimise the performance impact. The hook is automatically 'unhooked' by the VM
+	when it receive's the create notification before it sends the #subclassWindow:
+	callback.
+	Primitive failure reasons:
+		0 	- hookBoolean not a boolean
+		1	- already hooked by the view in the failure data
+	"
+
+	<primitive: 108>
+	^self primitiveFailed!
+
+registerResourceHandlers
+	 !
+
+setUrl: aUrl 
+	url := aUrl.
+	cefBrowser ifNil: [^nil].
+	cefBrowser mainFrame loadUrl: aUrl!
+
+setWndProc: anAddress 
+	"Private - Set the window procedure of the receiver to the argument, anAddress.
+	Answer the old window procedure address."
+
+	^UserLibrary default
+		setWindowDWORD: self asParameter
+		nIndex: GWL_WNDPROC
+		dwNewDWORD: anAddress!
+
+show
+	| h |
+	creationParent isNil ifTrue: [self parentView: DesktopView current].
+	self primHookWindowCreate: true.
+	h := self create.
+	self primHookWindowCreate: false.
+	handle = nil ifTrue: [Error signal: 'Hook failed'].
+	UserLibrary default showWindow: handle nCmdShow: SW_SHOWNORMAL.
+	^h!
+
+showCef
+	UserLibrary default showWindow: cefHandle nCmdShow: SW_SHOWNORMAL!
+
+state
+	^nil!
+
+subclassWindow
+	"Private - Install the Dolphin VM's WndProc as the Window Procedure of the receiver's window.
+	This is a helper function to be sent from View classes which need to be subclassed (e.g. 
+	ControlViews) in order that messages are received and dispatched through the Dolphin WndProc.
+	The previous window procedure is typically stored in an instance variable, since windows
+	can be 'subclassed' on an instance specific basis, and we may be subclassing a window
+	that has already been subclassed (!!)."
+
+	| dolphinWndProc oldProc |
+	dolphinWndProc := VMLibrary default getWndProc.
+	(oldProc := self setWndProc: dolphinWndProc) = dolphinWndProc 
+		ifFalse: [self oldWndProc: oldProc]!
+
+subclassWindow: hWnd 
+	"Private - Subclass the receiver's associated Win32 window by substituting the VM's 
+	window procedure and saving the control's one, and record hWnd as the handle 
+	of the receiver's window."
+
+	self doLog.
+	self attachHandle: hWnd.
+	self subclassWindow!
+
+subViews
+	^Array new!
+
+subViewsDo: aBlock!
+
+url
+	^url ifNil: [url := self defaultUrl]!
+
+url: aCEFString 
+	url := aCEFString!
+
+validateUserInterface!
+
+wmNcDestroy: message wParam: wParam lParam: lParam 
+	"Private - Notification that a window is about to disappear so we
+ 	remove it from our management."
+
+	| answer |
+	SessionManager inputState removeWindowAt: handle.
+	answer := self 
+				defaultWindowProcessing: message
+				wParam: wParam
+				lParam: lParam.
+	handle := nil.
+	^answer! !
+!CEFWindow categoriesFor: #allSubViewsDo:!hierarchy!private! !
+!CEFWindow categoriesFor: #asParameter!public! !
+!CEFWindow categoriesFor: #attachHandle:!public! !
+!CEFWindow categoriesFor: #cb_do_close:browser:!private! !
+!CEFWindow categoriesFor: #cb_on_after_created:browser:!event handling!private! !
+!CEFWindow categoriesFor: #cb_on_before_close:browser:!private! !
+!CEFWindow categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!private! !
+!CEFWindow categoriesFor: #cb_run_modal:browser:!private! !
+!CEFWindow categoriesFor: #cefWindowExStyle!private! !
+!CEFWindow categoriesFor: #cefWindowStyle!private! !
+!CEFWindow categoriesFor: #client!accessing!private! !
+!CEFWindow categoriesFor: #create!public! !
+!CEFWindow categoriesFor: #createClient!accessing!private! !
+!CEFWindow categoriesFor: #defaultUrl!private! !
+!CEFWindow categoriesFor: #defaultWindowProcessing:wParam:lParam:!dispatching!private! !
+!CEFWindow categoriesFor: #destroy!public! !
+!CEFWindow categoriesFor: #dispatchMessage:wParam:lParam:!dispatching!public! !
+!CEFWindow categoriesFor: #ensureCefInit!private! !
+!CEFWindow categoriesFor: #enterIdle!public! !
+!CEFWindow categoriesFor: #executeJavascript:!public! !
+!CEFWindow categoriesFor: #handle!accessing!private! !
+!CEFWindow categoriesFor: #handle:!accessing!private! !
+!CEFWindow categoriesFor: #hasVisibleStyle!hierarchy!private! !
+!CEFWindow categoriesFor: #invalidateLayout!public! !
+!CEFWindow categoriesFor: #isManaged!public! !
+!CEFWindow categoriesFor: #isPersistentView!public! !
+!CEFWindow categoriesFor: #isPopup!public! !
+!CEFWindow categoriesFor: #isTabStop!public! !
+!CEFWindow categoriesFor: #isTopView!public! !
+!CEFWindow categoriesFor: #isWindowVisible!public! !
+!CEFWindow categoriesFor: #oldWndProc!public! !
+!CEFWindow categoriesFor: #oldWndProc:!public! !
+!CEFWindow categoriesFor: #onStartup!public! !
+!CEFWindow categoriesFor: #parentView!hierarchy!public! !
+!CEFWindow categoriesFor: #parentView:!hierarchy!private! !
+!CEFWindow categoriesFor: #placement!public! !
+!CEFWindow categoriesFor: #presenter!public! !
+!CEFWindow categoriesFor: #preTranslateMessage:!public! !
+!CEFWindow categoriesFor: #primHookWindowCreate:!helpers!private! !
+!CEFWindow categoriesFor: #registerResourceHandlers!private! !
+!CEFWindow categoriesFor: #setUrl:!public! !
+!CEFWindow categoriesFor: #setWndProc:!public! !
+!CEFWindow categoriesFor: #show!operations!public! !
+!CEFWindow categoriesFor: #showCef!public! !
+!CEFWindow categoriesFor: #state!public! !
+!CEFWindow categoriesFor: #subclassWindow!operations!private! !
+!CEFWindow categoriesFor: #subclassWindow:!operations!private! !
+!CEFWindow categoriesFor: #subViews!public! !
+!CEFWindow categoriesFor: #subViewsDo:!public! !
+!CEFWindow categoriesFor: #url!private! !
+!CEFWindow categoriesFor: #url:!private! !
+!CEFWindow categoriesFor: #validateUserInterface!public! !
+!CEFWindow categoriesFor: #wmNcDestroy:wParam:lParam:!public! !
+
+CEFWindow methodProtocol: #window attributes: #(#readOnly) selectors: #(#asParameter #destroy #dispatchMessage:wParam:lParam: #enterIdle #isPersistentView #isWindowVisible #onStartup #preTranslateMessage: #subclassWindow:)!
 
 CEFApp guid: (GUID fromString: '{6FE4CB1D-45AF-483B-A4E7-7DB1D0F51754}')!
 CEFApp comment: ''!
@@ -609,8 +1049,7 @@ freeCEF
 initialize
 	super initialize.
 	isInitialize := false.
-	
-	!
+	isMultiThreadLoop := 1!
 
 main
 	| res cacheFolder |
@@ -618,8 +1057,8 @@ main
 	isInitialize := true.
 	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
 	self log: 'started '.
-	browserProcessHandler := CEF3BrowserProcessHandler new.
-	browserProcessHandler handler: self.
+	"browserProcessHandler := CEF3BrowserProcessHandler new.
+	browserProcessHandler handler: self."
 	args := CEF3MainArgs new.
 	args instance: VMLibrary default applicationHandle.
 	app := CEF3App new.
@@ -631,19 +1070,15 @@ main
 	self log: 'cef_execute_process:   ' , res displayString.
 	res >= 0 ifTrue: [^SessionManager current exit: res].
 	settings := CEF3Settings new.
-	"SessionManager current isRuntime 
-		ifFalse: 
-			[settings 
-				browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString]."
 	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
 	File createDirectoryPath: cacheFolder.
 	settings cache_path: cacheFolder asCefString.
 	settings 
 		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
-	settings
-		remote_debugging_port: 9222;
-		"no_sandbox: 1;"
-		multi_threaded_message_loop: 1.
+	settings remote_debugging_port: 9223.
+	settings multi_threaded_message_loop: isMultiThreadLoop.
+
+	"settings no_sandbox: 1."
 	res := self lib 
 				cef_initialize: args
 				settings: settings
@@ -657,6 +1092,7 @@ onBeforeCommandLineProcessing: cefapp process_type: cefstring command_line: aCEF
 
 onGetBrowserProcessHandler: cefapp 
 	self log: 'onGetBrowserProcessHandler: ' , browserProcessHandler displayString.
+	browserProcessHandler ifNil: [^0].
 	^browserProcessHandler yourAddress!
 
 onGetRenderProcessHandler: cefapp 
@@ -1359,6 +1795,7 @@ acceptUrlBlock: anObject
 	acceptUrlBlock := anObject!
 
 basicAcceptUrl: aUrl 
+	self doLog.
 	^acceptUrlBlock ifNotNil: [:aBlock | aBlock value: aUrl] ifNil: [false]!
 
 html
@@ -1391,6 +1828,55 @@ html: aString acceptUrl: aBlock
 !CEFHtmlResourceHandler class categoriesFor: #html:!public! !
 !CEFHtmlResourceHandler class categoriesFor: #html:acceptUrl:!public! !
 
+CEFMessageResourceHandler guid: (GUID fromString: '{B18EFDFC-404D-4C1B-BFD2-78A35BA208BD}')!
+CEFMessageResourceHandler comment: ''!
+!CEFMessageResourceHandler categoriesForClass!Kernel-Objects! !
+!CEFMessageResourceHandler methodsFor!
+
+basicAcceptUrl: aUrl 
+	^'*message' match: aUrl!
+
+contents
+	"| aHtmlString |
+	aHtmlString := String writeStream.
+	dim = #column ifTrue: [crossTabModel dimensions first saveDimensionValuesInStream: aHtmlString].
+	dim = #row ifTrue: [crossTabModel dimensions second saveDimensionValuesInStream: aHtmlString].
+	^aHtmlString contents asByteArray readStream"
+
+	^'' asByteArray!
+
+createStream
+	| aContent aStream aFilename aFolder aPath |
+	aContent := self contents.
+	self logResponse: aContent.
+	^aContent readStream!
+
+logResponse: aContent 
+	 !
+
+onMessage: aDicMsg 
+	 !
+
+onPostData
+	postData isNil 
+		ifFalse: [self onMessage: (JsonReader readFrom: postData asString readStream)]
+		ifTrue: [self log: 'WARN: postData is nil']!
+
+postData: anObject 
+	super postData: anObject.
+	[self onPostData] postToInputQueue!
+
+stream
+	^stream ifNil: [stream := self createStream]! !
+!CEFMessageResourceHandler categoriesFor: #basicAcceptUrl:!public! !
+!CEFMessageResourceHandler categoriesFor: #contents!public! !
+!CEFMessageResourceHandler categoriesFor: #createStream!public! !
+!CEFMessageResourceHandler categoriesFor: #logResponse:!public! !
+!CEFMessageResourceHandler categoriesFor: #onMessage:!public! !
+!CEFMessageResourceHandler categoriesFor: #onPostData!public! !
+!CEFMessageResourceHandler categoriesFor: #postData:!accessing!private! !
+!CEFMessageResourceHandler categoriesFor: #stream!private! !
+
 CEFMessageCallback guid: (GUID fromString: '{8B73921A-FD8A-46D7-807A-D6644FCB98E4}')!
 CEFMessageCallback comment: ''!
 !CEFMessageCallback categoriesForClass!System-Support! !
@@ -1403,6 +1889,9 @@ cefReceiver: anAddress
 	receiverAddress := (DWORD fromAddress: anAddress) value.
 	^receiver getInstance: receiverAddress!
 
+log: logMsg 
+	!
+
 selector
 	^selector!
 
@@ -1414,6 +1903,7 @@ valueWithArgumentsAt: anAddress
 		withArgumentsAt: anAddress
 		descriptor: descriptor! !
 !CEFMessageCallback categoriesFor: #cefReceiver:!evaluating!private! !
+!CEFMessageCallback categoriesFor: #log:!public! !
 !CEFMessageCallback categoriesFor: #selector!accessing!private! !
 !CEFMessageCallback categoriesFor: #valueWithArgumentsAt:!evaluating!private! !
 
@@ -1511,7 +2001,7 @@ logMsg: anObject
 valueWithArgumentsAt: anAddress 
 	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
 
-	SessionManager current log: logMsg.
+	self log: logMsg.
 	^super valueWithArgumentsAt: anAddress! !
 !CEFLogMessageCallback categoriesFor: #logMsg!accessing!private! !
 !CEFLogMessageCallback categoriesFor: #logMsg:!accessing!private! !
@@ -1751,7 +2241,8 @@ getCompileMethod: aSymbol proc: proc
 	^self class getCEFCompileMethod: aSymbol proc: proc!
 
 log: aMsg 
-	SessionManager current log: self class name , ' : ' , aMsg! !
+	self doLog
+	"SessionManager current log: self class name , ' : ' , aMsg"! !
 !CEFExternalStructure categoriesFor: #getCompileMethod:proc:!must not strip!public! !
 !CEFExternalStructure categoriesFor: #log:!public! !
 
@@ -7707,28 +8198,207 @@ processType
 !CEF3RuntimeSessionManager categoriesFor: #main!operations!public! !
 !CEF3RuntimeSessionManager categoriesFor: #processType!accessing!private! !
 
-CEFView guid: (GUID fromString: '{0CB0496B-4CE2-46D0-B0EC-06CF03CB4E32}')!
-CEFView comment: ''!
-!CEFView categoriesForClass!MVP-Resources-Misc! !
-!CEFView methodsFor!
+CEFViewHandle guid: (GUID fromString: '{7754E445-B925-44AE-B34B-91A4D1D16368}')!
+CEFViewHandle comment: ''!
+!CEFViewHandle categoriesForClass!MVP-Resources-Misc! !
+!CEFViewHandle methodsFor!
+
+defaultWindowProcessing: message wParam: wParam lParam: lParam 
+	"Private - Pass a message to the 'default' window procedure of the receiver."
+
+	self doLog.
+	^UserLibrary default 
+		callWindowProc: self oldWndProc
+		hWnd: self asParameter
+		msg: message
+		wParam: wParam
+		lParam: lParam!
+
+destroyed
+	self winFinalize.
+	self clearHandle.
+	self isStateRestoring ifFalse: [interactor := creationParent := presenter := DeafObject current]	"If not being recreated, discard the presenter"!
+
+dispatchMessage: message wParam: wParam lParam: lParam 
+	^self 
+		defaultWindowProcessing: message
+		wParam: wParam
+		lParam: lParam!
+
+isPersistentView
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^false!
+
+oldWndProc
+	"Private - Answer the window procedure of the control before we subclassed it."
+
+	^oldWndProc!
+
+oldWndProc: anAddress
+	"Private - Set the window procedure of the control before we subclassed it."
+
+	oldWndProc := anAddress!
+
+onPositionChanged: aPositionEvent 
+	"Private - Handle a window position change event (move or resize)."
+
+	self doLog.
+	super onPositionChanged: aPositionEvent
+	"	aPositionEvent isResize ifTrue: [self setCefPosition]"!
+
+preTranslateMessage: aMSG
+	"Answer whether the receiver would like to consume the argument aMSG."
+
+	^false!
+
+subclassWindow
+	"Private - Install the Dolphin VM's WndProc as the Window Procedure of the receiver's window.
+	This is a helper function to be sent from View classes which need to be subclassed (e.g. 
+	ControlViews) in order that messages are received and dispatched through the Dolphin WndProc.
+	The previous window procedure is typically stored in an instance variable, since windows
+	can be 'subclassed' on an instance specific basis, and we may be subclassing a window
+	that has already been subclassed (!!)."
+
+	| dolphinWndProc oldProc |
+	dolphinWndProc := VMLibrary default getWndProc.
+	(oldProc := self setWndProc: dolphinWndProc) = dolphinWndProc 
+		ifFalse: [self oldWndProc: oldProc]!
+
+subclassWindow: hWnd
+	"Private - Subclass the receiver's associated Win32 window by substituting the VM's 
+	window procedure and saving the control's one, and record hWnd as the handle 
+	of the receiver's window."
+
+	super subclassWindow: hWnd.
+	self subclassWindow!
+
+withOldWndProc: operation 
+	"Private - Evaluate the niladic valuable, operation, with the old (unsubclassed) window
+	procedure. This avoids us having to process (and slow down!!) messages in which we are not
+	interested."
+
+	self setWndProc: self oldWndProc.
+	^operation ensure: [self setWndProc: VMLibrary default getWndProc]! !
+!CEFViewHandle categoriesFor: #defaultWindowProcessing:wParam:lParam:!dispatching!private! !
+!CEFViewHandle categoriesFor: #destroyed!public! !
+!CEFViewHandle categoriesFor: #dispatchMessage:wParam:lParam:!dispatching!private! !
+!CEFViewHandle categoriesFor: #isPersistentView!public! !
+!CEFViewHandle categoriesFor: #oldWndProc!accessing!private! !
+!CEFViewHandle categoriesFor: #oldWndProc:!accessing!private! !
+!CEFViewHandle categoriesFor: #onPositionChanged:!event handling!private! !
+!CEFViewHandle categoriesFor: #preTranslateMessage:!dispatching!public! !
+!CEFViewHandle categoriesFor: #subclassWindow!operations!private! !
+!CEFViewHandle categoriesFor: #subclassWindow:!operations!private! !
+!CEFViewHandle categoriesFor: #withOldWndProc:!dispatching!private! !
+
+!CEFViewHandle class methodsFor!
+
+fromHandle: h 
+	| cef |
+	cef := super fromHandle: h.
+	SessionManager inputState windowAt: h put: cef.
+	^cef! !
+!CEFViewHandle class categoriesFor: #fromHandle:!public! !
+
+CEFWindowView guid: (GUID fromString: '{5DBB3854-FEDF-4099-ADEF-036409103DB8}')!
+CEFWindowView comment: ''!
+!CEFWindowView categoriesForClass!MVP-Resources-Misc! !
+!CEFWindowView methodsFor!
 
 addResourceHandler: aResourceHandler 
 	self client requestHandler addResourceHandler: aResourceHandler!
+
+attachHandle: anIntegerOrHandle 
+	"Private - Set the handle for this View and ensure that it is registered in our
+	AllViews collection. Note that though the View (sub)instance itself
+	holds its handle as an instance of ExternalHandle, AllViews is an 
+	IdentityDictionary keyed by an Integer (which will be a SmallInteger since 
+	window handles are typically small positive numbers). This arrangement
+	permits AllViews to be an IdentityDictionary, and a faster lookup results
+	for the critical message dispatching."
+
+	self doLog.
+	self handle: anIntegerOrHandle asExternalHandle.
+	SessionManager inputState windowAt: anIntegerOrHandle put: self!
+
+basicCreateAt: position extent: extentPoint 
+	"Private - Create the Win32 window for the receiver, and answer its handle.
+	N.B. The window may not be properly subclassed - use #createAt:extent: instead."
+
+	| dwStyle |
+	self doLog.
+	dwStyle := self baseStyle.
+	self ensureCefInit.
+	"aRect := self clientRectangle."
+	windowInfo := (CEF3WindowInfo new)
+				window_name: 'CEF browser' asCefString;
+				style: dwStyle;
+				ex_style: self extendedStyle;
+				parent_window: self parentView handle;
+				x: 0;
+				y: 0;
+				width: 800;
+				height: 600;
+				yourself.
+	browserSettings := CEF3BrowserSettings new.
+	browserSettings application_cache: 1.
+	browserSettings
+		local_storage: 1;
+		databases: 1;
+		javascript_open_windows: 1;
+		javascript_close_windows: 1;
+		javascript_access_clipboard: 1;
+		javascript_dom_paste: 1;
+		universal_access_from_file_urls: 1;
+		file_access_from_file_urls: 1;
+		web_security: 2.
+	CEF3Library default 
+		cef_browser_host_create_browser_sync: windowInfo
+		client: self client asCefClient
+		url: self url asCefString
+		settings: browserSettings
+		request_context: 0.
+	^handle
+
+	"
+	^UserLibrary default 
+		createWindowEx: self extendedStyle
+		lpClassName: self class winClassName
+		lpWindowName: self windowName
+		dwStyle: dwStyle
+		x: position x
+		y: position y
+		nWidth: extentPoint x
+		nHeight: extentPoint y
+		hWndParent: self creationParentView asParameter
+		hMenu: ((dwStyle anyMask: WS_CHILD) ifTrue: [self defaultId])
+		hInstance: VMLibrary default applicationHandle
+		lpParam: nil"!
 
 cb_do_close: this browser: browser 
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
+	self doLog.
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
-			cefHandle := cefBrowser host windowHandle.
-			self setCefPosition.
-			self onCefBrowserCreated]
-		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
+			cefHandle := cefBrowser host windowHandle
+			"	self subclassWindow: cefBrowser host windowHandle."
+			"self onCefBrowserCreated"
+			"cefview := CEFViewHandle fromHandle: cefHandle.
+			cefview subclassWindow: cefHandle.
+			self addSubView: cefview.
+			cefview arrangement: 1.
+			self setCefPosition."]
+		ifFalse: 
+			["self onNewChildBrowser: aCEF3BrowserEx"
+			]!
 
 cb_on_before_close: this browser: browser 
-	!
+	self doLog!
 
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
 	self doLog.
@@ -7740,11 +8410,305 @@ cb_run_modal: this browser: browser
 cefBrowser
 	^cefBrowser!
 
+client
+	^client 
+		ifNil: 
+			[client := self createClient. 
+			self registerResourceHandlers.
+			client]!
+
+createAt: position extent: extentPoint 
+	"Private - Create the View window ensuring it has the VM window procedure.
+	Answer the receiver."
+
+	"self basicCreateAt: position extent: extentPoint.
+	^self presenter onViewCreated."
+	self primHookWindowCreate: true.
+	self basicCreateAt: position extent: extentPoint.
+	self primHookWindowCreate: false.
+	handle = nil ifTrue: [Error signal: 'Hook failed'].
+
+	"self hookWindowCreate.
+	self unhookWindowCreate: (self basicCreateAt: position extent: extentPoint)."
+	self presenter onViewCreated!
+
+createClient
+	| aClient |
+	aClient := CEFClient new.
+	aClient lifeSpanHandler handler: self.
+	^aClient!
+
+defaultUrl
+	^'about:blank'!
+
+defaultWindowProcessing: message wParam: wParam lParam: lParam 
+	"Private - Pass a message to the 'default' window procedure of the receiver."
+
+	self doLog.
+	^UserLibrary default 
+		callWindowProc: self oldWndProc
+		hWnd: self asParameter
+		msg: message
+		wParam: wParam
+		lParam: lParam!
+
+defaultWindowStyle
+	"Private - Answer a default style to use when creating an instance of the receiver.
+	All controls have the WS_TABSTOP style by default.
+
+	WARNING: There is a bug in the Windows tabbing algorithm.
+	We specify the WS_EX_CONTROLPARENT style for ContainerViews otherwise tabs only
+	work between siblings in a single level. If a ContainerView with this style
+	contains no tabbable subViews, then pressing the TAB key will causes the
+	application to hang."
+
+	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE | WS_OVERLAPPED).
+	^super defaultWindowStyle 
+		bitOr: ##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE | WS_OVERLAPPED)!
+
+dispatchMessage: message wParam: wParam lParam: lParam 
+	"WM_NCDESTROY = message 
+		ifTrue: 
+			[^self 
+				wmNcDestroy: message
+				wParam: wParam
+				lParam: lParam]."
+	^super 
+		dispatchMessage: message
+		wParam: wParam
+		lParam: lParam.
+	^self 
+		defaultWindowProcessing: message
+		wParam: wParam
+		lParam: lParam!
+
+ensureCefInit
+	client := nil.
+	CEFApp new!
+
+executeJavascript: aString 
+	self cefBrowser mainFrame executeJavascript: aString!
+
+handle: aHandleOrNil 
+	"Private - Set the handle for the receiver. N.B. This is a simple
+	accessor method; set the handle of a View with #attachHandle:"
+
+	self doLog.
+	handle := aHandleOrNil!
+
+isManaged
+	^true!
+
+isPersistentView
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^false!
+
+isWindow
+	^UserLibrary default  isWindow: handle!
+
+oldWndProc
+	^oldWndProc!
+
+oldWndProc: anAddress
+	"Private - Set the window procedure of the control before we subclassed it."
+
+	oldWndProc := anAddress!
+
+onCefBrowserCreated
+	url ifNil: [self setUrl: self defaultUrl] ifNotNil: [:value | self setUrl: value].
+	self isManaged: true.
+	self invalidateLayout.
+	self invalidate.
+	self trigger: #cefBrowserCreated!
+
+preTranslateMessage: arg1 
+	"This is an auto-generated target implementation for the protocol <window>
+	and remains to be correctly implemented."
+
+	^false.
+	^super preTranslateMessage: arg1!
+
+registerResourceHandlers
+	 !
+
+setCefPosition
+	| hdwp aFlag |
+	hdwp := UserLibrary default beginDeferWindowPos: 1.
+	aFlag := ##(SWP_NOZORDER | SWP_NOACTIVATE).
+	hdwp := UserLibrary default 
+				deferWindowPos: hdwp
+				hwnd: handle
+				hwndInsertAfter: 0
+				x: 0
+				y: 0
+				cx: 800
+				cy: 600
+				uFlags: aFlag.
+	^UserLibrary default endDeferWindowPos: hdwp!
+
+setUrl: aUrl 
+	url := aUrl.
+	cefBrowser ifNil: [^nil].
+	cefBrowser mainFrame loadUrl: aUrl!
+
+subclassWindow
+	"Private - Install the Dolphin VM's WndProc as the Window Procedure of the receiver's window.
+	This is a helper function to be sent from View classes which need to be subclassed (e.g. 
+	ControlViews) in order that messages are received and dispatched through the Dolphin WndProc.
+	The previous window procedure is typically stored in an instance variable, since windows
+	can be 'subclassed' on an instance specific basis, and we may be subclassing a window
+	that has already been subclassed (!!)."
+
+	| dolphinWndProc oldProc |
+	dolphinWndProc := VMLibrary default getWndProc.
+	(oldProc := self setWndProc: dolphinWndProc) = dolphinWndProc 
+		ifFalse: [self oldWndProc: oldProc]!
+
+subclassWindow: hWnd 
+	"Private - Subclass the receiver's associated Win32 window by substituting the VM's 
+	window procedure and saving the control's one, and record hWnd as the handle 
+	of the receiver's window."
+
+	self doLog.
+	super subclassWindow: hWnd.
+	self subclassWindow!
+
+url
+	^url ifNil: [url := self defaultUrl]!
+
+url: aCEFString 
+	url := aCEFString!
+
+wmNcDestroy: message wParam: wParam lParam: lParam 
+	"Private - Notification that a window is about to disappear so we
+ 	remove it from our management."
+
+	| answer |
+	self doLog.
+	SessionManager inputState removeWindowAt: handle.
+	answer := self 
+				defaultWindowProcessing: message
+				wParam: wParam
+				lParam: lParam.
+	handle := nil.
+	^answer!
+
+wmPaint: message wParam: wParam lParam: lParam 
+	"Private - Controls do their own painting so only allow the default."
+
+	self ensureLayoutValid.
+	^self defaultWindowProcessing: message wParam: wParam lParam: lParam!
+
+wmPrintClient: message wParam: wParam lParam: lParam 
+	self ensureLayoutValid.
+	^nil!
+
+wmSysColorChange: message wParam: wParam lParam: lParam
+	"Private - A system color has occurred. Just accept the default window processing as the
+	control should handle it."
+
+	^nil!
+
+wmWindowPosChanged: message wParam: wParam lParam: lParam
+	"Private - The position of the receiver is about to change in some manner.
+	The superclass doesn't invoke default window processing in order to suppress
+	the old WM_SIZE and WM_MOVE events which aren't needed by Dolphin 3.0,
+	however most controls still depended on these messages so we must override to
+	cause the default processing to be invoked."
+
+	super wmWindowPosChanged: message wParam: wParam lParam: lParam.
+	^nil	"Accept default processing"
+! !
+!CEFWindowView categoriesFor: #addResourceHandler:!private! !
+!CEFWindowView categoriesFor: #attachHandle:!private!realizing/unrealizing! !
+!CEFWindowView categoriesFor: #basicCreateAt:extent:!private!realizing/unrealizing! !
+!CEFWindowView categoriesFor: #cb_do_close:browser:!private! !
+!CEFWindowView categoriesFor: #cb_on_after_created:browser:!event handling!private! !
+!CEFWindowView categoriesFor: #cb_on_before_close:browser:!private! !
+!CEFWindowView categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!private! !
+!CEFWindowView categoriesFor: #cb_run_modal:browser:!private! !
+!CEFWindowView categoriesFor: #cefBrowser!accessing!private! !
+!CEFWindowView categoriesFor: #client!accessing!private! !
+!CEFWindowView categoriesFor: #createAt:extent:!private!realizing/unrealizing! !
+!CEFWindowView categoriesFor: #createClient!accessing!private! !
+!CEFWindowView categoriesFor: #defaultUrl!private! !
+!CEFWindowView categoriesFor: #defaultWindowProcessing:wParam:lParam:!dispatching!private! !
+!CEFWindowView categoriesFor: #defaultWindowStyle!constants!private! !
+!CEFWindowView categoriesFor: #dispatchMessage:wParam:lParam:!dispatching!public! !
+!CEFWindowView categoriesFor: #ensureCefInit!private! !
+!CEFWindowView categoriesFor: #executeJavascript:!public! !
+!CEFWindowView categoriesFor: #handle:!accessing!private! !
+!CEFWindowView categoriesFor: #isManaged!private! !
+!CEFWindowView categoriesFor: #isPersistentView!public! !
+!CEFWindowView categoriesFor: #isWindow!public! !
+!CEFWindowView categoriesFor: #oldWndProc!public! !
+!CEFWindowView categoriesFor: #oldWndProc:!accessing!private! !
+!CEFWindowView categoriesFor: #onCefBrowserCreated!private! !
+!CEFWindowView categoriesFor: #preTranslateMessage:!public! !
+!CEFWindowView categoriesFor: #registerResourceHandlers!private! !
+!CEFWindowView categoriesFor: #setCefPosition!public! !
+!CEFWindowView categoriesFor: #setUrl:!public! !
+!CEFWindowView categoriesFor: #subclassWindow!operations!private! !
+!CEFWindowView categoriesFor: #subclassWindow:!operations!private! !
+!CEFWindowView categoriesFor: #url!private! !
+!CEFWindowView categoriesFor: #url:!private! !
+!CEFWindowView categoriesFor: #wmNcDestroy:wParam:lParam:!public! !
+!CEFWindowView categoriesFor: #wmPaint:wParam:lParam:!event handling-win32!private! !
+!CEFWindowView categoriesFor: #wmPrintClient:wParam:lParam:!event handling-win32!private! !
+!CEFWindowView categoriesFor: #wmSysColorChange:wParam:lParam:!event handling-win32!private! !
+!CEFWindowView categoriesFor: #wmWindowPosChanged:wParam:lParam:!event handling-win32!private! !
+
+CEFView guid: (GUID fromString: '{0CB0496B-4CE2-46D0-B0EC-06CF03CB4E32}')!
+CEFView comment: ''!
+!CEFView categoriesForClass!MVP-Resources-Misc! !
+!CEFView methodsFor!
+
+addResourceHandler: aResourceHandler 
+	self client requestHandler addResourceHandler: aResourceHandler!
+
+cb_do_close: this browser: browser 
+	self releaseCefView.
+	^0!
+
+cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
+	self doLog.
+	cefBrowser isNil 
+		ifTrue: 
+			[cefBrowser := aCEF3BrowserEx.
+			cefHandle := cefBrowser host windowHandle.
+			cefview := CEFViewHandle fromHandle: cefHandle.
+			self addSubView: cefview.
+			cefview arrangement: 1.
+			self setCefPosition.
+			self onCefBrowserCreated]
+		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
+
+cb_on_before_close: this browser: browser 
+	self releaseCefView.!
+
+cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
+	self doLog.
+	^0!
+
+cb_run_modal: this browser: browser 
+	!
+
+cefBrowser
+	^cefBrowser!
+
+cefview
+	^cefview!
+
+cefview: anObject
+	cefview := anObject!
+
 cefWindowExStyle
 	^0!
 
 cefWindowStyle
-	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE ).!
+	^##(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_TABSTOP | WS_VISIBLE | WS_OVERLAPPED).!
 
 client
 	^client 
@@ -7759,6 +8723,11 @@ createClient
 	aClient lifeSpanHandler handler: self.
 	^aClient!
 
+defaultLayoutManager
+	"Private - Answer a default LayoutManager to use."
+
+	^ProportionalLayout new !
+
 defaultUrl
 	^'about:blank'!
 
@@ -7768,6 +8737,29 @@ ensureCefInit
 
 executeJavascript: aString 
 	self cefBrowser mainFrame executeJavascript: aString!
+
+forceCefViewToRepaint
+	"	cefview position: (cefview position x + 1) @ 0.
+	cefview position: (cefview position x - 1) @ 0"
+
+	| aPoint |
+	cefview isNil ifTrue: [^nil].
+	aPoint := cefview position + (1 @ 0).
+	cefview 
+		setWindowPosAfter: 0
+		x: aPoint x
+		y: aPoint y
+		width: 0
+		height: 0
+		flags: ##(16r4000 | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE).
+	aPoint := aPoint - (1 @ 0).
+	cefview 
+		setWindowPosAfter: 0
+		x: aPoint x
+		y: aPoint y
+		width: 0
+		height: 0
+		flags: ##(16r4000 | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE)!
 
 initialize
 	super initialize.
@@ -7781,10 +8773,19 @@ intializeFromParent: aCEFView browser: aCEF3BrowserEx
 isCefReady
 	^cefBrowser isNil not!
 
+isManaged
+	^true!
+
 onCefBrowserCreated
 	url ifNil: [self setUrl: self defaultUrl] ifNotNil: [:value | self setUrl: value].
 	self isManaged: true.
+	self invalidateLayout.
+	self invalidate.
 	self trigger: #cefBrowserCreated!
+
+onDestroyed
+	self releaseCefView.
+	super onDestroyed!
 
 onModelChanged
 	self registerResourceHandlers.
@@ -7795,17 +8796,6 @@ onNewChildBrowser: aCEF3BrowserEx
 	| aChild |
 	aChild := CEFView parentBrowserView: self browser: aCEF3BrowserEx.
 	childBrowserView add: aChild!
-
-onPositionChanged: aPositionEvent 
-	"Private - Handle a window position change event (move or resize)."
-
-	"self doLog."
-	super onPositionChanged: aPositionEvent.
-	aPositionEvent isResize 
-		ifTrue: 
-			[self setCefPosition
-			"[self setCefPosition] postToInputQueue
-"]!
 
 onViewCreated
 	| aRect |
@@ -7838,8 +8828,7 @@ onViewCreated
 		client: self client asCefClient
 		url: self url asCefString
 		settings: browserSettings
-		request_context: 0.
-	!
+		request_context: 0!
 
 registerResourceHandlers
 	 !
@@ -7847,14 +8836,18 @@ registerResourceHandlers
 releaseCefLifeSpanHandler
 	client ifNotNil: [:value | value lifeSpanHandler handler: nil]!
 
+releaseCefView
+	self doLog.
+	cefview isNil 
+		ifFalse: 
+			[cefview destroyed.
+			cefview := nil]!
+
 removeAllResourceHandlers
 	self client requestHandler removeAllResourceHandlers!
 
 setCefPosition
-	| hdwp rect aFlag |
-	PGTranscript
-		display: 'setCefPosition';
-		cr.
+	| hdwp rect aFlag answer |
 	rect := self clientRectangle.
 	hdwp := UserLibrary default beginDeferWindowPos: 1.
 	aFlag := flags := ##(SWP_NOZORDER | SWP_NOACTIVATE).
@@ -7867,18 +8860,34 @@ setCefPosition
 				cx: rect width
 				cy: rect height
 				uFlags: aFlag.
-	UserLibrary default endDeferWindowPos: hdwp!
+	answer := UserLibrary default endDeferWindowPos: hdwp!
 
 setUrl: aUrl 
 	url := aUrl.
 	cefBrowser ifNil: [^nil].
 	cefBrowser mainFrame loadUrl: aUrl!
 
+subViewsDo: aMonadicValuable 
+	"Evaluate the <monadicValuable> argument for each of the receiver's sub-views, in z-order
+	sequence"
+
+	^super subViewsDo: aMonadicValuable.
+	cefview isNil ifFalse: [aMonadicValuable value: cefview]!
+
 url
 	^url ifNil: [url := self defaultUrl]!
 
 url: aCEFString 
-	url := aCEFString! !
+	url := aCEFString!
+
+wmPaint: message wParam: wParam lParam: lParam 
+	"Private - Controls do their own painting so only allow the default."
+
+	self forceCefViewToRepaint.
+	^super 
+		wmPaint: message
+		wParam: wParam
+		lParam: lParam! !
 !CEFView categoriesFor: #addResourceHandler:!private! !
 !CEFView categoriesFor: #cb_do_close:browser:!private! !
 !CEFView categoriesFor: #cb_on_after_created:browser:!event handling!private! !
@@ -7886,28 +8895,36 @@ url: aCEFString
 !CEFView categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!private! !
 !CEFView categoriesFor: #cb_run_modal:browser:!private! !
 !CEFView categoriesFor: #cefBrowser!accessing!private! !
+!CEFView categoriesFor: #cefview!accessing!private! !
+!CEFView categoriesFor: #cefview:!accessing!private! !
 !CEFView categoriesFor: #cefWindowExStyle!private! !
 !CEFView categoriesFor: #cefWindowStyle!private! !
 !CEFView categoriesFor: #client!accessing!private! !
 !CEFView categoriesFor: #createClient!accessing!private! !
+!CEFView categoriesFor: #defaultLayoutManager!constants!private! !
 !CEFView categoriesFor: #defaultUrl!private! !
 !CEFView categoriesFor: #ensureCefInit!private! !
 !CEFView categoriesFor: #executeJavascript:!public! !
+!CEFView categoriesFor: #forceCefViewToRepaint!event handling!private! !
 !CEFView categoriesFor: #initialize!private! !
 !CEFView categoriesFor: #intializeFromParent:browser:!private! !
 !CEFView categoriesFor: #isCefReady!public! !
+!CEFView categoriesFor: #isManaged!private! !
 !CEFView categoriesFor: #onCefBrowserCreated!private! !
+!CEFView categoriesFor: #onDestroyed!private! !
 !CEFView categoriesFor: #onModelChanged!public! !
 !CEFView categoriesFor: #onNewChildBrowser:!private! !
-!CEFView categoriesFor: #onPositionChanged:!event handling!private! !
 !CEFView categoriesFor: #onViewCreated!event handling!private! !
 !CEFView categoriesFor: #registerResourceHandlers!private! !
 !CEFView categoriesFor: #releaseCefLifeSpanHandler!accessing!private! !
+!CEFView categoriesFor: #releaseCefView!private! !
 !CEFView categoriesFor: #removeAllResourceHandlers!private! !
 !CEFView categoriesFor: #setCefPosition!event handling!private! !
 !CEFView categoriesFor: #setUrl:!public! !
+!CEFView categoriesFor: #subViewsDo:!hierarchy!public!sub views! !
 !CEFView categoriesFor: #url!private! !
 !CEFView categoriesFor: #url:!private! !
+!CEFView categoriesFor: #wmPaint:wParam:lParam:!event handling!private! !
 
 !CEFView class methodsFor!
 
