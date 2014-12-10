@@ -26,6 +26,9 @@ view executeJavascript: ''alert("hello")''.
 view setUrl: ''http://127.0.0.1:8080/am_crosstab_view.html''.
 view setUrl: ''http://127.0.0.1:8080/test2.html''.
 
+view setUrl: ''http://192.168.1.102:9090/am_crosstab_view.html''.
+
+
 view setUrl: ''chrome://chrome-urls/''.
   
 view addResourceHandler: (CEFDirectoryResourceHandler directory:''D:\MyDolphin\bntribe\bn\bin\config\html\pathways'' domain:''http://m/'').
@@ -225,12 +228,12 @@ CEFObject subclass: #CEFDownloadHandler
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFRequestHandler
-	instanceVariableNames: 'resourceHandlers pendingResourceHandlers'
+	instanceVariableNames: 'resourceHandlers pendingResourceHandlers requestHandler'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFResourceHandler
-	instanceVariableNames: 'requestHandler cefHandler stream postData url'
+	instanceVariableNames: 'requestHandler cefHandler stream postData url hasResponse readResponseCallback'
 	classVariableNames: 'MIMETYPES'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -445,7 +448,7 @@ CEF3BeforeDownloadCallback subclass: #CEF3BeforeDownloadCallbackEx
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3Browser subclass: #CEF3BrowserEx
-	instanceVariableNames: 'get_host_ex get_main_frame_ex'
+	instanceVariableNames: 'get_host_ex get_main_frame_ex get_identifier_ex'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -670,24 +673,24 @@ cb_do_close: this browser: browser
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	self doLog.
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
-			cefHandle := cefBrowser host windowHandle.
+			cefHandle := cefBrowser host windowHandle
 			"cefview := CEFViewHandle fromHandle: cefHandle.
 			cefview subclassWindow: cefHandle.
 			self addSubView: cefview.
 			cefview arrangement: 1.
 			self setCefPosition.
 			self onCefBrowserCreated"]
-		ifFalse: ["self onNewChildBrowser: aCEF3BrowserEx"]!
+		ifFalse: 
+			["self onNewChildBrowser: aCEF3BrowserEx"
+			]!
 
 cb_on_before_close: this browser: browser 
 	!
 
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
-	self doLog.
 	^0!
 
 cb_run_modal: this browser: browser 
@@ -750,8 +753,7 @@ defaultUrl
 
 defaultWindowProcessing: message wParam: wParam lParam: lParam 
 	"Private - Pass a message to the 'default' window procedure of the receiver."
-
-	self doLog.
+ 
 	^UserLibrary default 
 		callWindowProc: self oldWndProc
 		hWnd: self asParameter
@@ -927,7 +929,6 @@ subclassWindow: hWnd
 	window procedure and saving the control's one, and record hWnd as the handle 
 	of the receiver's window."
 
-	self doLog.
 	self attachHandle: hWnd.
 	self subclassWindow!
 
@@ -1078,7 +1079,7 @@ main
 	settings remote_debugging_port: 9223.
 	settings multi_threaded_message_loop: isMultiThreadLoop.
 
-	"settings no_sandbox: 1."
+	settings no_sandbox: 1.
 	res := self lib 
 				cef_initialize: args
 				settings: settings
@@ -1291,13 +1292,29 @@ cb_get_resource_handler: this browser: browser frame: frame request: aCEF3Reques
       struct _cef_frame_t* frame, struct _cef_request_t* request);
 "
 
-	self log: 'cb_get_resource_handler: ' , aCEF3RequestEx getUrl str asString.
+	"self log: 'cb_get_resource_handler: ' , aCEF3RequestEx getUrl str asString."
 	^(self findResourceHandler: aCEF3RequestEx getUrl str asString) 
 		ifNil: [0]
 		ifNotNil: [:aCEFResourceHandler | self serveRequest: aCEF3RequestEx with: aCEFResourceHandler]!
 
+cb_on_before_browse: this browser: browser frame: frame request: aCEF3RequestEx is_redirect: is_redirect 
+	requestHandler 
+		ifNotNil: 
+			[:value | 
+			^value 
+				cb_on_before_browse: this
+				browser: browser
+				frame: frame
+				request: aCEF3RequestEx
+				is_redirect: is_redirect].
+	^0!
+
 findResourceHandler: aUrl 
-	^resourceHandlers detect: [:each | each acceptUrl: aUrl] ifNone: [nil]!
+	^resourceHandlers detect: 
+			[:each | 
+			"self log: 'findResourceHandler: ' , aUrl , ' ==> ' , each displayString."
+			each acceptUrl: aUrl]
+		ifNone: [nil]!
 
 initialize
 	super initialize.
@@ -1313,6 +1330,12 @@ removePendingResourceHandler: aCEFResourceHandler
 removeResourceHandler: aCEFResourceHandler 
 	resourceHandlers remove: aCEFResourceHandler!
 
+requestHandler
+	^requestHandler!
+
+requestHandler: anObject
+	requestHandler := anObject!
+
 resourceHandlers
 	^resourceHandlers!
 
@@ -1325,11 +1348,14 @@ serveRequest: aCEF3RequestEx with: aCEFResourceHandler
 !CEFRequestHandler categoriesFor: #addPendingResourceHandler:!public! !
 !CEFRequestHandler categoriesFor: #addResourceHandler:!public! !
 !CEFRequestHandler categoriesFor: #cb_get_resource_handler:browser:frame:request:!**compiled accessors**!callback!must not strip!public! !
+!CEFRequestHandler categoriesFor: #cb_on_before_browse:browser:frame:request:is_redirect:!public! !
 !CEFRequestHandler categoriesFor: #findResourceHandler:!public! !
 !CEFRequestHandler categoriesFor: #initialize!public! !
 !CEFRequestHandler categoriesFor: #removeAllResourceHandlers!public! !
 !CEFRequestHandler categoriesFor: #removePendingResourceHandler:!public! !
 !CEFRequestHandler categoriesFor: #removeResourceHandler:!public! !
+!CEFRequestHandler categoriesFor: #requestHandler!accessing!private! !
+!CEFRequestHandler categoriesFor: #requestHandler:!accessing!private! !
 !CEFRequestHandler categoriesFor: #resourceHandlers!accessing!private! !
 !CEFRequestHandler categoriesFor: #serveRequest:with:!public! !
 
@@ -1381,7 +1407,7 @@ void (CEF_CALLBACK *get_response_headers)(
 "
 
 	self log: 'cb_get_response_headers: ' , aLARGE_INTEGER displayString.
-	aCEF3ResponseEx setStatus: 200.
+	aCEF3ResponseEx setStatus: self status.
 	aCEF3ResponseEx setStatusText: 'OK' asCefString.
 	aCEF3ResponseEx setMimeType: self mimeType asCefString.
 	self log: 'cb_get_response_headers: ' , aCEF3ResponseEx getMimeType str asString.
@@ -1423,22 +1449,29 @@ cb_read_response: this data_out: data_out bytes_to_read: bytes_to_read bytes_rea
       struct _cef_callback_t* callback);
 "
 
-	| out aReadBytes aSDWORD |
+	| aSDWORD |
+	readResponseCallback := aCEF3CallbackEx.
 	aSDWORD := SDWORD fromAddress: intpointer.
-	self stream atEnd 
+	self hasResponse 
 		ifTrue: 
-			[self closeStream.
-			aSDWORD value: 0.
-			self onDone.
-			^0].
-	out := ExternalAddress fromInteger: data_out.
-	aReadBytes := self stream lastPosition - self stream position.
-	aReadBytes := aReadBytes min: bytes_to_read.
-	self stream 
-		next: aReadBytes
-		into: out
-		startingAt: 1.
-	aSDWORD value: aReadBytes.
+			[| out aReadBytes |
+			self stream atEnd 
+				ifTrue: 
+					[self closeStream.
+					aSDWORD value: 0.
+					self onDone.
+					^0].
+			out := ExternalAddress fromInteger: data_out.
+			aReadBytes := self stream lastPosition - self stream position.
+			aReadBytes := aReadBytes min: bytes_to_read.
+			self stream 
+				next: aReadBytes
+				into: out
+				startingAt: 1.
+			aSDWORD value: aReadBytes]
+		ifFalse: 
+			[aSDWORD value: 0.
+			[self readResponse] postToInputQueue].
 	^1!
 
 cefHandler
@@ -1457,12 +1490,18 @@ copy
 	aCopy resetOnCopy.
 	^aCopy!
 
+getPath
+	^(url subStrings: '?') first!
+
+hasResponse
+	^hasResponse ifNil: [false]!
+
 initialize
 	!
 
 mimeType
 	| aExt aMimeType |
-	aExt := File splitExtensionFrom: url.
+	aExt := File splitExtensionFrom: (self getPath).
 	aMimeType := self class mimeTypes at: aExt ifAbsent: ['application/octet-stream'].
 	^aMimeType!
 
@@ -1476,6 +1515,10 @@ postData
 postData: anObject
 	postData := anObject!
 
+readResponse
+	hasResponse := true.
+	readResponseCallback cont_ex!
+
 requestHandler
 	^requestHandler!
 
@@ -1484,6 +1527,9 @@ requestHandler: anObject
 
 resetOnCopy
 	cefHandler := stream := requestHandler := nil!
+
+status
+	^200!
 
 stream
 	self subclassResponsibility! !
@@ -1499,14 +1545,18 @@ stream
 !CEFResourceHandler categoriesFor: #cefHandler!accessing!private! !
 !CEFResourceHandler categoriesFor: #closeStream!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #copy!public! !
+!CEFResourceHandler categoriesFor: #getPath!public! !
+!CEFResourceHandler categoriesFor: #hasResponse!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #initialize!private! !
 !CEFResourceHandler categoriesFor: #mimeType!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #onDone!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData:!accessing!private! !
+!CEFResourceHandler categoriesFor: #readResponse!public! !
 !CEFResourceHandler categoriesFor: #requestHandler!accessing!private! !
 !CEFResourceHandler categoriesFor: #requestHandler:!accessing!private! !
 !CEFResourceHandler categoriesFor: #resetOnCopy!private! !
+!CEFResourceHandler categoriesFor: #status!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #stream!private! !
 
 !CEFResourceHandler class methodsFor!
@@ -1740,6 +1790,8 @@ CEFDirectoryResourceHandler comment: ''!
 
 basicAcceptUrl: aUrl 
 	| answer |
+
+	self doLog.
 	answer := (aUrl beginsWith: domain) 
 				ifTrue: [File exists: (self filenameFromUrl: aUrl)]
 				ifFalse: [false].
@@ -1760,6 +1812,7 @@ domain: anObject
 filenameFromUrl: aUrl 
 	| aPath answer |
 	aPath := aUrl copyFrom: domain size + 1.
+	aPath := (aPath subStrings: '?') first.
 	answer := File composePath: self directory subPath: aPath.
 	^answer!
 
@@ -2241,7 +2294,7 @@ getCompileMethod: aSymbol proc: proc
 	^self class getCEFCompileMethod: aSymbol proc: proc!
 
 log: aMsg 
-	self doLog
+	"self doLog"
 	"SessionManager current log: self class name , ' : ' , aMsg"! !
 !CEFExternalStructure categoriesFor: #getCompileMethod:proc:!must not strip!public! !
 !CEFExternalStructure categoriesFor: #log:!public! !
@@ -5206,7 +5259,7 @@ on_process_message_received: anObject
 	bytes dwordAtOffset: 68 put: anObject!
 
 onCallback: aCEF3Client 
-	self log: 'onCallback:'.
+	"self log: 'onCallback:'."
 	^0!
 
 requestHandler
@@ -6239,12 +6292,12 @@ initalizeCallbacksRegistry
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_do_close:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword CEF3BrowserEx*')).
 	CallbackRegistry at: #on_before_close:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_on_before_close:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword'))! !
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEF3BrowserEx*'))! !
 !CEF3LifeSpanHandler class categoriesFor: #defineFields!initializing!public! !
 !CEF3LifeSpanHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
 
@@ -6965,7 +7018,21 @@ cb_get_resource_handler: this browser: browser frame: frame request: request
 "!
 
 cb_on_before_browse: this browser: browser frame: frame request: request is_redirect: is_redirect 
-	self log: 'cb_on_before_browse:'.
+	| aResH |
+	"self doLog."
+	aResH := handler 
+				ifNotNil: 
+					[:value | 
+					(value 
+						cb_on_before_browse: this
+						browser: browser
+						frame: frame
+						request: request
+						is_redirect: is_redirect) ifNotNil: [:value2 | value2 asInteger]]
+				ifNil: [0].
+	^aResH.
+
+	"log: 'cb_on_before_browse:'."
 	^0
 	"
 ///
@@ -7282,7 +7349,7 @@ initalizeCallbacksRegistry
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_on_before_browse:browser:frame:request:is_redirect:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword dword sdword')).
+				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword dword CEF3RequestEx* sdword')).
 	CallbackRegistry at: #on_before_resource_load:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -7816,6 +7883,10 @@ get_host_ex: this
 	<stdcall: CEF3BrowserHostEx* get_host CEF3Browser*>
 	^self invalidCall!
 
+get_identifier_ex: this 
+	<stdcall: sdword get_identifier CEF3Browser*>
+	^self invalidCall!
+
 get_main_frame_ex: this 
 	<stdcall: CEF3FrameEx* get_main_frame CEF3Browser*>
 	^self invalidCall!
@@ -7824,16 +7895,23 @@ host
 	get_host_ex isNil ifTrue: [self initializeExternalMethods].
 	^get_host_ex value: self withArguments: (Array with: self)!
 
+identifier
+	get_identifier_ex isNil ifTrue: [self initializeExternalMethods].
+	^get_identifier_ex value: self withArguments: (Array with: self)!
+
 initializeExternalMethods
 	get_host_ex := self getCompileMethod: #get_host_ex: proc: self get_host.
-	get_main_frame_ex := self getCompileMethod: #get_main_frame_ex: proc: self get_main_frame!
+	get_main_frame_ex := self getCompileMethod: #get_main_frame_ex: proc: self get_main_frame.
+	get_identifier_ex := self getCompileMethod: #get_identifier_ex: proc: self get_identifier!
 
 mainFrame
 	get_main_frame_ex isNil ifTrue: [self initializeExternalMethods].
 	^get_main_frame_ex value: self withArguments: (Array with: self)! !
 !CEF3BrowserEx categoriesFor: #get_host_ex:!public! !
+!CEF3BrowserEx categoriesFor: #get_identifier_ex:!public! !
 !CEF3BrowserEx categoriesFor: #get_main_frame_ex:!public! !
 !CEF3BrowserEx categoriesFor: #host!public! !
+!CEF3BrowserEx categoriesFor: #identifier!public! !
 !CEF3BrowserEx categoriesFor: #initializeExternalMethods!must not strip!public! !
 !CEF3BrowserEx categoriesFor: #mainFrame!public! !
 
@@ -8205,8 +8283,7 @@ CEFViewHandle comment: ''!
 
 defaultWindowProcessing: message wParam: wParam lParam: lParam 
 	"Private - Pass a message to the 'default' window procedure of the receiver."
-
-	self doLog.
+ 
 	^UserLibrary default 
 		callWindowProc: self oldWndProc
 		hWnd: self asParameter
@@ -8243,8 +8320,7 @@ oldWndProc: anAddress
 
 onPositionChanged: aPositionEvent 
 	"Private - Handle a window position change event (move or resize)."
-
-	self doLog.
+ 
 	super onPositionChanged: aPositionEvent
 	"	aPositionEvent isResize ifTrue: [self setCefPosition]"!
 
@@ -8252,6 +8328,17 @@ preTranslateMessage: aMSG
 	"Answer whether the receiver would like to consume the argument aMSG."
 
 	^false!
+
+state
+	"Private - Answer a MessageSequence which, when replayed, will restore the receiver 
+	to its current state.
+	Implementation Note: We avoid saving unecessary window state by only recording 
+	differences from the default state of a new View. This reduces the size of View resources
+	and a saved image, and speeds up view restoration."
+
+	| answer |
+	answer := MessageSequence new.
+	^answer!
 
 subclassWindow
 	"Private - Install the Dolphin VM's WndProc as the Window Procedure of the receiver's window.
@@ -8289,6 +8376,7 @@ withOldWndProc: operation
 !CEFViewHandle categoriesFor: #oldWndProc:!accessing!private! !
 !CEFViewHandle categoriesFor: #onPositionChanged:!event handling!private! !
 !CEFViewHandle categoriesFor: #preTranslateMessage:!dispatching!public! !
+!CEFViewHandle categoriesFor: #state!accessing!private! !
 !CEFViewHandle categoriesFor: #subclassWindow!operations!private! !
 !CEFViewHandle categoriesFor: #subclassWindow:!operations!private! !
 !CEFViewHandle categoriesFor: #withOldWndProc:!dispatching!private! !
@@ -8318,8 +8406,7 @@ attachHandle: anIntegerOrHandle
 	window handles are typically small positive numbers). This arrangement
 	permits AllViews to be an IdentityDictionary, and a faster lookup results
 	for the critical message dispatching."
-
-	self doLog.
+ 
 	self handle: anIntegerOrHandle asExternalHandle.
 	SessionManager inputState windowAt: anIntegerOrHandle put: self!
 
@@ -8328,7 +8415,7 @@ basicCreateAt: position extent: extentPoint
 	N.B. The window may not be properly subclassed - use #createAt:extent: instead."
 
 	| dwStyle |
-	self doLog.
+ 
 	dwStyle := self baseStyle.
 	self ensureCefInit.
 	"aRect := self clientRectangle."
@@ -8381,7 +8468,7 @@ cb_do_close: this browser: browser
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	self doLog.
+ 
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
@@ -8398,10 +8485,10 @@ cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx
 			]!
 
 cb_on_before_close: this browser: browser 
-	self doLog!
+	 !
 
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
-	self doLog.
+ 
 	^0!
 
 cb_run_modal: this browser: browser 
@@ -8443,8 +8530,7 @@ defaultUrl
 
 defaultWindowProcessing: message wParam: wParam lParam: lParam 
 	"Private - Pass a message to the 'default' window procedure of the receiver."
-
-	self doLog.
+ 
 	^UserLibrary default 
 		callWindowProc: self oldWndProc
 		hWnd: self asParameter
@@ -8492,8 +8578,7 @@ executeJavascript: aString
 handle: aHandleOrNil 
 	"Private - Set the handle for the receiver. N.B. This is a simple
 	accessor method; set the handle of a View with #attachHandle:"
-
-	self doLog.
+ 
 	handle := aHandleOrNil!
 
 isManaged
@@ -8570,8 +8655,7 @@ subclassWindow: hWnd
 	"Private - Subclass the receiver's associated Win32 window by substituting the VM's 
 	window procedure and saving the control's one, and record hWnd as the handle 
 	of the receiver's window."
-
-	self doLog.
+ 
 	super subclassWindow: hWnd.
 	self subclassWindow!
 
@@ -8586,7 +8670,7 @@ wmNcDestroy: message wParam: wParam lParam: lParam
  	remove it from our management."
 
 	| answer |
-	self doLog.
+ 
 	SessionManager inputState removeWindowAt: handle.
 	answer := self 
 				defaultWindowProcessing: message
@@ -8668,12 +8752,19 @@ CEFView comment: ''!
 addResourceHandler: aResourceHandler 
 	self client requestHandler addResourceHandler: aResourceHandler!
 
+caption: aString 
+	UserLibrary default setWindowText: cefHandle asParameter lpString: aString!
+
 cb_do_close: this browser: browser 
-	self releaseCefView.
+	"self doLog.
+	browser identifier == cefBrowser identifier 
+		ifTrue: 
+			[self closeChildren.
+			self releaseCefView]."
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	self doLog.
+ 
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
@@ -8686,10 +8777,14 @@ cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx
 		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
 
 cb_on_before_close: this browser: browser 
-	self releaseCefView.!
+	browser identifier == cefBrowser identifier 
+		ifTrue: 
+			[self closeChildren.
+			self releaseCefView]
+		ifFalse: [self closeChildBrowser: browser]!
 
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
-	self doLog.
+ 
 	^0!
 
 cb_run_modal: this browser: browser 
@@ -8717,6 +8812,29 @@ client
 			self registerResourceHandlers.
 			client]!
 
+closeCefWindow
+	UserLibrary default 
+		sendMessage: cefHandle asParameter
+		msg: WM_CLOSE
+		wParam: 0
+		lParam: 0.
+	self releaseCefView!
+
+closeChildBrowser: browser 
+	| childView |
+	childView := childBrowserView detect: [:each | each cefBrowser identifier == browser identifier]
+				ifNone: [nil].
+	childView ifNil: [^nil].
+	childBrowserView remove: childView.
+	childView releaseCefView!
+
+closeChildren
+	| c |
+ 
+	c := childBrowserView.
+	childBrowserView := OrderedCollection new.
+	c do: [:each | each closeCefWindow]!
+
 createClient
 	| aClient |
 	aClient := CEFClient new.
@@ -8743,6 +8861,7 @@ forceCefViewToRepaint
 	cefview position: (cefview position x - 1) @ 0"
 
 	| aPoint |
+ 
 	cefview isNil ifTrue: [^nil].
 	aPoint := cefview position + (1 @ 0).
 	cefview 
@@ -8795,7 +8914,8 @@ onModelChanged
 onNewChildBrowser: aCEF3BrowserEx 
 	| aChild |
 	aChild := CEFView parentBrowserView: self browser: aCEF3BrowserEx.
-	childBrowserView add: aChild!
+	childBrowserView add: aChild.
+	^aChild!
 
 onViewCreated
 	| aRect |
@@ -8830,6 +8950,13 @@ onViewCreated
 		settings: browserSettings
 		request_context: 0!
 
+parentClosing
+	self 
+		sendMessage: WM_CLOSE
+		wParam: 0
+		lParam: 0.
+	self releaseCefView!
+
 registerResourceHandlers
 	 !
 
@@ -8837,7 +8964,7 @@ releaseCefLifeSpanHandler
 	client ifNotNil: [:value | value lifeSpanHandler handler: nil]!
 
 releaseCefView
-	self doLog.
+	 
 	cefview isNil 
 		ifFalse: 
 			[cefview destroyed.
@@ -8861,6 +8988,13 @@ setCefPosition
 				cy: rect height
 				uFlags: aFlag.
 	answer := UserLibrary default endDeferWindowPos: hdwp!
+
+setIcon: anIcon 
+	^UserLibrary default 
+		sendMessage: cefHandle asParameter
+		msg: WM_SETICON
+		wParam: 1
+		lParam: anIcon asParameter!
 
 setUrl: aUrl 
 	url := aUrl.
@@ -8889,6 +9023,7 @@ wmPaint: message wParam: wParam lParam: lParam
 		wParam: wParam
 		lParam: lParam! !
 !CEFView categoriesFor: #addResourceHandler:!private! !
+!CEFView categoriesFor: #caption:!public! !
 !CEFView categoriesFor: #cb_do_close:browser:!private! !
 !CEFView categoriesFor: #cb_on_after_created:browser:!event handling!private! !
 !CEFView categoriesFor: #cb_on_before_close:browser:!private! !
@@ -8900,6 +9035,9 @@ wmPaint: message wParam: wParam lParam: lParam
 !CEFView categoriesFor: #cefWindowExStyle!private! !
 !CEFView categoriesFor: #cefWindowStyle!private! !
 !CEFView categoriesFor: #client!accessing!private! !
+!CEFView categoriesFor: #closeCefWindow!private! !
+!CEFView categoriesFor: #closeChildBrowser:!public! !
+!CEFView categoriesFor: #closeChildren!private! !
 !CEFView categoriesFor: #createClient!accessing!private! !
 !CEFView categoriesFor: #defaultLayoutManager!constants!private! !
 !CEFView categoriesFor: #defaultUrl!private! !
@@ -8915,11 +9053,13 @@ wmPaint: message wParam: wParam lParam: lParam
 !CEFView categoriesFor: #onModelChanged!public! !
 !CEFView categoriesFor: #onNewChildBrowser:!private! !
 !CEFView categoriesFor: #onViewCreated!event handling!private! !
+!CEFView categoriesFor: #parentClosing!private! !
 !CEFView categoriesFor: #registerResourceHandlers!private! !
 !CEFView categoriesFor: #releaseCefLifeSpanHandler!accessing!private! !
 !CEFView categoriesFor: #releaseCefView!private! !
 !CEFView categoriesFor: #removeAllResourceHandlers!private! !
 !CEFView categoriesFor: #setCefPosition!event handling!private! !
+!CEFView categoriesFor: #setIcon:!public! !
 !CEFView categoriesFor: #setUrl:!public! !
 !CEFView categoriesFor: #subViewsDo:!hierarchy!public!sub views! !
 !CEFView categoriesFor: #url!private! !
