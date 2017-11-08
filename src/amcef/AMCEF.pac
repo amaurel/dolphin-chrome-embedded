@@ -185,9 +185,11 @@ package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\Util\AMUtil';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
+	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Dialogs\Common\Dolphin Common Dialogs';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\JSON\JSON';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
+	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Swazoo\Swazoo';
 	yourself).
 
 package setManualPrerequisites: #(
@@ -233,7 +235,7 @@ CEFObject subclass: #CEFRequestHandler
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFResourceHandler
-	instanceVariableNames: 'requestHandler cefHandler stream postData url hasResponse readResponseCallback'
+	instanceVariableNames: 'requestHandler cefHandler stream postData url hasResponse processCallback readResponseCallback error errorStream'
 	classVariableNames: 'MIMETYPES'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -1031,18 +1033,18 @@ cb_create: this browser: browser frame: frame sheme_name: sheme_name request: aC
       struct _cef_frame_t* frame, struct _cef_request_t* request);
 "
 
-	self log: 'cb_create: ' , aCEF3RequestEx getUrl str asString.
+	"self log: 'cb_create: ' , aCEF3RequestEx getUrl str asString."
 	^0!
 
 cb_on_before_child_process_launch: c command: co 
-	self log: 'cb_on_before_child_process_launch:command:'!
+	"self log: 'cb_on_before_child_process_launch:command:'"!
 
 cb_on_context_initialized: c 
-	self log: 'cb_on_context_initialized:'.
+	"self log: 'cb_on_context_initialized:'."
 	self registerSchemeFactory!
 
 cb_on_render_process_thread_created: c extra_info: e 
-	self log: 'cb_on_render_process_thread_created:extra_info:'!
+	"self log: 'cb_on_render_process_thread_created:extra_info:'"!
 
 freeCEF
 	self lib cef_shutdown!
@@ -1088,20 +1090,20 @@ main
 	self log: 'cef_initialize:   ' , res displayString!
 
 onBeforeCommandLineProcessing: cefapp process_type: cefstring command_line: aCEF3CommandLine 
-	self log: 'onBeforeCommandLineProcessing'.
+	"self log: 'onBeforeCommandLineProcessing'."
 	 !
 
 onGetBrowserProcessHandler: cefapp 
-	self log: 'onGetBrowserProcessHandler: ' , browserProcessHandler displayString.
+	"self log: 'onGetBrowserProcessHandler: ' , browserProcessHandler displayString."
 	browserProcessHandler ifNil: [^0].
 	^browserProcessHandler yourAddress!
 
 onGetRenderProcessHandler: cefapp 
-	self log: 'onGetRenderProcessHandler:'.
+	"self log: 'onGetRenderProcessHandler:'."
 	^0!
 
 onGetResourceBundleHandler: cefapp  
-	self log: 'onGetResourceBundleHandler:'.
+"	self log: 'onGetResourceBundleHandler:'."
 	^0!
 
 onRegisterCustomSchemes: cefapp registrar: aCEF3SchemeRegistrarEx 
@@ -1122,19 +1124,18 @@ onRegisterCustomSchemes: cefapp registrar: aCEF3SchemeRegistrarEx
 				is_standard: 1
 				is_local: 0
 				is_display_isolated: 0.
-	self log: 'onRegisterCustomSchemes : return code ' , answer displayString!
+	"self log: 'onRegisterCustomSchemes : return code ' , answer displayString"!
 
 registerSchemeFactory
 	shemeHandlerFactory 
 		ifNil: 
-			[| answer |
-			shemeHandlerFactory := CEF3SchemeHandlerFactory new.
+			[shemeHandlerFactory := CEF3SchemeHandlerFactory new.
 			shemeHandlerFactory handler: self.
-			answer := self lib 
-						cef_register_scheme_handler_factory: self scheme asCefString
-						domain_name: 'myapp' asCefString
-						factory: shemeHandlerFactory.
-			self log: 'registerSchemeFactory return code :' , answer displayString]!
+			self lib 
+				cef_register_scheme_handler_factory: self scheme asCefString
+				domain_name: 'myapp' asCefString
+				factory: shemeHandlerFactory
+			"self log: 'registerSchemeFactory return code :' , answer displayString"]!
 
 scheme
 	^'client'! !
@@ -1181,7 +1182,8 @@ new
 	^Current!
 
 onShutdown
-	SessionManager current isRuntime ifFalse: [Current := nil]!
+	Current 
+		ifNotNil: [:value | SessionManager current isRuntime ifTrue: ["value freeCEF"] ifFalse: [Current := nil]]!
 
 onStartup
 	SessionManager current isRuntime ifFalse: [Current := nil]! !
@@ -1260,8 +1262,23 @@ CEFDownloadHandler comment: ''!
 !CEFDownloadHandler methodsFor!
 
 cb_on_before_download: this browser: browser download_item: download_item suggested_name: suggested_name callback: callback 
+	| filename suggested_filename extension fileTypes |
 	self log: 'cb_on_before_download:'.
-	callback continue_download_path: '' asCefString show_dialog: 1 !
+	suggested_filename := suggested_name str asString.
+	extension := File splitExtensionFrom: suggested_filename.
+	extension = 'svg' ifTrue: [fileTypes := #(#('SVG Image (*.svg)' '*.svg'))].
+	extension = 'png' ifTrue: [fileTypes := #(#('PNG Image (*.png)' '*.png'))].
+	
+	[filename := (FileSaveDialog new)
+				caption: 'Save image ...';
+				fileTypes: fileTypes;
+				value: suggested_filename;
+				showModal.
+	filename isNil 
+		ifFalse: 
+			[(filename endsWith: '.' , extension) ifFalse: [filename := filename , '.' , extension].
+			callback continue_download_path: filename asCefString show_dialog: 0]] 
+			postToInputQueue!
 
 cb_on_download_updated: this browser: browser download_item: download_item callback: callback 
 	 self log: 'cb_on_download_updated:'! !
@@ -1374,17 +1391,19 @@ asCefResourceHandler
 basicAcceptUrl: aUrl 
 	^Error notYetImplemented!
 
+basicReadResponse
+	hasResponse := true.
+	"readResponseCallback cont_ex"!
+
 cb_can_get_cookie: this cookie: cookie 
-	self log: 'cb_can_get_cookie: '.
 	^1!
 
 cb_can_set_cookie: this cookie: cookie 
-	self log: 'cb_can_set_cookie: '.
+	 
 	^0!
 
 cb_cancel: this 
-	self log: 'cb_cancel: '.
-	
+	 
 	[requestHandler 
 		ifNotNil: [:aCEFRequestHandler | aCEFRequestHandler removePendingResourceHandler: self]] 
 			on: Error
@@ -1406,11 +1425,10 @@ void (CEF_CALLBACK *get_response_headers)(
       int64* response_length, cef_string_t* redirectUrl);
 "
 
-	self log: 'cb_get_response_headers: ' , aLARGE_INTEGER displayString.
 	aCEF3ResponseEx setStatus: self status.
-	aCEF3ResponseEx setStatusText: 'OK' asCefString.
+	aCEF3ResponseEx setStatusText: self statusText.
 	aCEF3ResponseEx setMimeType: self mimeType asCefString.
-	self log: 'cb_get_response_headers: ' , aCEF3ResponseEx getMimeType str asString.
+	"self log: 'cb_get_response_headers: ' , aCEF3ResponseEx getMimeType str asString."
 	aLARGE_INTEGER value: -1!
 
 cb_process_request: this request: aCEF3RequestEx callback: aCEF3CallbackEx 
@@ -1425,14 +1443,15 @@ cb_process_request: this request: aCEF3RequestEx callback: aCEF3CallbackEx
       struct _cef_request_t* request, struct _cef_callback_t* callback);
 "
 
-	self log: 'cb_process_request:'.
+	hasResponse := false.
+	processCallback := aCEF3CallbackEx.
 	aCEF3RequestEx getPostData 
 		ifNotNil: 
 			[:value | 
 			| elements |
 			elements := value getElements.
 			elements isEmpty ifFalse: [self postData: elements first getBytes]].
-	aCEF3CallbackEx cont_ex.
+	[self processRequest] postToInputQueue .
 	^1!
 
 cb_read_response: this data_out: data_out bytes_to_read: bytes_to_read bytes_read: intpointer callback: aCEF3CallbackEx 
@@ -1454,24 +1473,24 @@ cb_read_response: this data_out: data_out bytes_to_read: bytes_to_read bytes_rea
 	aSDWORD := SDWORD fromAddress: intpointer.
 	self hasResponse 
 		ifTrue: 
-			[| out aReadBytes |
-			self stream atEnd 
+			[| out aReadBytes aStream |
+			aStream := self responseStream.
+			aStream atEnd 
 				ifTrue: 
 					[self closeStream.
 					aSDWORD value: 0.
 					self onDone.
 					^0].
 			out := ExternalAddress fromInteger: data_out.
-			aReadBytes := self stream lastPosition - self stream position.
+			aReadBytes := aStream lastPosition - aStream position.
 			aReadBytes := aReadBytes min: bytes_to_read.
-			self stream 
+			aStream
 				next: aReadBytes
 				into: out
 				startingAt: 1.
 			aSDWORD value: aReadBytes]
-		ifFalse: 
-			[aSDWORD value: 0.
-			[self readResponse] postToInputQueue].
+		ifFalse: [self pgHalt	"aSDWORD value: 0
+			[self readResponse] postToInputQueue"].
 	^1!
 
 cefHandler
@@ -1481,8 +1500,16 @@ cefHandler
 			cefHandler handler: self]!
 
 closeStream
-	stream close.
-	stream := nil!
+	errorStream 
+		ifNotNil: 
+			[:value | 
+			value close.
+			errorStream := nil].
+	stream 
+		ifNotNil: 
+			[:value | 
+			value close.
+			stream := nil]!
 
 copy
 	| aCopy |
@@ -1490,11 +1517,22 @@ copy
 	aCopy resetOnCopy.
 	^aCopy!
 
+errorStream
+	^errorStream ifNil: [errorStream := error asByteArray readStream]!
+
 getPath
 	^(url subStrings: '?') first!
 
+handleError: ex 
+	self doLog.
+	error := ex description.
+	 !
+
+hasError
+	^error isNil not!
+
 hasResponse
-	^hasResponse ifNil: [false]!
+	^self hasError or: [hasResponse]!
 
 initialize
 	!
@@ -1515,9 +1553,16 @@ postData
 postData: anObject
 	postData := anObject!
 
+postDataReadStream
+	^postData asString asUTF8ToAnsi readStream!
+
+processRequest
+	error := nil.
+	[self readResponse] on: Error do: [:ex | self handleError: ex].
+	processCallback cont_ex!
+
 readResponse
-	hasResponse := true.
-	readResponseCallback cont_ex!
+	self basicReadResponse!
 
 requestHandler
 	^requestHandler!
@@ -1528,14 +1573,24 @@ requestHandler: anObject
 resetOnCopy
 	cefHandler := stream := requestHandler := nil!
 
+responseStream
+	^self hasError ifTrue: [self errorStream]  ifFalse: [self stream]!
+
 status
-	^200!
+	^self hasError ifFalse: [200] ifTrue: [500]!
+
+statusText
+	^'OK' asCefString!
 
 stream
-	self subclassResponsibility! !
+	self subclassResponsibility!
+
+uri
+	^SwazooURI fromString: url! !
 !CEFResourceHandler categoriesFor: #acceptUrl:!public! !
 !CEFResourceHandler categoriesFor: #asCefResourceHandler!private! !
 !CEFResourceHandler categoriesFor: #basicAcceptUrl:!private! !
+!CEFResourceHandler categoriesFor: #basicReadResponse!public! !
 !CEFResourceHandler categoriesFor: #cb_can_get_cookie:cookie:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_can_set_cookie:cookie:!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #cb_cancel:!**compiled accessors**!callback!must not strip!private! !
@@ -1545,19 +1600,27 @@ stream
 !CEFResourceHandler categoriesFor: #cefHandler!accessing!private! !
 !CEFResourceHandler categoriesFor: #closeStream!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #copy!public! !
+!CEFResourceHandler categoriesFor: #errorStream!private! !
 !CEFResourceHandler categoriesFor: #getPath!public! !
+!CEFResourceHandler categoriesFor: #handleError:!public! !
+!CEFResourceHandler categoriesFor: #hasError!private! !
 !CEFResourceHandler categoriesFor: #hasResponse!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #initialize!private! !
 !CEFResourceHandler categoriesFor: #mimeType!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #onDone!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData!accessing!private! !
 !CEFResourceHandler categoriesFor: #postData:!accessing!private! !
+!CEFResourceHandler categoriesFor: #postDataReadStream!public! !
+!CEFResourceHandler categoriesFor: #processRequest!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #readResponse!public! !
 !CEFResourceHandler categoriesFor: #requestHandler!accessing!private! !
 !CEFResourceHandler categoriesFor: #requestHandler:!accessing!private! !
 !CEFResourceHandler categoriesFor: #resetOnCopy!private! !
+!CEFResourceHandler categoriesFor: #responseStream!private! !
 !CEFResourceHandler categoriesFor: #status!**compiled accessors**!callback!must not strip!private! !
+!CEFResourceHandler categoriesFor: #statusText!**compiled accessors**!callback!must not strip!private! !
 !CEFResourceHandler categoriesFor: #stream!private! !
+!CEFResourceHandler categoriesFor: #uri!public! !
 
 !CEFResourceHandler class methodsFor!
 
@@ -1790,8 +1853,7 @@ CEFDirectoryResourceHandler comment: ''!
 
 basicAcceptUrl: aUrl 
 	| answer |
-
-	self doLog.
+	self log: aUrl.
 	answer := (aUrl beginsWith: domain) 
 				ifTrue: [File exists: (self filenameFromUrl: aUrl)]
 				ifFalse: [false].
@@ -1912,7 +1974,7 @@ onMessage: aDicMsg
 
 onPostData
 	postData isNil 
-		ifFalse: [self onMessage: (JsonReader readFrom: postData asString readStream)]
+		ifFalse: [self onMessage: (JsonReader readFrom:self postDataReadStream)]
 		ifTrue: [self log: 'WARN: postData is nil']!
 
 postData: anObject 
@@ -4008,8 +4070,7 @@ on_register_custom_schemes: anObject
 	bytes dwordAtOffset: 20 put: anObject!
 
 onBeforeCommandLineProcessing: cefapp process_type: cefstring command_line: aCEF3CommandLine 
-	self log: 'onBeforeCommandLineProcessing'.
-!
+	self log: 'onBeforeCommandLineProcessing'!
 
 onGetBrowserProcessHandler: cefapp 
 	self log: 'onGetBrowserProcessHandler: '.
@@ -8777,11 +8838,13 @@ cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx
 		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
 
 cb_on_before_close: this browser: browser 
-	browser identifier == cefBrowser identifier 
-		ifTrue: 
-			[self closeChildren.
-			self releaseCefView]
-		ifFalse: [self closeChildBrowser: browser]!
+	cefHandle isNull 
+		ifFalse: 
+			[browser identifier == cefBrowser identifier 
+				ifTrue: 
+					[self closeChildren.
+					self releaseCefView]
+				ifFalse: [self closeChildBrowser: browser]]!
 
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: window_Info client: c_lient settings: settings no_javascript_access: no_javascript_access 
  
