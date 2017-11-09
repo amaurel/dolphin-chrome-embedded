@@ -113,6 +113,10 @@ package classNames
 	add: #CEF3CallbackEx;
 	add: #CEF3Client;
 	add: #CEF3CommandLine;
+	add: #CEF3CommandLineEx;
+	add: #CEF3ContextMenuHandler;
+	add: #CEF3ContextMenuParams;
+	add: #CEF3ContextMenuParamsEx;
 	add: #CEF3DownloadHandler;
 	add: #CEF3Frame;
 	add: #CEF3FrameEx;
@@ -120,6 +124,8 @@ package classNames
 	add: #CEF3LifeSpanHandler;
 	add: #CEF3LoadHandler;
 	add: #CEF3MainArgs;
+	add: #CEF3MenuModel;
+	add: #CEF3MenuModelEx;
 	add: #CEF3PostData;
 	add: #CEF3PostDataElement;
 	add: #CEF3PostDataElementEx;
@@ -144,6 +150,7 @@ package classNames
 	add: #CEFClassCallbackRegistry;
 	add: #CEFClassCallbackRegistryEx;
 	add: #CEFClient;
+	add: #CEFContextMenuHandler;
 	add: #CEFDirectoryResourceHandler;
 	add: #CEFDownloadHandler;
 	add: #CEFExternalStructure;
@@ -167,6 +174,7 @@ package classNames
 
 package methodNames
 	add: #ExternalMethod -> #procAddress:;
+	add: #InputState -> #pumpMessage:;
 	add: #KernelLibrary -> #getProcessDEPPolicy:lpFlags:lpPermanent:;
 	add: #KernelLibrary -> #getSystemDEPPolicy;
 	add: #KernelLibrary -> #setProcessDEPPolicy:;
@@ -210,7 +218,7 @@ Object subclass: #CEFWindow
 	poolDictionaries: 'Win32Constants Win32Errors'
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFApp
-	instanceVariableNames: 'isInitialize args app settings logStream browserWindow shemeHandlerFactory browserProcessHandler isMultiThreadLoop'
+	instanceVariableNames: 'isInitialize args app settings logStream browserWindow shemeHandlerFactory browserProcessHandler isMultiThreadLoop loopThread'
 	classVariableNames: 'Current'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -220,7 +228,12 @@ CEFObject subclass: #CEFClassCallbackRegistry
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEFObject subclass: #CEFClient
-	instanceVariableNames: 'client requestHandler downloadHandler'
+	instanceVariableNames: 'client requestHandler downloadHandler contextMenuHandler'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEFObject subclass: #CEFContextMenuHandler
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -365,11 +378,21 @@ CEF3BaseObject subclass: #CEF3Callback
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3Client
-	instanceVariableNames: 'callbacks loadHandler lifeSpanHandler requestHandler downloadHandler'
+	instanceVariableNames: 'callbacks loadHandler lifeSpanHandler requestHandler downloadHandler contextMenuHandler'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3CommandLine
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3ContextMenuHandler
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3ContextMenuParams
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -391,6 +414,11 @@ CEF3BaseObject subclass: #CEF3LifeSpanHandler
 	classInstanceVariableNames: ''!
 CEF3BaseObject subclass: #CEF3LoadHandler
 	instanceVariableNames: 'callbacks'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3BaseObject subclass: #CEF3MenuModel
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -464,8 +492,23 @@ CEF3Callback subclass: #CEF3CallbackEx
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEF3CommandLine subclass: #CEF3CommandLineEx
+	instanceVariableNames: 'append_switch_ex append_switch_value_ex get_command_line_string_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3ContextMenuParams subclass: #CEF3ContextMenuParamsEx
+	instanceVariableNames: 'get_type_flags_ex get_source_url_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEF3Frame subclass: #CEF3FrameEx
 	instanceVariableNames: 'load_url_ex execute_java_script_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3MenuModel subclass: #CEF3MenuModelEx
+	instanceVariableNames: 'clear_ex add_item_ex get_count_exe'
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -538,6 +581,27 @@ procAddress: anExternalAddress
 
 	self descriptorLiteral dwordAtOffset: 0 put: anExternalAddress! !
 !ExternalMethod categoriesFor: #procAddress:!accessing!private! !
+
+!InputState methodsFor!
+
+pumpMessage: aMSG 
+	"Private - Read and dispatch the first pending host system message. If a WM_QUIT is
+	received, then exit Smalltalk."
+
+	(UserLibrary default 
+		getMessage: aMSG
+		hWnd: 0
+		wMsgFilterMin: 0
+		wMsgFilterMax: 0) == 0 
+		ifTrue: [SessionManager current onQuit: aMSG swParam]
+		ifFalse: 
+			[(self preTranslateMessage: aMSG) 
+				ifFalse: 
+					[(UserLibrary default)
+						translateMessage: aMSG;
+						dispatchMessage: aMSG]].
+	CEFApp new runLoop! !
+!InputState categoriesFor: #pumpMessage:!message dispatching!private! !
 
 !KernelLibrary methodsFor!
 
@@ -1037,7 +1101,14 @@ cb_create: this browser: browser frame: frame sheme_name: sheme_name request: aC
 	^0!
 
 cb_on_before_child_process_launch: c command: co 
-	"self log: 'cb_on_before_child_process_launch:command:'"!
+	"self log: 'cb_on_before_child_process_launch:command:'"
+
+	PGTranscript
+		display: 'cb_on_before_child_process_launch:';
+		cr.
+	PGTranscript
+		display: co;
+		cr!
 
 cb_on_context_initialized: c 
 	"self log: 'cb_on_context_initialized:'."
@@ -1055,6 +1126,9 @@ initialize
 	isMultiThreadLoop := 1!
 
 main
+	self mainProcess!
+
+main2
 	| res cacheFolder |
 	isInitialize ifTrue: [Error signal: 'App already initialized'].
 	isInitialize := true.
@@ -1073,6 +1147,7 @@ main
 	self log: 'cef_execute_process:   ' , res displayString.
 	res >= 0 ifTrue: [^SessionManager current exit: res].
 	settings := CEF3Settings new.
+	settings log_severity: 1.
 	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
 	File createDirectoryPath: cacheFolder.
 	settings cache_path: cacheFolder asCefString.
@@ -1080,7 +1155,6 @@ main
 		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
 	settings remote_debugging_port: 9223.
 	settings multi_threaded_message_loop: isMultiThreadLoop.
-
 	settings no_sandbox: 1.
 	res := self lib 
 				cef_initialize: args
@@ -1089,9 +1163,55 @@ main
 				windows_sandbox_info: 0.
 	self log: 'cef_initialize:   ' , res displayString!
 
-onBeforeCommandLineProcessing: cefapp process_type: cefstring command_line: aCEF3CommandLine 
+mainProcess
+	| res cacheFolder |
+	isInitialize ifTrue: [Error signal: 'App already initialized'].
+	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
+	self log: 'started '.
+	"browserProcessHandler := CEF3BrowserProcessHandler new.
+	browserProcessHandler handler: self."
+	args := CEF3MainArgs new.
+	args instance: VMLibrary default applicationHandle.
+	app := CEF3App new.
+	app handler: self.
+	settings := CEF3Settings new.
+	settings log_severity: 1.
+	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
+	File createDirectoryPath: cacheFolder.
+	settings cache_path: cacheFolder asCefString.
+	settings 
+		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
+	"	settings remote_debugging_port: 9223."
+	settings command_line_args_disabled: 0.
+	settings multi_threaded_message_loop: 0.
+	settings single_process: 0.
+	settings no_sandbox: 1.
+	res := self lib 
+				cef_initialize: args
+				settings: settings
+				application: app
+				windows_sandbox_info: 0.
+	isInitialize := true.
+	"self lib isInitialized: true."
+	self log: 'cef_initialize:   ' , res displayString!
+
+onBeforeCommandLineProcessing: cefapp process_type: process_type command_line: aCEF3CommandLine 
 	"self log: 'onBeforeCommandLineProcessing'."
-	 !
+
+	PGTranscript
+		display: 'onBeforeCommandLineProcessing:';
+		cr.
+	PGTranscript
+		display: process_type;
+		cr.
+	PGTranscript
+		display: aCEF3CommandLine;
+		cr.
+	aCEF3CommandLine appendSwitch: '--process-per-site'.
+	aCEF3CommandLine appendSwitch: '--renderer-process-limit' value: '1'.
+	PGTranscript
+		display: aCEF3CommandLine getCommandLineString;
+		cr!
 
 onGetBrowserProcessHandler: cefapp 
 	"self log: 'onGetBrowserProcessHandler: ' , browserProcessHandler displayString."
@@ -1137,8 +1257,29 @@ registerSchemeFactory
 				factory: shemeHandlerFactory
 			"self log: 'registerSchemeFactory return code :' , answer displayString"]!
 
+runLoop
+	isInitialize ifTrue: [CEF3Library default cef_do_message_loop_work]!
+
 scheme
-	^'client'! !
+	^'client'!
+
+subProcess
+	| res  |
+	isInitialize ifTrue: [Error signal: 'App already initialized'].
+	isInitialize := true.
+	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
+	self log: 'started '.
+	args := CEF3MainArgs new.
+	args instance: VMLibrary default applicationHandle.
+	app := CEF3App new.
+	app handler: self.
+	res := self lib 
+				cef_execute_process: args
+				application: app
+				windows_sandbox_info: 0.
+	self log: 'cef_execute_process:   ' , res displayString.
+	res >= 0 ifTrue: [^SessionManager current exit: res].
+	! !
 !CEFApp categoriesFor: #cb_create:browser:frame:sheme_name:request:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #cb_on_before_child_process_launch:command:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #cb_on_context_initialized:!**compiled accessors**!callback!must not strip!public! !
@@ -1146,13 +1287,17 @@ scheme
 !CEFApp categoriesFor: #freeCEF!public! !
 !CEFApp categoriesFor: #initialize!public! !
 !CEFApp categoriesFor: #main!public! !
+!CEFApp categoriesFor: #main2!public! !
+!CEFApp categoriesFor: #mainProcess!public! !
 !CEFApp categoriesFor: #onBeforeCommandLineProcessing:process_type:command_line:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #onGetBrowserProcessHandler:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #onGetRenderProcessHandler:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #onGetResourceBundleHandler:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #onRegisterCustomSchemes:registrar:!**compiled accessors**!callback!must not strip!public! !
 !CEFApp categoriesFor: #registerSchemeFactory!**compiled accessors**!callback!must not strip!public! !
+!CEFApp categoriesFor: #runLoop!public! !
 !CEFApp categoriesFor: #scheme!**compiled accessors**!callback!must not strip!public! !
+!CEFApp categoriesFor: #subProcess!public! !
 
 !CEFApp class methodsFor!
 
@@ -1242,7 +1387,9 @@ initialize
 	requestHandler := CEFRequestHandler new.
 	client requestHandler handler: requestHandler.
 	downloadHandler := CEFDownloadHandler new.
-	client downloadHandler handler: downloadHandler!
+	client downloadHandler handler: downloadHandler.
+	contextMenuHandler := CEFContextMenuHandler new.
+	client contextMenuHandler handler: contextMenuHandler!
 
 lifeSpanHandler
 	client ifNil: [self initialize].
@@ -1255,6 +1402,53 @@ requestHandler
 !CEFClient categoriesFor: #initialize!private! !
 !CEFClient categoriesFor: #lifeSpanHandler!public! !
 !CEFClient categoriesFor: #requestHandler!accessing!public! !
+
+CEFContextMenuHandler guid: (GUID fromString: '{E7D37E4F-AE18-43E5-AEAC-EB4E0CE95F31}')!
+CEFContextMenuHandler comment: ''!
+!CEFContextMenuHandler categoriesForClass!Kernel-Objects! !
+!CEFContextMenuHandler methodsFor!
+
+cb_on_before_context_menu: h browser: browser frame: frame params: params model: model 
+	PGTranscript
+		display: 'cb_on_before_context_menu: aaaa';
+		cr.
+	PGTranscript
+		display: browser identifier;
+		cr.
+	PGTranscript
+		display: model;
+		cr.
+	PGTranscript
+		display: model clearEx;
+		cr.
+	PGTranscript
+		display: model getCount;
+		cr.
+	
+	PGTranscript
+		display: (model add_item: 26501 label: 'Save image');
+		cr.
+
+	PGTranscript
+		display: params getSourceUrl;
+		cr.
+	PGTranscript
+		display: params getTypeFlags;
+		cr!
+
+cb_on_context_menu_command: h browser: browser frame: frame params: params command_id: cmd event_flags: flag 
+	PGTranscript
+		display: 'cb_on_context_menu_command:';
+		cr.
+	^1!
+
+cb_on_context_menu_dismissed: h browser: browser frame: frame 
+	PGTranscript
+		display: 'cb_on_context_menu_dismissed:';
+		cr! !
+!CEFContextMenuHandler categoriesFor: #cb_on_before_context_menu:browser:frame:params:model:!public! !
+!CEFContextMenuHandler categoriesFor: #cb_on_context_menu_command:browser:frame:params:command_id:event_flags:!public! !
+!CEFContextMenuHandler categoriesFor: #cb_on_context_menu_dismissed:browser:frame:!public! !
 
 CEFDownloadHandler guid: (GUID fromString: '{0867C359-4E06-4550-B315-D8DB6819EAAE}')!
 CEFDownloadHandler comment: ''!
@@ -2159,7 +2353,7 @@ CEF_EXPORT int cef_browser_host_create_browser(
     struct _cef_request_context_t* request_context);
 "
 
-	<cdecl: sdword cef_browser_host_create_browser CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
+	<stdcall: sdword cef_browser_host_create_browser CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
 	^self invalidCall!
 
 cef_browser_host_create_browser_sync: win_info client: client url: url settings: settings request_context: request_context 
@@ -2175,7 +2369,7 @@ CEF_EXPORT cef_browser_t* cef_browser_host_create_browser_sync(
     struct _cef_request_context_t* request_context);
 "
 
-	<cdecl: sdword cef_browser_host_create_browser_sync CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
+	<stdcall: CEF3BrowserEx* cef_browser_host_create_browser_sync CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
 	^self invalidCall!
 
 cef_build_revision
@@ -2186,7 +2380,7 @@ cef_build_revision
 
 "
 
-	<cdecl: sdword cef_build_revision>
+	<stdcall: sdword cef_build_revision>
 	^self invalidCall!
 
 cef_do_message_loop_work
@@ -2202,7 +2396,7 @@ cef_do_message_loop_work
 
 "
 
-	<cdecl: void cef_do_message_loop_work>
+	<stdcall: void cef_do_message_loop_work>
 	^self invalidCall!
 
 cef_execute_process: args application: application windows_sandbox_info: windows_sandbox_info
@@ -2223,7 +2417,7 @@ cdecl:
 
 "
 
-	<cdecl: sdword cef_execute_process CEF3MainArgs* CEF3App* dword>
+	<stdcall: sdword cef_execute_process CEF3MainArgs* CEF3App* dword>
 	^self invalidCall!
 
 cef_initialize: args settings:settings application: application windows_sandbox_info: windows_sandbox_info
@@ -2239,11 +2433,11 @@ CEF_EXPORT int cef_initialize(const struct _cef_main_args_t* args,
 
 "
 
-	<cdecl: sdword cef_initialize CEF3MainArgs* CEF3Settings* CEF3App* dword>
+	<stdcall: sdword cef_initialize CEF3MainArgs* CEF3Settings* CEF3App* dword>
 	^self invalidCall!
 
 cef_register_scheme_handler_factory: scheme_name domain_name: domain_name factory: factory 
-	<cdecl: sdword cef_register_scheme_handler_factory CEFString* CEFString* CEF3SchemeHandlerFactory* >
+	<stdcall: sdword cef_register_scheme_handler_factory CEFString* CEFString* CEF3SchemeHandlerFactory* >
 	^self invalidCall
 
 	"
@@ -2280,7 +2474,7 @@ CEF_EXPORT void cef_run_message_loop();
 
 "
 
-	<cdecl: void cef_run_message_loop>
+	<stdcall: void cef_run_message_loop>
 	^self invalidCall!
 
 cef_shutdown
@@ -2293,7 +2487,7 @@ CEF_EXPORT void cef_shutdown();
 
 "
 
-	<cdecl: void cef_shutdown>
+	<stdcall: void cef_shutdown>
 	^self invalidCall!
 
 cef_string_from_ascii: src src_len: src_len output: output 
@@ -2305,7 +2499,7 @@ CEF_EXPORT int cef_string_ascii_to_wide(const char* src, size_t src_len,
 
 "
 
-	<cdecl: sdword cef_string_ascii_to_utf16 char* dword CEFString*>
+	<stdcall: sdword cef_string_ascii_to_utf16 char* dword CEFString*>
 	^self invalidCall!
 
 cef_version_info: entry
@@ -2323,7 +2517,7 @@ cef_version_info: entry
 
 "
 
-	<cdecl: sdword cef_version_info sdword>
+	<stdcall: sdword cef_version_info sdword>
 	^self invalidCall!
 
 cef_version_infos
@@ -2357,7 +2551,7 @@ getCompileMethod: aSymbol proc: proc
 
 log: aMsg 
 	"self doLog"
-	"SessionManager current log: self class name , ' : ' , aMsg"! !
+	SessionManager current log: self class name , ' : ' , aMsg! !
 !CEFExternalStructure categoriesFor: #getCompileMethod:proc:!must not strip!public! !
 !CEFExternalStructure categoriesFor: #log:!public! !
 
@@ -2860,6 +3054,7 @@ doNotStripClasses
 	CEF3Callback.
 	CEF3Client.
 	CEF3CommandLine.
+CEF3CommandLineEx.
 	CEF3Frame.
 	CEF3LifeSpanHandler.
 	CEF3LoadHandler.
@@ -2883,7 +3078,11 @@ doNotStripClasses
 	CEF3SchemeRegistrarEx.
 	CEFStringUserFree.
 	CEF3BeforeDownloadCallbackEx.
-	CEF3QuotaCallbackEx!
+	CEF3QuotaCallbackEx.
+	CEF3MenuModelEx.
+	CEF3MenuModel.
+	CEF3ContextMenuParamsEx.
+	CEF3ContextMenuParams!
 
 doNotStripSelectors
 	| stream |
@@ -4160,7 +4359,7 @@ initalizeCallbacksRegistry
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #onBeforeCommandLineProcessing:process_type:command_line:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword dword dword')).
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEFString* CEF3CommandLineEx*')).
 	"
 (ExternalDescriptor fromString: 'stdcall: void CEF3App* CEFString* CEF3CommandLine*')
 "
@@ -5127,7 +5326,11 @@ asCefClient
 	^self!
 
 cb_get_context_menu_handler: aCEF3Client 
-	^0!
+	PGTranscript
+		display: 'CEF3Client  cb_get_context_menu_handler:';
+		cr.
+	contextMenuHandler handler isNil ifTrue: [^0].
+	^contextMenuHandler yourAddress!
 
 cb_get_display_handler: aCEF3Client 
 	self log: 'cb_get_display_handler:'.
@@ -5165,6 +5368,9 @@ cb_get_request_handler: aCEF3Client
 cb_on_process_message_received: aCEF3Client browser: aCEF3Browser source_process: asdword message: aCEF3ProcessMessage 
 	self log: 'cb_on_process_message_received:'.
 	^0!
+
+contextMenuHandler
+	^contextMenuHandler!
 
 downloadHandler
 	^downloadHandler!
@@ -5304,6 +5510,7 @@ initialize
 	lifeSpanHandler := CEF3LifeSpanHandler new.
 	requestHandler := CEF3RequestHandler new.
 	downloadHandler := CEF3DownloadHandler new.
+	contextMenuHandler := CEF3ContextMenuHandler new.
 	super initialize!
 
 lifeSpanHandler
@@ -5335,6 +5542,7 @@ requestHandler
 !CEF3Client categoriesFor: #cb_get_load_handler:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #cb_get_request_handler:!must not strip!public! !
 !CEF3Client categoriesFor: #cb_on_process_message_received:browser:source_process:message:!callback!must not strip!public! !
+!CEF3Client categoriesFor: #contextMenuHandler!accessing!private! !
 !CEF3Client categoriesFor: #downloadHandler!accessing!private! !
 !CEF3Client categoriesFor: #get_context_menu_handler!**compiled accessors**!must not strip!public! !
 !CEF3Client categoriesFor: #get_context_menu_handler:!**compiled accessors**!must not strip!public! !
@@ -5409,6 +5617,8 @@ initalizeCallbacksRegistry
 	(CallbackRegistry at: #get_life_span_handler:) selector: #cb_get_life_span_handler:.
 	(CallbackRegistry at: #get_request_handler:) selector: #cb_get_request_handler:.
 	(CallbackRegistry at: #get_download_handler:) selector: #cb_get_download_handler:.
+	(CallbackRegistry at: #get_context_menu_handler:) selector: #cb_get_context_menu_handler:.
+
 	CallbackRegistry at: #on_process_message_received:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -5826,6 +6036,323 @@ typedef struct _cef_command_line_t {
 		defineField: #append_argument type: LPVOIDField new;
 		defineField: #prepend_wrapper type: LPVOIDField new! !
 !CEF3CommandLine class categoriesFor: #defineFields!initializing!public! !
+
+CEF3ContextMenuHandler guid: (GUID fromString: '{8E978D00-FE13-4E05-9F50-435BB6A57BEF}')!
+CEF3ContextMenuHandler comment: ''!
+!CEF3ContextMenuHandler categoriesForClass!External-Data-Structured! !
+!CEF3ContextMenuHandler methodsFor!
+
+cb_on_before_context_menu: h browser: browser frame: frame params: params model: model 
+	"the call is delegated to the handler see CEFHandlerMessageCallback cefReceiver:"!
+
+cb_on_context_menu_command: h browser: browser frame: frame params: params command_id: cmd event_flags: flag 
+	"the call is delegated to the handler see CEFHandlerMessageCallback cefReceiver:"!
+
+cb_on_context_menu_dismissed: h browser: browser frame: frame 
+	"the call is delegated to the handler see CEFHandlerMessageCallback cefReceiver:"!
+
+on_before_context_menu
+	"Answer the receiver's on_before_context_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+on_before_context_menu: anObject
+	"Set the receiver's on_before_context_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+on_context_menu_command
+	"Answer the receiver's on_context_menu_command field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+on_context_menu_command: anObject
+	"Set the receiver's on_context_menu_command field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+on_context_menu_dismissed
+	"Answer the receiver's on_context_menu_dismissed field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+on_context_menu_dismissed: anObject
+	"Set the receiver's on_context_menu_dismissed field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject! !
+!CEF3ContextMenuHandler categoriesFor: #cb_on_before_context_menu:browser:frame:params:model:!public! !
+!CEF3ContextMenuHandler categoriesFor: #cb_on_context_menu_command:browser:frame:params:command_id:event_flags:!public! !
+!CEF3ContextMenuHandler categoriesFor: #cb_on_context_menu_dismissed:browser:frame:!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_before_context_menu!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_before_context_menu:!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_context_menu_command!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_context_menu_command:!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_context_menu_dismissed!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #on_context_menu_dismissed:!**compiled accessors**!public! !
+
+!CEF3ContextMenuHandler class methodsFor!
+
+defineFields
+	" 
+
+	CEF3ContextMenuHandler  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #on_before_context_menu type: LPVOIDField new;
+		defineField: #on_context_menu_command type: LPVOIDField new;
+		defineField: #on_context_menu_dismissed type: LPVOIDField new!
+
+initalizeCallbacksRegistry
+	CallbackRegistry := self createCallbackRegistry.
+	CallbackRegistry at: #on_before_context_menu:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_before_context_menu:browser:frame:params:model:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void dword CEF3BrowserEx* CEF3FrameEx* CEF3ContextMenuParamsEx* CEF3MenuModelEx*')).
+	CallbackRegistry at: #on_context_menu_command:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_context_menu_command:browser:frame:params:command_id:event_flags:
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: sdword dword dword dword CEF3ContextMenuParamsEx* sdword dword')).
+	CallbackRegistry at: #on_context_menu_dismissed:
+		put: (CEFHandlerMessageCallback 
+				receiver: self
+				selector: #cb_on_context_menu_dismissed:browser:frame: 
+				descriptor: (ExternalDescriptor 
+						fromString: 'stdcall: void dword dword dword'))! !
+!CEF3ContextMenuHandler class categoriesFor: #defineFields!initializing!public! !
+!CEF3ContextMenuHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
+
+CEF3ContextMenuParams guid: (GUID fromString: '{D1AB47F2-4993-42FE-B59F-4D09819C2F24}')!
+CEF3ContextMenuParams comment: ''!
+!CEF3ContextMenuParams categoriesForClass!External-Data-Structured! !
+!CEF3ContextMenuParams methodsFor!
+
+get_edit_state_flags
+	"Answer the receiver's get_edit_state_flags field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 76) asExternalAddress!
+
+get_edit_state_flags: anObject
+	"Set the receiver's get_edit_state_flags field to the value of anObject."
+
+	bytes dwordAtOffset: 76 put: anObject!
+
+get_frame_charset
+	"Answer the receiver's get_frame_charset field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 52) asExternalAddress!
+
+get_frame_charset: anObject
+	"Set the receiver's get_frame_charset field to the value of anObject."
+
+	bytes dwordAtOffset: 52 put: anObject!
+
+get_frame_url
+	"Answer the receiver's get_frame_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 48) asExternalAddress!
+
+get_frame_url: anObject
+	"Set the receiver's get_frame_url field to the value of anObject."
+
+	bytes dwordAtOffset: 48 put: anObject!
+
+get_link_url
+	"Answer the receiver's get_link_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 28) asExternalAddress!
+
+get_link_url: anObject
+	"Set the receiver's get_link_url field to the value of anObject."
+
+	bytes dwordAtOffset: 28 put: anObject!
+
+get_media_state_flags
+	"Answer the receiver's get_media_state_flags field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 60) asExternalAddress!
+
+get_media_state_flags: anObject
+	"Set the receiver's get_media_state_flags field to the value of anObject."
+
+	bytes dwordAtOffset: 60 put: anObject!
+
+get_media_type
+	"Answer the receiver's get_media_type field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 56) asExternalAddress!
+
+get_media_type: anObject
+	"Set the receiver's get_media_type field to the value of anObject."
+
+	bytes dwordAtOffset: 56 put: anObject!
+
+get_page_url
+	"Answer the receiver's get_page_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 44) asExternalAddress!
+
+get_page_url: anObject
+	"Set the receiver's get_page_url field to the value of anObject."
+
+	bytes dwordAtOffset: 44 put: anObject!
+
+get_selection_text
+	"Answer the receiver's get_selection_text field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 64) asExternalAddress!
+
+get_selection_text: anObject
+	"Set the receiver's get_selection_text field to the value of anObject."
+
+	bytes dwordAtOffset: 64 put: anObject!
+
+get_source_url
+	"Answer the receiver's get_source_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 36) asExternalAddress!
+
+get_source_url: anObject
+	"Set the receiver's get_source_url field to the value of anObject."
+
+	bytes dwordAtOffset: 36 put: anObject!
+
+get_type_flags
+	"Answer the receiver's get_type_flags field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+get_type_flags: anObject
+	"Set the receiver's get_type_flags field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject!
+
+get_unfiltered_link_url
+	"Answer the receiver's get_unfiltered_link_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 32) asExternalAddress!
+
+get_unfiltered_link_url: anObject
+	"Set the receiver's get_unfiltered_link_url field to the value of anObject."
+
+	bytes dwordAtOffset: 32 put: anObject!
+
+get_xcoord
+	"Answer the receiver's get_xcoord field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+get_xcoord: anObject
+	"Set the receiver's get_xcoord field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+get_ycoord
+	"Answer the receiver's get_ycoord field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+get_ycoord: anObject
+	"Set the receiver's get_ycoord field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+has_image_contents
+	"Answer the receiver's has_image_contents field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 40) asExternalAddress!
+
+has_image_contents: anObject
+	"Set the receiver's has_image_contents field to the value of anObject."
+
+	bytes dwordAtOffset: 40 put: anObject!
+
+is_editable
+	"Answer the receiver's is_editable field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 68) asExternalAddress!
+
+is_editable: anObject
+	"Set the receiver's is_editable field to the value of anObject."
+
+	bytes dwordAtOffset: 68 put: anObject!
+
+is_speech_input_enabled
+	"Answer the receiver's is_speech_input_enabled field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 72) asExternalAddress!
+
+is_speech_input_enabled: anObject
+	"Set the receiver's is_speech_input_enabled field to the value of anObject."
+
+	bytes dwordAtOffset: 72 put: anObject! !
+!CEF3ContextMenuParams categoriesFor: #get_edit_state_flags!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_edit_state_flags:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_frame_charset!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_frame_charset:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_frame_url!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_frame_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_link_url!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_link_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_media_state_flags!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_media_state_flags:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_media_type!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_media_type:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_page_url!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_page_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_selection_text!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_selection_text:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_source_url!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_source_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_type_flags!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_type_flags:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_unfiltered_link_url!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_unfiltered_link_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_xcoord!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_xcoord:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_ycoord!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_ycoord:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #has_image_contents!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #has_image_contents:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_editable!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_editable:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_speech_input_enabled!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_speech_input_enabled:!**compiled accessors**!public! !
+
+!CEF3ContextMenuParams class methodsFor!
+
+defineFields
+	" 
+
+	CEF3ContextMenuParams  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #get_xcoord type: LPVOIDField new;
+		defineField: #get_ycoord type: LPVOIDField new;
+		defineField: #get_type_flags type: LPVOIDField new;
+		defineField: #get_link_url type: LPVOIDField new;
+		defineField: #get_unfiltered_link_url type: LPVOIDField new;
+		defineField: #get_source_url type: LPVOIDField new;
+		defineField: #has_image_contents type: LPVOIDField new;
+		defineField: #get_page_url type: LPVOIDField new;
+		defineField: #get_frame_url type: LPVOIDField new;
+		defineField: #get_frame_charset type: LPVOIDField new;
+		defineField: #get_media_type type: LPVOIDField new;
+		defineField: #get_media_state_flags type: LPVOIDField new;
+		defineField: #get_selection_text type: LPVOIDField new;
+		defineField: #is_editable type: LPVOIDField new;
+		defineField: #is_speech_input_enabled type: LPVOIDField new;
+		defineField: #get_edit_state_flags type: LPVOIDField new! !
+!CEF3ContextMenuParams class categoriesFor: #defineFields!initializing!public! !
 
 CEF3DownloadHandler guid: (GUID fromString: '{36CA71C4-4240-4D44-B5A5-B9555C41B01A}')!
 CEF3DownloadHandler comment: ''!
@@ -6480,6 +7007,661 @@ initalizeCallbacksRegistry
 						fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword sdword CEFString* CEFString*'))! !
 !CEF3LoadHandler class categoriesFor: #defineFields!initializing!public! !
 !CEF3LoadHandler class categoriesFor: #initalizeCallbacksRegistry!public! !
+
+CEF3MenuModel guid: (GUID fromString: '{7F362549-A6AB-48C5-89CD-4E1455245670}')!
+CEF3MenuModel comment: ''!
+!CEF3MenuModel categoriesForClass!External-Data-Structured! !
+!CEF3MenuModel methodsFor!
+
+add_check_item
+	"Answer the receiver's add_check_item field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 32) asExternalAddress!
+
+add_check_item: anObject
+	"Set the receiver's add_check_item field to the value of anObject."
+
+	bytes dwordAtOffset: 32 put: anObject!
+
+add_item
+	"Answer the receiver's add_item field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 28) asExternalAddress!
+
+add_item: anObject
+	"Set the receiver's add_item field to the value of anObject."
+
+	bytes dwordAtOffset: 28 put: anObject!
+
+add_radio_item
+	"Answer the receiver's add_radio_item field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 36) asExternalAddress!
+
+add_radio_item: anObject
+	"Set the receiver's add_radio_item field to the value of anObject."
+
+	bytes dwordAtOffset: 36 put: anObject!
+
+add_separator
+	"Answer the receiver's add_separator field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+add_separator: anObject
+	"Set the receiver's add_separator field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject!
+
+add_sub_menu
+	"Answer the receiver's add_sub_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 40) asExternalAddress!
+
+add_sub_menu: anObject
+	"Set the receiver's add_sub_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 40 put: anObject!
+
+clear
+	"Answer the receiver's clear field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+clear: anObject
+	"Set the receiver's clear field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+get_accelerator
+	"Answer the receiver's get_accelerator field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 204) asExternalAddress!
+
+get_accelerator: anObject
+	"Set the receiver's get_accelerator field to the value of anObject."
+
+	bytes dwordAtOffset: 204 put: anObject!
+
+get_accelerator_at
+	"Answer the receiver's get_accelerator_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 208) asExternalAddress!
+
+get_accelerator_at: anObject
+	"Set the receiver's get_accelerator_at field to the value of anObject."
+
+	bytes dwordAtOffset: 208 put: anObject!
+
+get_command_id_at
+	"Answer the receiver's get_command_id_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 76) asExternalAddress!
+
+get_command_id_at: anObject
+	"Set the receiver's get_command_id_at field to the value of anObject."
+
+	bytes dwordAtOffset: 76 put: anObject!
+
+get_count
+	"Answer the receiver's get_count field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+get_count: anObject
+	"Set the receiver's get_count field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
+get_group_id
+	"Answer the receiver's get_group_id field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 108) asExternalAddress!
+
+get_group_id: anObject
+	"Set the receiver's get_group_id field to the value of anObject."
+
+	bytes dwordAtOffset: 108 put: anObject!
+
+get_group_id_at
+	"Answer the receiver's get_group_id_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 112) asExternalAddress!
+
+get_group_id_at: anObject
+	"Set the receiver's get_group_id_at field to the value of anObject."
+
+	bytes dwordAtOffset: 112 put: anObject!
+
+get_index_of
+	"Answer the receiver's get_index_of field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 72) asExternalAddress!
+
+get_index_of: anObject
+	"Set the receiver's get_index_of field to the value of anObject."
+
+	bytes dwordAtOffset: 72 put: anObject!
+
+get_label
+	"Answer the receiver's get_label field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 84) asExternalAddress!
+
+get_label: anObject
+	"Set the receiver's get_label field to the value of anObject."
+
+	bytes dwordAtOffset: 84 put: anObject!
+
+get_label_at
+	"Answer the receiver's get_label_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 88) asExternalAddress!
+
+get_label_at: anObject
+	"Set the receiver's get_label_at field to the value of anObject."
+
+	bytes dwordAtOffset: 88 put: anObject!
+
+get_sub_menu
+	"Answer the receiver's get_sub_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 124) asExternalAddress!
+
+get_sub_menu: anObject
+	"Set the receiver's get_sub_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 124 put: anObject!
+
+get_sub_menu_at
+	"Answer the receiver's get_sub_menu_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 128) asExternalAddress!
+
+get_sub_menu_at: anObject
+	"Set the receiver's get_sub_menu_at field to the value of anObject."
+
+	bytes dwordAtOffset: 128 put: anObject!
+
+get_type
+	"Answer the receiver's get_type field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 100) asExternalAddress!
+
+get_type: anObject
+	"Set the receiver's get_type field to the value of anObject."
+
+	bytes dwordAtOffset: 100 put: anObject!
+
+get_type_at
+	"Answer the receiver's get_type_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 104) asExternalAddress!
+
+get_type_at: anObject
+	"Set the receiver's get_type_at field to the value of anObject."
+
+	bytes dwordAtOffset: 104 put: anObject!
+
+has_accelerator
+	"Answer the receiver's has_accelerator field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 180) asExternalAddress!
+
+has_accelerator: anObject
+	"Set the receiver's has_accelerator field to the value of anObject."
+
+	bytes dwordAtOffset: 180 put: anObject!
+
+has_accelerator_at
+	"Answer the receiver's has_accelerator_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 184) asExternalAddress!
+
+has_accelerator_at: anObject
+	"Set the receiver's has_accelerator_at field to the value of anObject."
+
+	bytes dwordAtOffset: 184 put: anObject!
+
+insert_check_item_at
+	"Answer the receiver's insert_check_item_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 52) asExternalAddress!
+
+insert_check_item_at: anObject
+	"Set the receiver's insert_check_item_at field to the value of anObject."
+
+	bytes dwordAtOffset: 52 put: anObject!
+
+insert_item_at
+	"Answer the receiver's insert_item_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 48) asExternalAddress!
+
+insert_item_at: anObject
+	"Set the receiver's insert_item_at field to the value of anObject."
+
+	bytes dwordAtOffset: 48 put: anObject!
+
+insert_radio_item_at
+	"Answer the receiver's insert_radio_item_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 56) asExternalAddress!
+
+insert_radio_item_at: anObject
+	"Set the receiver's insert_radio_item_at field to the value of anObject."
+
+	bytes dwordAtOffset: 56 put: anObject!
+
+insert_separator_at
+	"Answer the receiver's insert_separator_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 44) asExternalAddress!
+
+insert_separator_at: anObject
+	"Set the receiver's insert_separator_at field to the value of anObject."
+
+	bytes dwordAtOffset: 44 put: anObject!
+
+insert_sub_menu_at
+	"Answer the receiver's insert_sub_menu_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 60) asExternalAddress!
+
+insert_sub_menu_at: anObject
+	"Set the receiver's insert_sub_menu_at field to the value of anObject."
+
+	bytes dwordAtOffset: 60 put: anObject!
+
+is_checked
+	"Answer the receiver's is_checked field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 164) asExternalAddress!
+
+is_checked: anObject
+	"Set the receiver's is_checked field to the value of anObject."
+
+	bytes dwordAtOffset: 164 put: anObject!
+
+is_checked_at
+	"Answer the receiver's is_checked_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 168) asExternalAddress!
+
+is_checked_at: anObject
+	"Set the receiver's is_checked_at field to the value of anObject."
+
+	bytes dwordAtOffset: 168 put: anObject!
+
+is_enabled
+	"Answer the receiver's is_enabled field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 148) asExternalAddress!
+
+is_enabled: anObject
+	"Set the receiver's is_enabled field to the value of anObject."
+
+	bytes dwordAtOffset: 148 put: anObject!
+
+is_enabled_at
+	"Answer the receiver's is_enabled_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 152) asExternalAddress!
+
+is_enabled_at: anObject
+	"Set the receiver's is_enabled_at field to the value of anObject."
+
+	bytes dwordAtOffset: 152 put: anObject!
+
+is_visible
+	"Answer the receiver's is_visible field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 132) asExternalAddress!
+
+is_visible: anObject
+	"Set the receiver's is_visible field to the value of anObject."
+
+	bytes dwordAtOffset: 132 put: anObject!
+
+is_visible_at
+	"Answer the receiver's is_visible_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 136) asExternalAddress!
+
+is_visible_at: anObject
+	"Set the receiver's is_visible_at field to the value of anObject."
+
+	bytes dwordAtOffset: 136 put: anObject!
+
+remove
+	"Answer the receiver's remove field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 64) asExternalAddress!
+
+remove: anObject
+	"Set the receiver's remove field to the value of anObject."
+
+	bytes dwordAtOffset: 64 put: anObject!
+
+remove_accelerator
+	"Answer the receiver's remove_accelerator field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 196) asExternalAddress!
+
+remove_accelerator: anObject
+	"Set the receiver's remove_accelerator field to the value of anObject."
+
+	bytes dwordAtOffset: 196 put: anObject!
+
+remove_accelerator_at
+	"Answer the receiver's remove_accelerator_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 200) asExternalAddress!
+
+remove_accelerator_at: anObject
+	"Set the receiver's remove_accelerator_at field to the value of anObject."
+
+	bytes dwordAtOffset: 200 put: anObject!
+
+remove_at
+	"Answer the receiver's remove_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 68) asExternalAddress!
+
+remove_at: anObject
+	"Set the receiver's remove_at field to the value of anObject."
+
+	bytes dwordAtOffset: 68 put: anObject!
+
+set_accelerator
+	"Answer the receiver's set_accelerator field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 188) asExternalAddress!
+
+set_accelerator: anObject
+	"Set the receiver's set_accelerator field to the value of anObject."
+
+	bytes dwordAtOffset: 188 put: anObject!
+
+set_accelerator_at
+	"Answer the receiver's set_accelerator_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 192) asExternalAddress!
+
+set_accelerator_at: anObject
+	"Set the receiver's set_accelerator_at field to the value of anObject."
+
+	bytes dwordAtOffset: 192 put: anObject!
+
+set_checked
+	"Answer the receiver's set_checked field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 172) asExternalAddress!
+
+set_checked: anObject
+	"Set the receiver's set_checked field to the value of anObject."
+
+	bytes dwordAtOffset: 172 put: anObject!
+
+set_checked_at
+	"Answer the receiver's set_checked_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 176) asExternalAddress!
+
+set_checked_at: anObject
+	"Set the receiver's set_checked_at field to the value of anObject."
+
+	bytes dwordAtOffset: 176 put: anObject!
+
+set_command_id_at
+	"Answer the receiver's set_command_id_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 80) asExternalAddress!
+
+set_command_id_at: anObject
+	"Set the receiver's set_command_id_at field to the value of anObject."
+
+	bytes dwordAtOffset: 80 put: anObject!
+
+set_enabled
+	"Answer the receiver's set_enabled field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 156) asExternalAddress!
+
+set_enabled: anObject
+	"Set the receiver's set_enabled field to the value of anObject."
+
+	bytes dwordAtOffset: 156 put: anObject!
+
+set_enabled_at
+	"Answer the receiver's set_enabled_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 160) asExternalAddress!
+
+set_enabled_at: anObject
+	"Set the receiver's set_enabled_at field to the value of anObject."
+
+	bytes dwordAtOffset: 160 put: anObject!
+
+set_group_id
+	"Answer the receiver's set_group_id field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 116) asExternalAddress!
+
+set_group_id: anObject
+	"Set the receiver's set_group_id field to the value of anObject."
+
+	bytes dwordAtOffset: 116 put: anObject!
+
+set_group_id_at
+	"Answer the receiver's set_group_id_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 120) asExternalAddress!
+
+set_group_id_at: anObject
+	"Set the receiver's set_group_id_at field to the value of anObject."
+
+	bytes dwordAtOffset: 120 put: anObject!
+
+set_label
+	"Answer the receiver's set_label field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 92) asExternalAddress!
+
+set_label: anObject
+	"Set the receiver's set_label field to the value of anObject."
+
+	bytes dwordAtOffset: 92 put: anObject!
+
+set_label_at
+	"Answer the receiver's set_label_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 96) asExternalAddress!
+
+set_label_at: anObject
+	"Set the receiver's set_label_at field to the value of anObject."
+
+	bytes dwordAtOffset: 96 put: anObject!
+
+set_visible
+	"Answer the receiver's set_visible field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 140) asExternalAddress!
+
+set_visible: anObject
+	"Set the receiver's set_visible field to the value of anObject."
+
+	bytes dwordAtOffset: 140 put: anObject!
+
+set_visible_at
+	"Answer the receiver's set_visible_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 144) asExternalAddress!
+
+set_visible_at: anObject
+	"Set the receiver's set_visible_at field to the value of anObject."
+
+	bytes dwordAtOffset: 144 put: anObject! !
+!CEF3MenuModel categoriesFor: #add_check_item!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_check_item:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_item!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_item:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_radio_item!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_radio_item:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_separator!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_separator:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_sub_menu!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #add_sub_menu:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #clear!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #clear:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_accelerator!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_accelerator:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_accelerator_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_accelerator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_command_id_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_command_id_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_count!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_count:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_group_id!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_group_id:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_group_id_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_group_id_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_index_of!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_index_of:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_label!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_label:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_label_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_label_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_sub_menu!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_sub_menu:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_sub_menu_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_sub_menu_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_type!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_type:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_type_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_type_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #has_accelerator!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #has_accelerator:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #has_accelerator_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #has_accelerator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_check_item_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_check_item_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_item_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_item_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_radio_item_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_radio_item_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_separator_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_separator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_sub_menu_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #insert_sub_menu_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_checked!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_checked:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_checked_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_checked_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_enabled!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_enabled:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_enabled_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_enabled_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_visible!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_visible:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_visible_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_visible_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_accelerator!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_accelerator:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_accelerator_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_accelerator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #remove_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_accelerator!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_accelerator:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_accelerator_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_accelerator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_checked!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_checked:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_checked_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_checked_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_command_id_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_command_id_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_enabled!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_enabled:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_enabled_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_enabled_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_group_id!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_group_id:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_group_id_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_group_id_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_label!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_label:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_label_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_label_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_visible!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_visible:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_visible_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_visible_at:!**compiled accessors**!public! !
+
+!CEF3MenuModel class methodsFor!
+
+defineFields
+	" 
+
+	CEF3MenuModel  compileDefinition
+ 
+"
+
+	super defineFields.
+	self
+		defineField: #clear type: LPVOIDField new;
+		defineField: #get_count type: LPVOIDField new;
+		defineField: #add_separator type: LPVOIDField new;
+		defineField: #add_item type: LPVOIDField new;
+		defineField: #add_check_item type: LPVOIDField new;
+		defineField: #add_radio_item type: LPVOIDField new;
+		defineField: #add_sub_menu type: LPVOIDField new;
+		defineField: #insert_separator_at type: LPVOIDField new;
+		defineField: #insert_item_at type: LPVOIDField new;
+		defineField: #insert_check_item_at type: LPVOIDField new;
+		defineField: #insert_radio_item_at type: LPVOIDField new;
+		defineField: #insert_sub_menu_at type: LPVOIDField new;
+		defineField: #remove type: LPVOIDField new;
+		defineField: #remove_at type: LPVOIDField new;
+		defineField: #get_index_of type: LPVOIDField new;
+		defineField: #get_command_id_at type: LPVOIDField new;
+		defineField: #set_command_id_at type: LPVOIDField new;
+		defineField: #get_label type: LPVOIDField new;
+		defineField: #get_label_at type: LPVOIDField new;
+		defineField: #set_label type: LPVOIDField new;
+		defineField: #set_label_at type: LPVOIDField new;
+		defineField: #get_type type: LPVOIDField new;
+		defineField: #get_type_at type: LPVOIDField new;
+		defineField: #get_group_id type: LPVOIDField new;
+		defineField: #get_group_id_at type: LPVOIDField new;
+		defineField: #set_group_id type: LPVOIDField new;
+		defineField: #set_group_id_at type: LPVOIDField new;
+		defineField: #get_sub_menu type: LPVOIDField new;
+		defineField: #get_sub_menu_at type: LPVOIDField new;
+		defineField: #is_visible type: LPVOIDField new;
+		defineField: #is_visible_at type: LPVOIDField new;
+		defineField: #set_visible type: LPVOIDField new;
+		defineField: #set_visible_at type: LPVOIDField new;
+		defineField: #is_enabled type: LPVOIDField new;
+		defineField: #is_enabled_at type: LPVOIDField new;
+		defineField: #set_enabled type: LPVOIDField new;
+		defineField: #set_enabled_at type: LPVOIDField new;
+		defineField: #is_checked type: LPVOIDField new;
+		defineField: #is_checked_at type: LPVOIDField new;
+		defineField: #set_checked type: LPVOIDField new;
+		defineField: #set_checked_at type: LPVOIDField new;
+		defineField: #has_accelerator type: LPVOIDField new;
+		defineField: #has_accelerator_at type: LPVOIDField new;
+		defineField: #set_accelerator type: LPVOIDField new;
+		defineField: #set_accelerator_at type: LPVOIDField new;
+		defineField: #remove_accelerator type: LPVOIDField new;
+		defineField: #remove_accelerator_at type: LPVOIDField new;
+		defineField: #get_accelerator type: LPVOIDField new;
+		defineField: #get_accelerator_at type: LPVOIDField new! !
+!CEF3MenuModel class categoriesFor: #defineFields!public! !
 
 CEF3PostData guid: (GUID fromString: '{EEE72B27-4C4D-49AE-B500-0D0FD7C2B101}')!
 CEF3PostData comment: ''!
@@ -8025,6 +9207,79 @@ initializeExternalMethods
 !CEF3CallbackEx categoriesFor: #cont_ex:!must not strip!public! !
 !CEF3CallbackEx categoriesFor: #initializeExternalMethods!must not strip!public! !
 
+CEF3CommandLineEx guid: (GUID fromString: '{DA74A25F-C942-4FAF-B496-E485FE275D7C}')!
+CEF3CommandLineEx comment: ''!
+!CEF3CommandLineEx categoriesForClass!External-Data-Structured! !
+!CEF3CommandLineEx methodsFor!
+
+append_switch_ex: this switch:switch
+	<stdcall: void  append_switch dword CEFString*>
+	^self invalidCall!
+
+append_switch_value_ex: this switch:switch value: value
+	<stdcall: void append_switch_value dword CEFString*  CEFString*>
+	^self invalidCall!
+
+appendSwitch: aString
+	append_switch_ex ifNil: [self initializeExternalMethods].
+	^append_switch_ex value: self withArguments: (Array with: self yourAddress with: aString asCefString )!
+
+appendSwitch: aString value: aValue
+	append_switch_value_ex ifNil: [self initializeExternalMethods].
+	^append_switch_value_ex value: self withArguments: (Array with: self yourAddress with: aString asCefString with: aValue asCefString)!
+
+get_command_line_string_ex: this 
+	<stdcall: CEFString*  get_command_line_string dword >
+	^self invalidCall!
+
+getCommandLineString
+	get_command_line_string_ex ifNil: [self initializeExternalMethods].
+	^get_command_line_string_ex value: self withArguments: (Array with: self yourAddress  )!
+
+initializeExternalMethods
+	append_switch_ex := self getCompileMethod: #append_switch_ex:switch: proc: self append_switch.
+	append_switch_value_ex := self getCompileMethod: #append_switch_value_ex:switch:value:
+				proc: self append_switch_with_value.
+	get_command_line_string_ex := self getCompileMethod: #get_command_line_string_ex:
+				proc: self get_command_line_string! !
+!CEF3CommandLineEx categoriesFor: #append_switch_ex:switch:!must not strip!private! !
+!CEF3CommandLineEx categoriesFor: #append_switch_value_ex:switch:value:!must not strip!private! !
+!CEF3CommandLineEx categoriesFor: #appendSwitch:!public! !
+!CEF3CommandLineEx categoriesFor: #appendSwitch:value:!public! !
+!CEF3CommandLineEx categoriesFor: #get_command_line_string_ex:!must not strip!private! !
+!CEF3CommandLineEx categoriesFor: #getCommandLineString!public! !
+!CEF3CommandLineEx categoriesFor: #initializeExternalMethods!must not strip!private! !
+
+CEF3ContextMenuParamsEx guid: (GUID fromString: '{C8B43DCA-597D-4C41-8290-7DC7F85EED41}')!
+CEF3ContextMenuParamsEx comment: ''!
+!CEF3ContextMenuParamsEx categoriesForClass!External-Data-Structured! !
+!CEF3ContextMenuParamsEx methodsFor!
+
+get_source_url_ex: this
+	<stdcall: CEFStringUserFree* get_source_url dword>
+	^self invalidCall!
+
+get_type_flags_ex: this
+	<stdcall: dword get_type_flags dword>
+	^self invalidCall!
+
+getSourceUrl
+	get_source_url_ex ifNil: [self initializeExternalMethods].
+	^get_source_url_ex value: self withArguments: (Array with: self yourAddress)!
+
+getTypeFlags
+	get_type_flags_ex ifNil: [self initializeExternalMethods].
+	^get_type_flags_ex value: self withArguments: (Array with: self yourAddress)!
+
+initializeExternalMethods
+	get_source_url_ex := self getCompileMethod: #get_source_url_ex: proc: self get_source_url.
+	get_type_flags_ex := self getCompileMethod: #get_type_flags_ex: proc: self get_type_flags! !
+!CEF3ContextMenuParamsEx categoriesFor: #get_source_url_ex:!must not strip!private! !
+!CEF3ContextMenuParamsEx categoriesFor: #get_type_flags_ex:!must not strip!private! !
+!CEF3ContextMenuParamsEx categoriesFor: #getSourceUrl!must not strip!private! !
+!CEF3ContextMenuParamsEx categoriesFor: #getTypeFlags!must not strip!private! !
+!CEF3ContextMenuParamsEx categoriesFor: #initializeExternalMethods!must not strip!private! !
+
 CEF3FrameEx guid: (GUID fromString: '{312A1D42-29A5-402E-9B61-7B168A6351AA}')!
 CEF3FrameEx comment: ''!
 !CEF3FrameEx categoriesForClass!External-Data-Structured! !
@@ -8056,6 +9311,51 @@ loadUrl: aString
 !CEF3FrameEx categoriesFor: #initializeExternalMethods!must not strip!private! !
 !CEF3FrameEx categoriesFor: #load_url_ex:url:!must not strip!public! !
 !CEF3FrameEx categoriesFor: #loadUrl:!must not strip!public! !
+
+CEF3MenuModelEx guid: (GUID fromString: '{76E4F936-7532-4E2F-97B7-9D1CC15D7A40}')!
+CEF3MenuModelEx comment: ''!
+!CEF3MenuModelEx categoriesForClass!External-Data-Structured! !
+!CEF3MenuModelEx methodsFor!
+
+add_item: id label: label 
+	add_item_ex ifNil: [self initializeExternalMethods].
+	^add_item_ex value: self
+		withArguments: (Array 
+				with: self yourAddress
+				with: id
+				with: label asCefString)!
+
+add_item_ex: this command_id: id label: label
+	<stdcall: sdword add_item dword sdword CEFString*>
+	^self invalidCall!
+
+clear_ex: this
+	<stdcall: dword clear dword>
+	^self invalidCall!
+
+clearEx
+	clear_ex ifNil: [self initializeExternalMethods].
+	^clear_ex value: self withArguments: (Array with: self  yourAddress )!
+
+get_count_exe: this
+	<stdcall: sdword get_count dword>
+	^self invalidCall!
+
+getCount
+	get_count_exe ifNil: [self initializeExternalMethods].
+	^get_count_exe value: self withArguments: (Array with: self yourAddress)!
+
+initializeExternalMethods
+	clear_ex := self getCompileMethod: #clear_ex: proc: self clear.
+	add_item_ex := self getCompileMethod: #add_item_ex:command_id:label: proc: self add_item.
+	get_count_exe := self getCompileMethod: #get_count_exe: proc: self get_count! !
+!CEF3MenuModelEx categoriesFor: #add_item:label:!public! !
+!CEF3MenuModelEx categoriesFor: #add_item_ex:command_id:label:!public! !
+!CEF3MenuModelEx categoriesFor: #clear_ex:!public! !
+!CEF3MenuModelEx categoriesFor: #clearEx!public! !
+!CEF3MenuModelEx categoriesFor: #get_count_exe:!public! !
+!CEF3MenuModelEx categoriesFor: #getCount!public! !
+!CEF3MenuModelEx categoriesFor: #initializeExternalMethods!must not strip!private! !
 
 CEF3PostDataEx guid: (GUID fromString: '{06E22F92-841A-4D11-A70D-7766BDBB6C2E}')!
 CEF3PostDataEx comment: ''!
@@ -8825,7 +10125,9 @@ cb_do_close: this browser: browser
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
- 
+	PGTranscript
+		display: 'CEFView cb_on_after_created:';
+		cr.
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
