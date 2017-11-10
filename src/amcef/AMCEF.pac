@@ -193,6 +193,7 @@ package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\Util\AMUtil';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
+	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\System\Base64\Dolphin Base64';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Dialogs\Common\Dolphin Common Dialogs';
 	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\JSON\JSON';
@@ -1168,14 +1169,12 @@ mainProcess
 	isInitialize ifTrue: [Error signal: 'App already initialized'].
 	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
 	self log: 'started '.
-	"browserProcessHandler := CEF3BrowserProcessHandler new.
-	browserProcessHandler handler: self."
 	args := CEF3MainArgs new.
 	args instance: VMLibrary default applicationHandle.
 	app := CEF3App new.
 	app handler: self.
 	settings := CEF3Settings new.
-	settings log_severity: 1.
+	settings log_severity: 0.
 	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
 	File createDirectoryPath: cacheFolder.
 	settings cache_path: cacheFolder asCefString.
@@ -1409,38 +1408,39 @@ CEFContextMenuHandler comment: ''!
 !CEFContextMenuHandler methodsFor!
 
 cb_on_before_context_menu: h browser: browser frame: frame params: params model: model 
-	PGTranscript
-		display: 'cb_on_before_context_menu: aaaa';
-		cr.
-	PGTranscript
-		display: browser identifier;
-		cr.
-	PGTranscript
-		display: model;
-		cr.
-	PGTranscript
-		display: model clearEx;
-		cr.
-	PGTranscript
-		display: model getCount;
-		cr.
-	
-	PGTranscript
-		display: (model add_item: 26501 label: 'Save image');
-		cr.
+	"model clearEx."
 
-	PGTranscript
-		display: params getSourceUrl;
-		cr.
-	PGTranscript
-		display: params getTypeFlags;
-		cr!
+	| CM_TYPEFLAG_MEDIA |
+	model clearEx.
+	CM_TYPEFLAG_MEDIA := 1 bitShift: 3.
+	0 < (params getTypeFlags bitAnd: CM_TYPEFLAG_MEDIA) 
+		ifTrue: 
+			[| url |
+			url := params getSourceUrl str.
+			(url beginsWith: 'data:image/png;base64,') ifTrue: [model add_item: 26501 label: 'Save image']]!
 
 cb_on_context_menu_command: h browser: browser frame: frame params: params command_id: cmd event_flags: flag 
-	PGTranscript
-		display: 'cb_on_context_menu_command:';
-		cr.
-	^1!
+	cmd == 26501 
+		ifTrue: 
+			[| url data fileTypes filename stream extension |
+			url := params getSourceUrl str asString.
+			data := url copyFrom: 'data:image/png;base64,' size.
+			fileTypes := #(#('PNG Image (*.png)' '*.png')).
+			extension := 'png'.
+			
+			[filename := (FileSaveDialog new)
+						caption: 'Save image ...';
+						fileTypes: fileTypes;
+						value: 'image.png';
+						showModal.
+			filename isNil 
+				ifFalse: 
+					[(filename endsWith: '.' , extension) ifFalse: [filename := filename , '.' , extension].
+					stream := FileStream write: filename text: false.
+					[Base64Codec decodeFrom: data asByteArray readStream onto: stream] ensure: [stream close]]] 
+					postToInputQueue.
+			^1].
+	^0!
 
 cb_on_context_menu_dismissed: h browser: browser frame: frame 
 	PGTranscript
@@ -2551,7 +2551,7 @@ getCompileMethod: aSymbol proc: proc
 
 log: aMsg 
 	"self doLog"
-	SessionManager current log: self class name , ' : ' , aMsg! !
+	"SessionManager current log: self class name , ' : ' , aMsg"! !
 !CEFExternalStructure categoriesFor: #getCompileMethod:proc:!must not strip!public! !
 !CEFExternalStructure categoriesFor: #log:!public! !
 
@@ -5326,25 +5326,21 @@ asCefClient
 	^self!
 
 cb_get_context_menu_handler: aCEF3Client 
-	PGTranscript
-		display: 'CEF3Client  cb_get_context_menu_handler:';
-		cr.
+	 
 	contextMenuHandler handler isNil ifTrue: [^0].
 	^contextMenuHandler yourAddress!
 
 cb_get_display_handler: aCEF3Client 
-	self log: 'cb_get_display_handler:'.
+	 
 	^0!
 
 cb_get_download_handler: aCEF3Client 
-	PGTranscript
-		display: 'cb_get_download_handler:';
-		cr.
+	 
 	downloadHandler handler isNil ifTrue: [^0].
 	^downloadHandler yourAddress!
 
 cb_get_focus_handler: aCEF3Client 
-	self log: 'cb_get_focus_handler:'.
+	 
 	^0!
 
 cb_get_keyboard_handler: aCEF3Client 
@@ -5361,9 +5357,9 @@ cb_get_load_handler: aCEF3Client
 	^loadHandler yourAddress!
 
 cb_get_request_handler: aCEF3Client 
-	self log: 'cb_get_request_handler:'.
+ 
 	^requestHandler yourAddress.
-	^0!
+	 !
 
 cb_on_process_message_received: aCEF3Client browser: aCEF3Browser source_process: asdword message: aCEF3ProcessMessage 
 	self log: 'cb_on_process_message_received:'.
@@ -8235,7 +8231,7 @@ cb_get_auth_credentials: this browser: browser frame: frame isProxy: isProxy hos
 
 cb_get_resource_handler: this browser: browser frame: frame request: request 
 	| aResH |
-	self log: 'cb_get_resource_handler:'.
+	 
 	aResH := handler 
 				ifNotNil: 
 					[:value | 
@@ -8245,7 +8241,7 @@ cb_get_resource_handler: this browser: browser frame: frame request: request
 						frame: frame
 						request: request) ifNotNil: [:value2 | value2 asInteger]]
 				ifNil: [0].
-	self log: 'cb_get_resource_handler: ' , aResH displayString.
+	 
 	^aResH
 
 	"
@@ -8307,7 +8303,7 @@ cb_on_before_plugin_load: this browser: browser url: url policy_url: policy_url 
 	^0!
 
 cb_on_before_resource_load: this browser: browser frame: frame request: request 
-	self log: 'cb_on_before_resource_load:'.
+ 
 	^0
 	"
 ///
@@ -8396,7 +8392,7 @@ cb_on_render_process_terminated: this browser: browser status: status
 "!
 
 cb_on_resource_redirect: this browser: browser frame: frame old_url: old_url new_url: new_url 
-	self log: 'cb_on_resource_redirect:'
+	 
 	"
  ///
   // Called on the IO thread when a resource load is redirected. The |old_url|
@@ -10125,9 +10121,7 @@ cb_do_close: this browser: browser
 	^0!
 
 cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx 
-	PGTranscript
-		display: 'CEFView cb_on_after_created:';
-		cr.
+	 
 	cefBrowser isNil 
 		ifTrue: 
 			[cefBrowser := aCEF3BrowserEx.
@@ -10136,7 +10130,7 @@ cb_on_after_created: aCEF3LifeSpanHandler browser: aCEF3BrowserEx
 			self addSubView: cefview.
 			cefview arrangement: 1.
 			self setCefPosition.
-			self onCefBrowserCreated]
+			[self onCefBrowserCreated] postToInputQueue ]
 		ifFalse: [self onNewChildBrowser: aCEF3BrowserEx]!
 
 cb_on_before_close: this browser: browser 
@@ -10261,6 +10255,7 @@ isManaged
 	^true!
 
 onCefBrowserCreated
+ 
 	url ifNil: [self setUrl: self defaultUrl] ifNotNil: [:value | self setUrl: value].
 	self isManaged: true.
 	self invalidateLayout.
