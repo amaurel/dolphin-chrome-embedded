@@ -1,0 +1,292 @@
+[0809/125138:VERBOSE1:pref_proxy_config_tracker_impl.cc(148)] 0BE81E10: set chrome proxy config service to 0BE81C30
+[0809/125138:VERBOSE1:pref_proxy_config_tracker_impl.cc(277)] 0BE81E10: Done pushing proxy to UpdateProxyConfig
+[0809/125153:ERROR:renderer_main.cc(227)] Running without renderer sandbox
+[0809/125153:VERBOSE1:texture_image_transport_surface.cc(378)] Allocating new backbuffer texture
+[0809/125153:ERROR:cache_util_win.cc(20)] Unable to move the cache: 5
+[0809/125153:ERROR:cache_util.cc(132)] Unable to move cache folder C:\dev\bntribe\bn\bin\cef-cache to C:\dev\bntribe\bn\bin\old_cef-cache_000
+[0809/125153:ERROR:cache_creator.cc(125)] Unable to create cache
+[0809/125154:VERBOSE1:proxy_service.cc(1151)] Failed configuring with PAC script, falling-back to manual proxy servers.
+[0809/125154:VERBOSE1:resource_loader.cc(198)] OnReceivedRedirect: http://www.google.com/
+[0809/125156:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/?gws_rd=ssl
+[0809/125156:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 1857
+[0809/125216:VERBOSE1:resource_loader.cc(447)] CancelRequestInternal: https://www.google.com/?gws_rd=ssl
+[0809/125216:VERBOSE1:resource_loader.cc(447)] CancelRequestInternal: https://www.google.com/?gws_rd=ssl
+[0809/125216:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = -1
+[0809/125216:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/?gws_rd=ssl
+[0809/125216:ERROR:renderer_main.cc(227)] Running without renderer sandbox
+[0809/125216:VERBOSE1:texture_image_transport_surface.cc(378)] Allocating new backbuffer texture
+[0809/125216:VERBOSE1:resource_loader.cc(198)] OnReceivedRedirect: http://www.google.com/
+[0809/125217:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/?gws_rd=ssl
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4933
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 7164
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 32768
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 6739
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 20005
+[0809/125217:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125217:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125217:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125217:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 8047
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 7113
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3470
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4229
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4097
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4202
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3322
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3734
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4085
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4247
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4073
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4051
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 1794
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3673
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3900
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3969
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 5009
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4576
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4205
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3318
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3730
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3866
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3851
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 5062
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 2429
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 3477
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4005
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4236
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 8741
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 4491
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 8841
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 5507
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 5743
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 6725
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/?gws_rd=ssl" bytes_read = 0
+[0809/125217:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/?gws_rd=ssl
+[0809/125217:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 1842
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 30634
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 32768
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4767
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 14152
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 24505
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 22967
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4878
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 32768
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 9327
+[0809/125217:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4153
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3777
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 14156
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 8583
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 16421
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 15697
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 13964
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 12253
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png" bytes_read = 3712
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3760
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4522
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" bytes_read = 3712
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png" bytes_read = 1375
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_120x44dp.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 32768
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" bytes_read = 2257
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3964
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3820
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 12037
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 32768
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3192
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 8532
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4210
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4097
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3803
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 5029
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3445
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 6916
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3395
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4109
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4044
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4067
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 4339
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 3765
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 2033
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/m=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/gen_204?s=webaft&t=aft&atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&rt=wsrt.886,aft.770,prt.175
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/gen_204?s=webaft&t=aft&atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&rt=wsrt.886,aft.770,prt.175" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/gen_204?s=webaft&t=aft&atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&rt=wsrt.886,aft.770,prt.175
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/textinputassistant/tia.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/textinputassistant/tia.png" bytes_read = 258
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/textinputassistant/tia.png" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/textinputassistant/tia.png
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 1980
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 7750
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4479
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 3611
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4358
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 3796
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4253
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4445
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 5172
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4133
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4442
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4379
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4403
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4046
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 3703
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 4326
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 3928
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 28020
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 8309
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 8100
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc?xjs=s1
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://ssl.gstatic.com/gb/images/i1_1967ca6a.png
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://ssl.gstatic.com/gb/images/i1_1967ca6a.png" bytes_read = 2392
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://ssl.gstatic.com/gb/images/i1_1967ca6a.png" bytes_read = 1401
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://ssl.gstatic.com/gb/images/i1_1967ca6a.png" bytes_read = 1401
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://ssl.gstatic.com/gb/images/i1_1967ca6a.png" bytes_read = 2131
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://ssl.gstatic.com/gb/images/i1_1967ca6a.png" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://ssl.gstatic.com/gb/images/i1_1967ca6a.png
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi,aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=RMhBfe?xjs=s2
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi,aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=RMhBfe?xjs=s2" bytes_read = 3409
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi,aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=RMhBfe?xjs=s2" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/xjs/_/js/k=xjs.s.fr.leE9HqVNoOU.O/am=YBZhPn0AIP-nYGBRkBWMsMAMCoZI/rt=j/d=1/exm=sx,sb,cdos,cr,elog,hsm,jsa,r,d,csi,aa,abd,async,dvl,foot,ipv6,lu,m,mu,sf,d3l,cbin,tnqaT,cbhb,WgDvvc/ed=1/dg=0/rs=ACT90oHfjAR7TW9SVs_VYniyxJc0aPnDtA/m=RMhBfe?xjs=s2
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://consent.google.com/status?continue=https://www.google.com&pc=s&timestamp=1533811937&gl=FR
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://consent.google.com/status?continue=https://www.google.com&pc=s&timestamp=1533811937&gl=FR" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://consent.google.com/status?continue=https://www.google.com&pc=s&timestamp=1533811937&gl=FR
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/gen_204?atyp=i&ei=4RxsW__wCJCTlwTf2bi4DA&vet=10ahUKEwi_5and5t_cAhWQyYUKHd8sDscQsmQIDw..s&zx=1533811938361
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/gen_204?atyp=i&ei=4RxsW__wCJCTlwTf2bi4DA&vet=10ahUKEwi_5and5t_cAhWQyYUKHd8sDscQsmQIDw..s&zx=1533811938361" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/gen_204?atyp=i&ei=4RxsW__wCJCTlwTf2bi4DA&vet=10ahUKEwi_5and5t_cAhWQyYUKHd8sDscQsmQIDw..s&zx=1533811938361
+[0809/125218:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 1781
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 3937
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 4197
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 7809
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 12173
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 3929
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 10677
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 8089
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 8219
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 4324
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 8609
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 6003
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 3916
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 32768
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 20251
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 2393
+[0809/125218:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 0
+[0809/125218:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=def/exm=in,fot/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ
+[0809/125219:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 6442
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 13003
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 15300
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 19107
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 16325
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 4889
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 5714
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 8268
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 6628
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 3834
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 4362
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 9251
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 8295
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 14882
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 3521
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0" bytes_read = 0
+[0809/125219:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://apis.google.com/_/scs/abc-static/_/js/k=gapi.gapi.en.yK0z3MKtgaU.O/m=gapi_iframes,googleapis_client,plusone/rt=j/sv=1/d=1/ed=1/rs=AHpOoo-SafOYj4n3budMysbWxppU-lxJeg/cb=gapi.loaded_0
+[0809/125219:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/gen_204?atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&s=webhp&t=all&imc=3&imn=3&imp=3&adh=&ima=1&ime=0&imeb=0&imeo=0&mem=ujhs.10,tjhs.15,jhsl.793&rt=aft.770,dcl.178,iml.1116,ol.2051,prt.175,xjs.919,xjsee.919,xjses.850,xjsls.89,wsrt.886,cst.307,dnst.1,rqst.360,rspt.188,sslt.247,rqstt.826,unt.501,cstt.519,dit.1203&zx=1533811939362
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/gen_204?atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&s=webhp&t=all&imc=3&imn=3&imp=3&adh=&ima=1&ime=0&imeb=0&imeo=0&mem=ujhs.10,tjhs.15,jhsl.793&rt=aft.770,dcl.178,iml.1116,ol.2051,prt.175,xjs.919,xjsee.919,xjses.850,xjsls.89,wsrt.886,cst.307,dnst.1,rqst.360,rspt.188,sslt.247,rqstt.826,unt.501,cstt.519,dit.1203&zx=1533811939362" bytes_read = 0
+[0809/125219:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/gen_204?atyp=csi&ei=4RxsW__wCJCTlwTf2bi4DA&s=webhp&t=all&imc=3&imn=3&imp=3&adh=&ima=1&ime=0&imeb=0&imeo=0&mem=ujhs.10,tjhs.15,jhsl.793&rt=aft.770,dcl.178,iml.1116,ol.2051,prt.175,xjs.919,xjsee.919,xjses.850,xjsls.89,wsrt.886,cst.307,dnst.1,rqst.360,rspt.188,sslt.247,rqstt.826,unt.501,cstt.519,dit.1203&zx=1533811939362
+[0809/125219:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.google.com/images/nav_logo242.png
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1016
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 2802
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1401
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 723
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 1037
+[0809/125219:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.google.com/images/nav_logo242.png" bytes_read = 0
+[0809/125219:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.google.com/images/nav_logo242.png
+[0809/125220:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://adservice.google.com/adsid/google/ui
+[0809/125220:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://adservice.google.com/adsid/google/ui" bytes_read = 0
+[0809/125220:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://adservice.google.com/adsid/google/ui
+[0809/125323:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.gstatic.com/og/_/ss/k=og.og2.-1b9uxb1p9bl0y.L.W.O/m=lg/excm=in,fot/d=1/ed=1/rs=AA2YrTthv9lnOydluXzh5_B31LjVaSIcEg
+[0809/125323:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/ss/k=og.og2.-1b9uxb1p9bl0y.L.W.O/m=lg/excm=in,fot/d=1/ed=1/rs=AA2YrTthv9lnOydluXzh5_B31LjVaSIcEg" bytes_read = 10670
+[0809/125323:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/ss/k=og.og2.-1b9uxb1p9bl0y.L.W.O/m=lg/excm=in,fot/d=1/ed=1/rs=AA2YrTthv9lnOydluXzh5_B31LjVaSIcEg" bytes_read = 0
+[0809/125323:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.gstatic.com/og/_/ss/k=og.og2.-1b9uxb1p9bl0y.L.W.O/m=lg/excm=in,fot/d=1/ed=1/rs=AA2YrTthv9lnOydluXzh5_B31LjVaSIcEg
+[0809/125323:VERBOSE1:resource_loader.cc(309)] OnResponseStarted: https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=lat/exm=in,fot,def/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ
+[0809/125323:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=lat/exm=in,fot,def/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 5886
+[0809/125323:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=lat/exm=in,fot,def/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 12462
+[0809/125323:VERBOSE1:resource_loader.cc(349)] OnReadCompleted: "https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=lat/exm=in,fot,def/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ" bytes_read = 0
+[0809/125323:VERBOSE1:resource_loader.cc(621)] ResponseCompleted: https://www.gstatic.com/og/_/js/k=og.og2.en_US.zxip3xvtWOg.O/rt=j/m=lat/exm=in,fot,def/d=1/ed=1/rs=AA2YrTuVimoIL-Xw1BWbBFD6BAc5a-ZHpQ
+[0809/125323:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125323:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/125323:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0809/130312:WARNING:dns_config_service_win.cc(653)] Failed to read DnsConfig.
+[0809/130314:WARNING:dhcp_proxy_script_adapter_fetcher_win.cc(264)] Error fetching PAC URL from DHCP: 2
+[0809/130314:VERBOSE1:proxy_service.cc(1151)] Failed configuring with PAC script, falling-back to manual proxy servers.
+[0810/104938:VERBOSE1:proxy_service.cc(1151)] Failed configuring with PAC script, falling-back to manual proxy servers.
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:ipc_sync_channel.cc(385)] Canceling pending sends
+[0810/110813:VERBOSE1:statistics_recorder.cc(295)] Collections of all histograms
+Histogram: GPU.CollectContextGraphicsInfo recorded 1 samples, average = 1.0 (flags = 0x1)
+0  O                                                                         (0 = 0.0%)
+1  ------------------------------------------------------------------------O (1 = 100.0%) {0.0%}
+2  ... 
+
+Histogram: GPU.InitializeOneOffTime recorded 1 samples, average = 14.0 (flags = 0x1)
+0   ... 
+14  ------------------------------------------------------------------------O (1 = 100.0%) {0.0%}
+17  ... 
+
+Histogram: GPU.ProgramCache.BinaryCacheMissTime recorded 4 samples, average = 8097.5 (flags = 0x1)
+0     ... 
+5362  ------------------------O                                                 (1 = 25.0%) {0.0%}
+7439  ------------------------------------------------------------------------O (3 = 75.0%) {25.0%}
+10321 ... 
+
+Histogram: GPU.ProgramCache.MemorySizeAfterKb recorded 19 samples, average = 15.2 (flags = 0x1)
+0   O                                                                         (0 = 0.0%)
+1   ------------------------------------------------------------------------O (1 = 5.3%) {0.0%}
+2   O                                                                         (0 = 0.0%) {5.3%}
+3   ------------------------------------------------------------------------O (1 = 5.3%) {5.3%}
+4   ------------------------------------------------------------------------O (1 = 5.3%) {10.5%}
+5   ------------------------------------O                                     (1 = 5.3%) {15.8%}
+7   ------------------------------------O                                     (1 = 5.3%) {21.1%}
+9   ------------------------------------------------O                         (2 = 10.5%) {26.3%}
+12  ------------------------------------------------------O                   (3 = 15.8%) {36.8%}
+16  -------------------------------------------O                              (3 = 15.8%) {52.6%}
+21  ----------------------------------------------------------O               (4 = 21.1%) {68.4%}
+28  -----------------------------O                                            (2 = 10.5%) {89.5%}
+37  ... 
+
+Histogram: GPU.ProgramCache.MemorySizeBeforeKb recorded 4 samples, average = 19.5 (flags = 0x1)
+0   ------------------------------------------------------------------------O (1 = 25.0%)
+1   ... 
+21  -----------------------------O                                            (2 = 50.0%) {25.0%}
+28  --------------O                                                           (1 = 25.0%) {75.0%}
+37  ... 
+
+Histogram: GPU.ProgramCache.ProgramBinarySizeBytes recorded 4 samples, average = 2024.3 (flags = 0x1)
+0     ... 
+1347  ------------------------------------O                                     (1 = 25.0%) {0.0%}
+1774  ------------------------------------------------------------------------O (2 = 50.0%) {25.0%}
+2336  ------------------------------------O                                     (1 = 25.0%) {75.0%}
+3077  ... 
+
+
