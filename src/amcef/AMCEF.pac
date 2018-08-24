@@ -1,12 +1,15 @@
 | package |
 package := Package name: 'AMCEF'.
 package paxVersion: 1;
-	basicComment: 'CEF3Library default cef_version_infos. 
+	basicComment: 'CEF3Library default cef_version_infos. #(3 1805 68 0 3440 84)
  #(3 1706 35 0 1916 0)
-CEF3Library default cef_build_revision.  
-1706
+ 
+
+
+CEFApp new.
 
  
+KernelLibrary default setProcessDEPPolicy: 1.
 
 shell := ShellView new 
 			layoutManager: ProportionalLayout new;
@@ -143,10 +146,12 @@ package classNames
 	add: #CEF3SchemeHandlerFactory;
 	add: #CEF3SchemeRegistrar;
 	add: #CEF3SchemeRegistrarEx;
+	add: #CEF3ScopedObject;
 	add: #CEF3Settings;
 	add: #CEF3WindowInfo;
 	add: #CEFApp;
 	add: #CEFBase;
+	add: #CEFBaseScoped;
 	add: #CEFClassCallbackRegistry;
 	add: #CEFClassCallbackRegistryEx;
 	add: #CEFClient;
@@ -192,12 +197,12 @@ package globalAliases: (Set new
 package setPrerequisites: (IdentitySet new
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\D6Fix\AMCyclicPrerequisities';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Alex\Util\AMUtil';
-	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Base\Dolphin';
-	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\System\Base64\Dolphin Base64';
-	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Dialogs\Common\Dolphin Common Dialogs';
-	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
+	add: '..\..\bin\Object Arts\Dolphin\Base\Dolphin';
+	add: '..\..\bin\Object Arts\Dolphin\System\Base64\Dolphin Base64';
+	add: '..\..\bin\Object Arts\Dolphin\MVP\Dialogs\Common\Dolphin Common Dialogs';
+	add: '..\..\bin\Object Arts\Dolphin\MVP\Base\Dolphin MVP Base';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\JSON\JSON';
-	add: '..\..\..\bntribe\bn\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
+	add: '..\..\bin\Object Arts\Dolphin\Lagoon\Lagoon Image Stripper';
 	add: '..\..\..\bntribe\bn\src\st\Common\Dolphin\Goodies\Swazoo\Swazoo';
 	yourself).
 
@@ -318,6 +323,11 @@ CEFExternalStructure subclass: #CEFBase
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
+CEFExternalStructure subclass: #CEFBaseScoped
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
 CEFExternalStructure subclass: #CEFString
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -334,6 +344,11 @@ CEF3 subclass: #CEF3BrowserSettings
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 CEF3 subclass: #CEF3MainArgs
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3 subclass: #CEF3ScopedObject
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -468,11 +483,6 @@ CEF3BaseObject subclass: #CEF3SchemeHandlerFactory
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
-CEF3BaseObject subclass: #CEF3SchemeRegistrar
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	classInstanceVariableNames: ''!
 CEF3BeforeDownloadCallback subclass: #CEF3BeforeDownloadCallbackEx
 	instanceVariableNames: 'cont_ex'
 	classVariableNames: ''
@@ -535,6 +545,11 @@ CEF3Request subclass: #CEF3RequestEx
 	classInstanceVariableNames: ''!
 CEF3Response subclass: #CEF3ResponseEx
 	instanceVariableNames: 'set_status_ex set_status_text_ex is_read_only_ex set_mime_type_ex get_mime_type_ex'
+	classVariableNames: ''
+	poolDictionaries: ''
+	classInstanceVariableNames: ''!
+CEF3ScopedObject subclass: #CEF3SchemeRegistrar
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -601,7 +616,7 @@ pumpMessage: aMSG
 					[(UserLibrary default)
 						translateMessage: aMSG;
 						dispatchMessage: aMSG]].
-	CEFApp new runLoop! !
+	"CEFApp new runLoop"! !
 !InputState categoriesFor: #pumpMessage:!message dispatching!private! !
 
 !KernelLibrary methodsFor!
@@ -631,6 +646,11 @@ setProcessDEPPolicy: dwFlags
 BOOL WINAPI SetProcessDEPPolicy(
   _In_  DWORD dwFlags
 );
+"
+
+"
+KernelLibrary default setProcessDEPPolicy: 1
+
 "
 
 	<stdcall: bool SetPriorityClass dword>
@@ -1098,7 +1118,7 @@ cb_create: this browser: browser frame: frame sheme_name: sheme_name request: aC
       struct _cef_frame_t* frame, struct _cef_request_t* request);
 "
 
-	"self log: 'cb_create: ' , aCEF3RequestEx getUrl str asString."
+	self log: 'cb_create: ' , aCEF3RequestEx getUrl str asString.
 	^0!
 
 cb_on_before_child_process_launch: c command: co 
@@ -1112,11 +1132,11 @@ cb_on_before_child_process_launch: c command: co
 		cr!
 
 cb_on_context_initialized: c 
-	"self log: 'cb_on_context_initialized:'."
+	self log: 'cb_on_context_initialized:'.
 	self registerSchemeFactory!
 
 cb_on_render_process_thread_created: c extra_info: e 
-	"self log: 'cb_on_render_process_thread_created:extra_info:'"!
+	self log: 'cb_on_render_process_thread_created:extra_info:'!
 
 freeCEF
 	self lib cef_shutdown!
@@ -1127,20 +1147,23 @@ initialize
 	isMultiThreadLoop := 1!
 
 main
-	self mainProcess!
+	self main2.
+	"self mainProcess"!
 
 main2
 	| res cacheFolder |
 	isInitialize ifTrue: [Error signal: 'App already initialized'].
+	KernelLibrary default setProcessDEPPolicy: 1.
 	isInitialize := true.
 	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
 	self log: 'started '.
 	"browserProcessHandler := CEF3BrowserProcessHandler new.
 	browserProcessHandler handler: self."
+	self pgHalt.
 	args := CEF3MainArgs new.
 	args instance: VMLibrary default applicationHandle.
 	app := CEF3App new.
-	app handler: self.
+	"app handler: self."
 	res := self lib 
 				cef_execute_process: args
 				application: app
@@ -1149,11 +1172,15 @@ main2
 	res >= 0 ifTrue: [^SessionManager current exit: res].
 	settings := CEF3Settings new.
 	settings log_severity: 1.
+	settings log_file: (FileLocator imageRelative localFileSpecFor: 'cef.log') asCefString.
 	cacheFolder := FileLocator imageRelative localFileSpecFor: 'cef-cache'.
 	File createDirectoryPath: cacheFolder.
 	settings cache_path: cacheFolder asCefString.
-	settings 
+	"settings 
 		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'dolphin-cef.exe') asCefString.
+"
+	settings 
+		browser_subprocess_path: (FileLocator imageRelative localFileSpecFor: 'cefclient.exe') asCefString.
 	settings remote_debugging_port: 9223.
 	settings multi_threaded_message_loop: isMultiThreadLoop.
 	settings no_sandbox: 1.
@@ -1162,10 +1189,12 @@ main2
 				settings: settings
 				application: app
 				windows_sandbox_info: 0.
-	self log: 'cef_initialize:   ' , res displayString!
+	self log: 'cef_initialize:   ' , res displayString.
+	self pgHalt!
 
 mainProcess
 	| res cacheFolder |
+self pgHalt.
 	isInitialize ifTrue: [Error signal: 'App already initialized'].
 	SessionManager current isRuntime ifFalse: [SessionManager current openConsole].
 	self log: 'started '.
@@ -1238,11 +1267,15 @@ onRegisterCustomSchemes: cefapp registrar: aCEF3SchemeRegistrarEx
 "
 
 	| answer |
+	^0.
 	answer := aCEF3SchemeRegistrarEx 
 				addCustomScheme: self scheme asCefString
 				is_standard: 1
 				is_local: 0
-				is_display_isolated: 0.
+				is_display_isolated: 0
+				is_secure: 0
+				is_cors_enabled: 0
+				is_csp_bypassing: 0
 	"self log: 'onRegisterCustomSchemes : return code ' , answer displayString"!
 
 registerSchemeFactory
@@ -2195,11 +2228,12 @@ cefReceiver: anAddress
 	"Private - Evaluate the receiver with arguments instantiated from the raw data at anAddress."
 
 	| receiverAddress |
+self log: 'cefReceiver:'.
 	receiverAddress := (DWORD fromAddress: anAddress) value.
 	^receiver getInstance: receiverAddress!
 
 log: logMsg 
-	!
+	Transcript display: logMsg; cr.!
 
 selector
 	^selector!
@@ -2372,17 +2406,6 @@ CEF_EXPORT cef_browser_t* cef_browser_host_create_browser_sync(
 	<stdcall: CEF3BrowserEx* cef_browser_host_create_browser_sync CEF3WindowInfo* CEF3Client* CEFString* CEF3Settings* dword>
 	^self invalidCall!
 
-cef_build_revision
-	"
-///
-// Returns the CEF build revision for the libcef library.
-///
-
-"
-
-	<stdcall: sdword cef_build_revision>
-	^self invalidCall!
-
 cef_do_message_loop_work
 	"
 ///
@@ -2422,14 +2445,18 @@ cdecl:
 
 cef_initialize: args settings:settings application: application windows_sandbox_info: windows_sandbox_info
 	"
+cef_app_capi.h
 ///
 // This function should be called on the main application thread to initialize
 // the CEF browser process. The |application| parameter may be NULL. A return
 // value of true (1) indicates that it succeeded and false (0) indicates that it
-// failed.
+// failed. The |windows_sandbox_info| parameter is only used on Windows and may
+// be NULL (see cef_sandbox_win.h for details).
 ///
 CEF_EXPORT int cef_initialize(const struct _cef_main_args_t* args,
-    const struct _cef_settings_t* settings, struct _cef_app_t* application);
+                              const struct _cef_settings_t* settings,
+                              cef_app_t* application,
+                              void* windows_sandbox_info);
 
 "
 
@@ -2524,7 +2551,6 @@ cef_version_infos
 	^(0 to: 5) collect: [:each | self cef_version_info: each]! !
 !CEF3Library categoriesFor: #cef_browser_host_create_browser:client:url:settings:request_context:!public! !
 !CEF3Library categoriesFor: #cef_browser_host_create_browser_sync:client:url:settings:request_context:!public! !
-!CEF3Library categoriesFor: #cef_build_revision!public! !
 !CEF3Library categoriesFor: #cef_do_message_loop_work!public! !
 !CEF3Library categoriesFor: #cef_execute_process:application:windows_sandbox_info:!public! !
 !CEF3Library categoriesFor: #cef_initialize:settings:application:windows_sandbox_info:!public! !
@@ -2627,13 +2653,13 @@ cefSize: anObject
 
 	bytes dwordAtOffset: 0 put: anObject!
 
-get_refct
-	"Answer the receiver's get_refct field as a Smalltalk object."
+has_one_ref
+	"Answer the receiver's has_one_ref field as a Smalltalk object."
 
 	^(bytes dwordAtOffset: 12)!
 
-get_refct: anObject
-	"Set the receiver's get_refct field to the value of anObject."
+has_one_ref: anObject
+	"Set the receiver's has_one_ref field to the value of anObject."
 
 	bytes dwordAtOffset: 12 put: anObject!
 
@@ -2650,49 +2676,50 @@ release: anObject
 	"Set the receiver's release field to the value of anObject."
 
 	bytes dwordAtOffset: 8 put: anObject! !
-!CEFBase categoriesFor: #add_ref!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #add_ref:!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #cefSize!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #cefSize:!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #get_refct!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #get_refct:!**compiled accessors**!must not strip!public! !
+!CEFBase categoriesFor: #add_ref!**compiled accessors**!public! !
+!CEFBase categoriesFor: #add_ref:!**compiled accessors**!public! !
+!CEFBase categoriesFor: #cefSize!**compiled accessors**!public! !
+!CEFBase categoriesFor: #cefSize:!**compiled accessors**!public! !
+!CEFBase categoriesFor: #has_one_ref!**compiled accessors**!public! !
+!CEFBase categoriesFor: #has_one_ref:!**compiled accessors**!public! !
 !CEFBase categoriesFor: #initialize!must not strip!public! !
-!CEFBase categoriesFor: #release!**compiled accessors**!must not strip!public! !
-!CEFBase categoriesFor: #release:!**compiled accessors**!must not strip!public! !
+!CEFBase categoriesFor: #release!**compiled accessors**!public! !
+!CEFBase categoriesFor: #release:!**compiled accessors**!public! !
 
 !CEFBase class methodsFor!
 
 defineFields
 	" 
 
-	CEF1Base  compileDefinition.
+	CEFBase  compileDefinition.
 CEF1Base byteSize.
 ///
-// Structure defining the reference count implementation functions. All
-// framework structures must include the cef_base_t structure first.
+// All ref-counted framework structures must include this structure first.
 ///
-typedef struct _cef_base_t {
+typedef struct _cef_base_ref_counted_t {
   ///
   // Size of the data structure.
   ///
   size_t size;
 
   ///
-  // Increment the reference count.
+  // Called to increment the reference count for the object. Should be called
+  // for every new copy of a pointer to a given object.
   ///
-  int (CEF_CALLBACK *add_ref)(struct _cef_base_t* self);
+  void(CEF_CALLBACK* add_ref)(struct _cef_base_ref_counted_t* self);
 
   ///
-  // Decrement the reference count.  Delete this object when no references
-  // remain.
+  // Called to decrement the reference count for the object. If the reference
+  // count falls to 0 the object should self-delete. Returns true (1) if the
+  // resulting reference count is 0.
   ///
-  int (CEF_CALLBACK *release)(struct _cef_base_t* self);
+  int(CEF_CALLBACK* release)(struct _cef_base_ref_counted_t* self);
 
   ///
-  // Returns the current number of references.
+  // Returns true (1) if the current reference count is 1.
   ///
-  int (CEF_CALLBACK *get_refct)(struct _cef_base_t* self);
-} cef_base_t;
+  int(CEF_CALLBACK* has_one_ref)(struct _cef_base_ref_counted_t* self);
+} cef_base_ref_counted_t;
 
 "
 
@@ -2700,8 +2727,66 @@ typedef struct _cef_base_t {
 		defineField: #cefSize type: DWORDField new;
 		defineField: #add_ref type: DWORDField new;
 		defineField: #release type: DWORDField new;
-		defineField: #get_refct type: DWORDField new! !
+		defineField: #has_one_ref type: DWORDField new! !
 !CEFBase class categoriesFor: #defineFields!initializing!public! !
+
+CEFBaseScoped guid: (GUID fromString: '{81866259-A393-4635-B970-552AA631A728}')!
+CEFBaseScoped comment: ''!
+!CEFBaseScoped categoriesForClass!External-Data-Structured! !
+!CEFBaseScoped methodsFor!
+
+cefSize
+	"Answer the receiver's cefSize field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 0)!
+
+cefSize: anObject
+	"Set the receiver's cefSize field to the value of anObject."
+
+	bytes dwordAtOffset: 0 put: anObject!
+
+del
+	"Answer the receiver's del field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 4)!
+
+del: anObject
+	"Set the receiver's del field to the value of anObject."
+
+	bytes dwordAtOffset: 4 put: anObject! !
+!CEFBaseScoped categoriesFor: #cefSize!**compiled accessors**!public! !
+!CEFBaseScoped categoriesFor: #cefSize:!**compiled accessors**!public! !
+!CEFBaseScoped categoriesFor: #del!**compiled accessors**!public! !
+!CEFBaseScoped categoriesFor: #del:!**compiled accessors**!public! !
+
+!CEFBaseScoped class methodsFor!
+
+defineFields
+	" 
+
+	CEFBaseScoped  compileDefinition.
+///
+// All scoped framework structures must include this structure first.
+///
+typedef struct _cef_base_scoped_t {
+  ///
+  // Size of the data structure.
+  ///
+  size_t size;
+
+  ///
+  // Called to delete this object. May be NULL if the object is not owned.
+  ///
+  void(CEF_CALLBACK* del)(struct _cef_base_scoped_t* self);
+
+} cef_base_scoped_t;
+
+"
+
+	self
+		defineField: #cefSize type: DWORDField new;
+		defineField: #del type: DWORDField new! !
+!CEFBaseScoped class categoriesFor: #defineFields!initializing!public! !
 
 CEFString guid: (GUID fromString: '{91997CC6-49E8-4B6D-B64D-AEF70840469F}')!
 CEFString comment: ''!
@@ -2791,22 +2876,22 @@ cb_addRef: aBase
 	"self log: 'cb_addRef: ' , refCount displayString."
 	^refCount := refCount + 1!
 
-cb_getRefct: aBase 
-	self log: 'cb_getRefct: ' , refCount displayString.
-	^refCount!
+cb_has_one_ref: aBase 
+	self log: 'cb_has_one_ref: ' , refCount displayString.
+	^refCount > 0 ifTrue: [1] ifFalse: [0]!
 
 cb_releaseRef: aBase 
 	"self log: 'cb_releaseRef: ' , refCount displayString."
 	^refCount := 0 max: (refCount - 1)!
-
-get_refct: anObject 
-	self base get_refct: anObject!
 
 handler
 	^handler ifNil: [self]!
 
 handler: anObject
 	handler := anObject!
+
+has_one_ref: anObject 
+	self base has_one_ref: anObject!
 
 initialize
 	refCount := 1.
@@ -2819,11 +2904,11 @@ release: anObject
 !CEF3BaseObject categoriesFor: #base!**compiled accessors**!must not strip!public! !
 !CEF3BaseObject categoriesFor: #base:!**compiled accessors**!must not strip!public! !
 !CEF3BaseObject categoriesFor: #cb_addRef:!must not strip!public! !
-!CEF3BaseObject categoriesFor: #cb_getRefct:!must not strip!public! !
+!CEF3BaseObject categoriesFor: #cb_has_one_ref:!must not strip!public! !
 !CEF3BaseObject categoriesFor: #cb_releaseRef:!must not strip!public! !
-!CEF3BaseObject categoriesFor: #get_refct:!public! !
 !CEF3BaseObject categoriesFor: #handler!accessing!private! !
 !CEF3BaseObject categoriesFor: #handler:!accessing!private! !
+!CEF3BaseObject categoriesFor: #has_one_ref:!public! !
 !CEF3BaseObject categoriesFor: #initialize!must not strip!public! !
 !CEF3BaseObject categoriesFor: #release:!public! !
 
@@ -3110,11 +3195,12 @@ initalizeCallbacksRegistry
 				receiver: self
 				selector: #cb_releaseRef:
 				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
-	CallbackRegistry at: #get_refct:
+	 CallbackRegistry at: #has_one_ref:
 		put: (CEFMessageCallback 
 				receiver: self
-				selector: #cb_getRefct:
+				selector: #cb_has_one_ref:
 				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword CEFBase*')).
+	 
 	 !
 
 initalizeInstances
@@ -3190,45 +3276,35 @@ CEF3BrowserSettings comment: ''!
 !CEF3BrowserSettings categoriesForClass!External-Data-Structured! !
 !CEF3BrowserSettings methodsFor!
 
-accelerated_compositing
-	"Answer the receiver's accelerated_compositing field as a Smalltalk object."
+accept_language_list
+	"Answer the receiver's accept_language_list field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 184)!
+	^CEFString fromAddress: (bytes yourAddress + 180)!
 
-accelerated_compositing: anObject
-	"Set the receiver's accelerated_compositing field to the value of anObject."
+accept_language_list: anObject
+	"Set the receiver's accept_language_list field to the value of anObject."
 
-	bytes sdwordAtOffset: 184 put: anObject!
+	anObject replaceBytesOf: bytes from: 181 to: 192 startingAt: 1!
 
 application_cache
 	"Answer the receiver's application_cache field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 176)!
+	^(bytes sdwordAtOffset: 168)!
 
 application_cache: anObject
 	"Set the receiver's application_cache field to the value of anObject."
 
-	bytes sdwordAtOffset: 176 put: anObject!
+	bytes sdwordAtOffset: 168 put: anObject!
 
 background_color
 	"Answer the receiver's background_color field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 188)!
+	^(bytes sdwordAtOffset: 176)!
 
 background_color: anObject
 	"Set the receiver's background_color field to the value of anObject."
 
-	bytes dwordAtOffset: 188 put: anObject!
-
-caret_browsing
-	"Answer the receiver's caret_browsing field as a Smalltalk object."
-
-	^(bytes sdwordAtOffset: 128)!
-
-caret_browsing: anObject
-	"Set the receiver's caret_browsing field to the value of anObject."
-
-	bytes sdwordAtOffset: 128 put: anObject!
+	bytes sdwordAtOffset: 176 put: anObject!
 
 cefSize
 	"Answer the receiver's cefSize field as a Smalltalk object."
@@ -3243,127 +3319,117 @@ cefSize: anObject
 cursive_font_family
 	"Answer the receiver's cursive_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 52)!
+	^CEFString fromAddress: (bytes yourAddress + 56)!
 
 cursive_font_family: anObject
 	"Set the receiver's cursive_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 53 to: 64 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 57 to: 68 startingAt: 1!
 
 databases
 	"Answer the receiver's databases field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 172)!
+	^(bytes sdwordAtOffset: 164)!
 
 databases: anObject
 	"Set the receiver's databases field to the value of anObject."
 
-	bytes sdwordAtOffset: 172 put: anObject!
+	bytes sdwordAtOffset: 164 put: anObject!
 
 default_encoding
 	"Answer the receiver's default_encoding field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 92)!
+	^CEFString fromAddress: (bytes yourAddress + 96)!
 
 default_encoding: anObject
 	"Set the receiver's default_encoding field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 93 to: 104 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 97 to: 108 startingAt: 1!
 
 default_fixed_font_size
 	"Answer the receiver's default_fixed_font_size field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 80)!
+	^(bytes sdwordAtOffset: 84)!
 
 default_fixed_font_size: anObject
 	"Set the receiver's default_fixed_font_size field to the value of anObject."
 
-	bytes sdwordAtOffset: 80 put: anObject!
+	bytes sdwordAtOffset: 84 put: anObject!
 
 default_font_size
 	"Answer the receiver's default_font_size field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 76)!
+	^(bytes sdwordAtOffset: 80)!
 
 default_font_size: anObject
 	"Set the receiver's default_font_size field to the value of anObject."
 
-	bytes sdwordAtOffset: 76 put: anObject!
+	bytes sdwordAtOffset: 80 put: anObject!
 
 fantasy_font_family
 	"Answer the receiver's fantasy_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 64)!
+	^CEFString fromAddress: (bytes yourAddress + 68)!
 
 fantasy_font_family: anObject
 	"Set the receiver's fantasy_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 65 to: 76 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 69 to: 80 startingAt: 1!
 
 file_access_from_file_urls
 	"Answer the receiver's file_access_from_file_urls field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 144)!
+	^(bytes sdwordAtOffset: 136)!
 
 file_access_from_file_urls: anObject
 	"Set the receiver's file_access_from_file_urls field to the value of anObject."
 
-	bytes sdwordAtOffset: 144 put: anObject!
+	bytes sdwordAtOffset: 136 put: anObject!
 
 fixed_font_family
 	"Answer the receiver's fixed_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 16)!
+	^CEFString fromAddress: (bytes yourAddress + 20)!
 
 fixed_font_family: anObject
 	"Set the receiver's fixed_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 17 to: 28 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 21 to: 32 startingAt: 1!
 
 image_loading
 	"Answer the receiver's image_loading field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 152)!
+	^(bytes sdwordAtOffset: 144)!
 
 image_loading: anObject
 	"Set the receiver's image_loading field to the value of anObject."
 
-	bytes sdwordAtOffset: 152 put: anObject!
+	bytes sdwordAtOffset: 144 put: anObject!
 
 image_shrink_standalone_to_fit
 	"Answer the receiver's image_shrink_standalone_to_fit field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 156)!
+	^(bytes sdwordAtOffset: 148)!
 
 image_shrink_standalone_to_fit: anObject
 	"Set the receiver's image_shrink_standalone_to_fit field to the value of anObject."
 
-	bytes sdwordAtOffset: 156 put: anObject!
+	bytes sdwordAtOffset: 148 put: anObject!
 
 initialize
 	super initialize.
 	self cefSize: self class byteSize.
 	 !
 
-java
-	"Answer the receiver's java field as a Smalltalk object."
-
-	^(bytes sdwordAtOffset: 132)!
-
-java: anObject
-	"Set the receiver's java field to the value of anObject."
-
-	bytes sdwordAtOffset: 132 put: anObject!
-
 javascript
 	"Answer the receiver's javascript field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 108)!
+	^(bytes sdwordAtOffset: 112)!
 
 javascript: anObject
 	"Set the receiver's javascript field to the value of anObject."
 
-	bytes sdwordAtOffset: 108 put: anObject!
+	bytes sdwordAtOffset: 112 put: anObject!
 
 javascript_access_clipboard
 	"Answer the receiver's javascript_access_clipboard field as a Smalltalk object."
@@ -3395,153 +3461,151 @@ javascript_dom_paste: anObject
 
 	bytes sdwordAtOffset: 124 put: anObject!
 
-javascript_open_windows
-	"Answer the receiver's javascript_open_windows field as a Smalltalk object."
-
-	^(bytes sdwordAtOffset: 112)!
-
-javascript_open_windows: anObject
-	"Set the receiver's javascript_open_windows field to the value of anObject."
-
-	bytes sdwordAtOffset: 112 put: anObject!
-
 local_storage
 	"Answer the receiver's local_storage field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 168)!
+	^(bytes sdwordAtOffset: 160)!
 
 local_storage: anObject
 	"Set the receiver's local_storage field to the value of anObject."
 
-	bytes sdwordAtOffset: 168 put: anObject!
+	bytes sdwordAtOffset: 160 put: anObject!
 
 minimum_font_size
 	"Answer the receiver's minimum_font_size field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 84)!
+	^(bytes sdwordAtOffset: 88)!
 
 minimum_font_size: anObject
 	"Set the receiver's minimum_font_size field to the value of anObject."
 
-	bytes sdwordAtOffset: 84 put: anObject!
+	bytes sdwordAtOffset: 88 put: anObject!
 
 minimum_logical_font_size
 	"Answer the receiver's minimum_logical_font_size field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 88)!
+	^(bytes sdwordAtOffset: 92)!
 
 minimum_logical_font_size: anObject
 	"Set the receiver's minimum_logical_font_size field to the value of anObject."
 
-	bytes sdwordAtOffset: 88 put: anObject!
+	bytes sdwordAtOffset: 92 put: anObject!
 
 plugins
 	"Answer the receiver's plugins field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 136)!
+	^(bytes sdwordAtOffset: 128)!
 
 plugins: anObject
 	"Set the receiver's plugins field to the value of anObject."
 
-	bytes sdwordAtOffset: 136 put: anObject!
+	bytes sdwordAtOffset: 128 put: anObject!
 
 remote_fonts
 	"Answer the receiver's remote_fonts field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 104)!
+	^(bytes sdwordAtOffset: 108)!
 
 remote_fonts: anObject
 	"Set the receiver's remote_fonts field to the value of anObject."
 
-	bytes sdwordAtOffset: 104 put: anObject!
+	bytes sdwordAtOffset: 108 put: anObject!
 
 sans_serif_font_family
 	"Answer the receiver's sans_serif_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 40)!
+	^CEFString fromAddress: (bytes yourAddress + 44)!
 
 sans_serif_font_family: anObject
 	"Set the receiver's sans_serif_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 41 to: 52 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 45 to: 56 startingAt: 1!
 
 serif_font_family
 	"Answer the receiver's serif_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 28)!
+	^CEFString fromAddress: (bytes yourAddress + 32)!
 
 serif_font_family: anObject
 	"Set the receiver's serif_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 29 to: 40 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 33 to: 44 startingAt: 1!
 
 standard_font_family
 	"Answer the receiver's standard_font_family field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 4)!
+	^CEFString fromAddress: (bytes yourAddress + 8)!
 
 standard_font_family: anObject
 	"Set the receiver's standard_font_family field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 5 to: 16 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 9 to: 20 startingAt: 1!
 
 tab_to_links
 	"Answer the receiver's tab_to_links field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 164)!
+	^(bytes sdwordAtOffset: 156)!
 
 tab_to_links: anObject
 	"Set the receiver's tab_to_links field to the value of anObject."
 
-	bytes sdwordAtOffset: 164 put: anObject!
+	bytes sdwordAtOffset: 156 put: anObject!
 
 text_area_resize
 	"Answer the receiver's text_area_resize field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 160)!
+	^(bytes sdwordAtOffset: 152)!
 
 text_area_resize: anObject
 	"Set the receiver's text_area_resize field to the value of anObject."
 
-	bytes sdwordAtOffset: 160 put: anObject!
+	bytes sdwordAtOffset: 152 put: anObject!
 
 universal_access_from_file_urls
 	"Answer the receiver's universal_access_from_file_urls field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 140)!
+	^(bytes sdwordAtOffset: 132)!
 
 universal_access_from_file_urls: anObject
 	"Set the receiver's universal_access_from_file_urls field to the value of anObject."
 
-	bytes sdwordAtOffset: 140 put: anObject!
+	bytes sdwordAtOffset: 132 put: anObject!
 
 web_security
 	"Answer the receiver's web_security field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 148)!
+	^(bytes sdwordAtOffset: 140)!
 
 web_security: anObject
 	"Set the receiver's web_security field to the value of anObject."
 
-	bytes sdwordAtOffset: 148 put: anObject!
+	bytes sdwordAtOffset: 140 put: anObject!
 
 webgl
 	"Answer the receiver's webgl field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 180)!
+	^(bytes sdwordAtOffset: 172)!
 
 webgl: anObject
 	"Set the receiver's webgl field to the value of anObject."
 
-	bytes sdwordAtOffset: 180 put: anObject! !
-!CEF3BrowserSettings categoriesFor: #accelerated_compositing!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #accelerated_compositing:!**compiled accessors**!public! !
+	bytes sdwordAtOffset: 172 put: anObject!
+
+windowless_frame_rate
+	"Answer the receiver's windowless_frame_rate field as a Smalltalk object."
+
+	^(bytes sdwordAtOffset: 4)!
+
+windowless_frame_rate: anObject
+	"Set the receiver's windowless_frame_rate field to the value of anObject."
+
+	bytes sdwordAtOffset: 4 put: anObject! !
+!CEF3BrowserSettings categoriesFor: #accept_language_list!**compiled accessors**!public! !
+!CEF3BrowserSettings categoriesFor: #accept_language_list:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #application_cache!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #application_cache:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #background_color!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #background_color:!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #caret_browsing!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #caret_browsing:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #cefSize!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #cefSize:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #cursive_font_family!**compiled accessors**!public! !
@@ -3565,8 +3629,6 @@ webgl: anObject
 !CEF3BrowserSettings categoriesFor: #image_shrink_standalone_to_fit!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #image_shrink_standalone_to_fit:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #initialize!must not strip!public! !
-!CEF3BrowserSettings categoriesFor: #java!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #java:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #javascript!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #javascript:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #javascript_access_clipboard!**compiled accessors**!public! !
@@ -3575,8 +3637,6 @@ webgl: anObject
 !CEF3BrowserSettings categoriesFor: #javascript_close_windows:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #javascript_dom_paste!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #javascript_dom_paste:!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #javascript_open_windows!**compiled accessors**!public! !
-!CEF3BrowserSettings categoriesFor: #javascript_open_windows:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #local_storage!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #local_storage:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #minimum_font_size!**compiled accessors**!public! !
@@ -3603,6 +3663,8 @@ webgl: anObject
 !CEF3BrowserSettings categoriesFor: #web_security:!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #webgl!**compiled accessors**!public! !
 !CEF3BrowserSettings categoriesFor: #webgl:!**compiled accessors**!public! !
+!CEF3BrowserSettings categoriesFor: #windowless_frame_rate!**compiled accessors**!public! !
+!CEF3BrowserSettings categoriesFor: #windowless_frame_rate:!**compiled accessors**!public! !
 
 !CEF3BrowserSettings class methodsFor!
 
@@ -3610,12 +3672,12 @@ defineFields
 	" 
 
 	CEF3BrowserSettings  compileDefinition 
-		defineField: #user_style_sheet_location type: (StructureField type: CEFString); 
-		defineField: #author_and_user_styles type: SDWORDField new;
+	 
 "
 
 	self
 		defineField: #cefSize type: DWORDField new;
+		defineField: #windowless_frame_rate type: SDWORDField new;
 		defineField: #standard_font_family type: (StructureField type: CEFString);
 		defineField: #fixed_font_family type: (StructureField type: CEFString);
 		defineField: #serif_font_family type: (StructureField type: CEFString);
@@ -3629,12 +3691,9 @@ defineFields
 		defineField: #default_encoding type: (StructureField type: CEFString);
 		defineField: #remote_fonts type: SDWORDField new;
 		defineField: #javascript type: SDWORDField new;
-		defineField: #javascript_open_windows type: SDWORDField new;
 		defineField: #javascript_close_windows type: SDWORDField new;
 		defineField: #javascript_access_clipboard type: SDWORDField new;
 		defineField: #javascript_dom_paste type: SDWORDField new;
-		defineField: #caret_browsing type: SDWORDField new;
-		defineField: #java type: SDWORDField new;
 		defineField: #plugins type: SDWORDField new;
 		defineField: #universal_access_from_file_urls type: SDWORDField new;
 		defineField: #file_access_from_file_urls type: SDWORDField new;
@@ -3647,8 +3706,8 @@ defineFields
 		defineField: #databases type: SDWORDField new;
 		defineField: #application_cache type: SDWORDField new;
 		defineField: #webgl type: SDWORDField new;
-		defineField: #accelerated_compositing type: SDWORDField new;
-		defineField: #background_color type: DWORDField new! !
+		defineField: #background_color type: SDWORDField new;
+		defineField: #accept_language_list type: (StructureField type: CEFString)! !
 !CEF3BrowserSettings class categoriesFor: #defineFields!initializing!public! !
 
 CEF3MainArgs guid: (GUID fromString: '{597B5352-55A0-4349-B9DF-AD1C789D730B}')!
@@ -3685,40 +3744,85 @@ typedef struct _cef_main_args_t {
 	self defineField: #instance type: HANDLEField new! !
 !CEF3MainArgs class categoriesFor: #defineFields!initializing!public! !
 
+CEF3ScopedObject guid: (GUID fromString: '{DB9A7BF2-5A20-42BE-A9C4-A9ECF2E71176}')!
+CEF3ScopedObject comment: ''!
+!CEF3ScopedObject categoriesForClass!External-Data-Structured! !
+!CEF3ScopedObject methodsFor!
+
+base
+	"Answer the receiver's base field as a Smalltalk object."
+
+	^CEFBaseScoped fromAddress: (bytes yourAddress)!
+
+base: anObject
+	"Set the receiver's base field to the value of anObject."
+
+	anObject replaceBytesOf: bytes from: 1 to: 8 startingAt: 1!
+
+initialize
+	super initialize.
+	self base cefSize: self class byteSize! !
+!CEF3ScopedObject categoriesFor: #base!**compiled accessors**!public! !
+!CEF3ScopedObject categoriesFor: #base:!**compiled accessors**!public! !
+!CEF3ScopedObject categoriesFor: #initialize!must not strip!public! !
+
+!CEF3ScopedObject class methodsFor!
+
+defineFields
+	" 
+
+	CEF3ScopedObject  compileDefinition
+ 
+
+"
+
+	self defineField: #base type: (StructureField type: CEFBaseScoped)! !
+!CEF3ScopedObject class categoriesFor: #defineFields!initializing!public! !
+
 CEF3Settings guid: (GUID fromString: '{E2E2F0C9-1758-40AF-A191-767566433969}')!
 CEF3Settings comment: ''!
 !CEF3Settings categoriesForClass!External-Data-Structured! !
 !CEF3Settings methodsFor!
 
+accept_language_list
+	"Answer the receiver's accept_language_list field as a Smalltalk object."
+
+	^CEFString fromAddress: (bytes yourAddress + 192)!
+
+accept_language_list: anObject
+	"Set the receiver's accept_language_list field to the value of anObject."
+
+	anObject replaceBytesOf: bytes from: 193 to: 204 startingAt: 1!
+
 background_color
 	"Answer the receiver's background_color field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 160)!
+	^(bytes dwordAtOffset: 188)!
 
 background_color: anObject
 	"Set the receiver's background_color field to the value of anObject."
 
-	bytes dwordAtOffset: 160 put: anObject!
+	bytes dwordAtOffset: 188 put: anObject!
 
 browser_subprocess_path
 	"Answer the receiver's browser_subprocess_path field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 12)!
+	^CEFString fromAddress: (bytes yourAddress + 8)!
 
 browser_subprocess_path: anObject
 	"Set the receiver's browser_subprocess_path field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 13 to: 24 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 9 to: 20 startingAt: 1!
 
 cache_path
 	"Answer the receiver's cache_path field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 36)!
+	^CEFString fromAddress: (bytes yourAddress + 48)!
 
 cache_path: anObject
 	"Set the receiver's cache_path field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 37 to: 48 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 49 to: 60 startingAt: 1!
 
 cefSize
 	"Answer the receiver's cefSize field as a Smalltalk object."
@@ -3733,32 +3837,52 @@ cefSize: anObject
 command_line_args_disabled
 	"Answer the receiver's command_line_args_disabled field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 32)!
+	^(bytes sdwordAtOffset: 44)!
 
 command_line_args_disabled: anObject
 	"Set the receiver's command_line_args_disabled field to the value of anObject."
 
-	bytes sdwordAtOffset: 32 put: anObject!
+	bytes sdwordAtOffset: 44 put: anObject!
 
-context_safety_implementation
-	"Answer the receiver's context_safety_implementation field as a Smalltalk object."
+enable_net_security_expiration
+	"Answer the receiver's enable_net_security_expiration field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 152)!
+	^(bytes sdwordAtOffset: 184)!
 
-context_safety_implementation: anObject
-	"Set the receiver's context_safety_implementation field to the value of anObject."
+enable_net_security_expiration: anObject
+	"Set the receiver's enable_net_security_expiration field to the value of anObject."
 
-	bytes sdwordAtOffset: 152 put: anObject!
+	bytes sdwordAtOffset: 184 put: anObject!
+
+external_message_pump
+	"Answer the receiver's external_message_pump field as a Smalltalk object."
+
+	^(bytes sdwordAtOffset: 36)!
+
+external_message_pump: anObject
+	"Set the receiver's external_message_pump field to the value of anObject."
+
+	bytes sdwordAtOffset: 36 put: anObject!
+
+framework_dir_path
+	"Answer the receiver's framework_dir_path field as a Smalltalk object."
+
+	^CEFString fromAddress: (bytes yourAddress + 20)!
+
+framework_dir_path: anObject
+	"Set the receiver's framework_dir_path field to the value of anObject."
+
+	anObject replaceBytesOf: bytes from: 21 to: 32 startingAt: 1!
 
 ignore_certificate_errors
 	"Answer the receiver's ignore_certificate_errors field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 156)!
+	^(bytes sdwordAtOffset: 180)!
 
 ignore_certificate_errors: anObject
 	"Set the receiver's ignore_certificate_errors field to the value of anObject."
 
-	bytes sdwordAtOffset: 156 put: anObject!
+	bytes sdwordAtOffset: 180 put: anObject!
 
 initialize
 	super initialize.
@@ -3768,162 +3892,174 @@ initialize
 javascript_flags
 	"Answer the receiver's javascript_flags field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 104)!
+	^CEFString fromAddress: (bytes yourAddress + 132)!
 
 javascript_flags: anObject
 	"Set the receiver's javascript_flags field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 105 to: 116 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 133 to: 144 startingAt: 1!
 
 locale
 	"Answer the receiver's locale field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 76)!
+	^CEFString fromAddress: (bytes yourAddress + 104)!
 
 locale: anObject
 	"Set the receiver's locale field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 77 to: 88 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 105 to: 116 startingAt: 1!
 
 locales_dir_path
 	"Answer the receiver's locales_dir_path field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 128)!
+	^CEFString fromAddress: (bytes yourAddress + 156)!
 
 locales_dir_path: anObject
 	"Set the receiver's locales_dir_path field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 129 to: 140 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 157 to: 168 startingAt: 1!
 
 log_file
 	"Answer the receiver's log_file field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 88)!
+	^CEFString fromAddress: (bytes yourAddress + 116)!
 
 log_file: anObject
 	"Set the receiver's log_file field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 89 to: 100 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 117 to: 128 startingAt: 1!
 
 log_severity
 	"Answer the receiver's log_severity field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 100)!
+	^(bytes sdwordAtOffset: 128)!
 
 log_severity: anObject
 	"Set the receiver's log_severity field to the value of anObject."
 
-	bytes sdwordAtOffset: 100 put: anObject!
+	bytes sdwordAtOffset: 128 put: anObject!
 
 multi_threaded_message_loop
 	"Answer the receiver's multi_threaded_message_loop field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 24)!
+	^(bytes sdwordAtOffset: 32)!
 
 multi_threaded_message_loop: anObject
 	"Set the receiver's multi_threaded_message_loop field to the value of anObject."
 
-	bytes sdwordAtOffset: 24 put: anObject!
+	bytes sdwordAtOffset: 32 put: anObject!
 
 no_sandbox
 	"Answer the receiver's no_sandbox field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 8)!
+	^(bytes sdwordAtOffset: 4)!
 
 no_sandbox: anObject
 	"Set the receiver's no_sandbox field to the value of anObject."
 
-	bytes sdwordAtOffset: 8 put: anObject!
+	bytes sdwordAtOffset: 4 put: anObject!
 
 pack_loading_disabled
 	"Answer the receiver's pack_loading_disabled field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 140)!
+	^(bytes sdwordAtOffset: 168)!
 
 pack_loading_disabled: anObject
 	"Set the receiver's pack_loading_disabled field to the value of anObject."
 
-	bytes sdwordAtOffset: 140 put: anObject!
+	bytes sdwordAtOffset: 168 put: anObject!
 
 persist_session_cookies
 	"Answer the receiver's persist_session_cookies field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 48)!
+	^(bytes sdwordAtOffset: 72)!
 
 persist_session_cookies: anObject
 	"Set the receiver's persist_session_cookies field to the value of anObject."
 
-	bytes sdwordAtOffset: 48 put: anObject!
+	bytes sdwordAtOffset: 72 put: anObject!
+
+persist_user_preferences
+	"Answer the receiver's persist_user_preferences field as a Smalltalk object."
+
+	^(bytes sdwordAtOffset: 76)!
+
+persist_user_preferences: anObject
+	"Set the receiver's persist_user_preferences field to the value of anObject."
+
+	bytes sdwordAtOffset: 76 put: anObject!
 
 product_version
 	"Answer the receiver's product_version field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 64)!
+	^CEFString fromAddress: (bytes yourAddress + 92)!
 
 product_version: anObject
 	"Set the receiver's product_version field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 65 to: 76 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 93 to: 104 startingAt: 1!
 
 remote_debugging_port
 	"Answer the receiver's remote_debugging_port field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 144)!
+	^(bytes sdwordAtOffset: 172)!
 
 remote_debugging_port: anObject
 	"Set the receiver's remote_debugging_port field to the value of anObject."
 
-	bytes sdwordAtOffset: 144 put: anObject!
+	bytes sdwordAtOffset: 172 put: anObject!
 
 resources_dir_path
 	"Answer the receiver's resources_dir_path field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 116)!
+	^CEFString fromAddress: (bytes yourAddress + 144)!
 
 resources_dir_path: anObject
 	"Set the receiver's resources_dir_path field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 117 to: 128 startingAt: 1!
-
-single_process
-	"Answer the receiver's single_process field as a Smalltalk object."
-
-	^(bytes sdwordAtOffset: 4)!
-
-single_process: anObject
-	"Set the receiver's single_process field to the value of anObject."
-
-	bytes sdwordAtOffset: 4 put: anObject!
+	anObject replaceBytesOf: bytes from: 145 to: 156 startingAt: 1!
 
 uncaught_exception_stack_size
 	"Answer the receiver's uncaught_exception_stack_size field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 148)!
+	^(bytes sdwordAtOffset: 176)!
 
 uncaught_exception_stack_size: anObject
 	"Set the receiver's uncaught_exception_stack_size field to the value of anObject."
 
-	bytes sdwordAtOffset: 148 put: anObject!
+	bytes sdwordAtOffset: 176 put: anObject!
 
 user_agent
 	"Answer the receiver's user_agent field as a Smalltalk object."
 
-	^CEFString fromAddress: (bytes yourAddress + 52)!
+	^CEFString fromAddress: (bytes yourAddress + 80)!
 
 user_agent: anObject
 	"Set the receiver's user_agent field to the value of anObject."
 
-	anObject replaceBytesOf: bytes from: 53 to: 64 startingAt: 1!
+	anObject replaceBytesOf: bytes from: 81 to: 92 startingAt: 1!
+
+user_data_path
+	"Answer the receiver's user_data_path field as a Smalltalk object."
+
+	^CEFString fromAddress: (bytes yourAddress + 60)!
+
+user_data_path: anObject
+	"Set the receiver's user_data_path field to the value of anObject."
+
+	anObject replaceBytesOf: bytes from: 61 to: 72 startingAt: 1!
 
 windowless_rendering_enabled
 	"Answer the receiver's windowless_rendering_enabled field as a Smalltalk object."
 
-	^(bytes sdwordAtOffset: 28)!
+	^(bytes sdwordAtOffset: 40)!
 
 windowless_rendering_enabled: anObject
 	"Set the receiver's windowless_rendering_enabled field to the value of anObject."
 
-	bytes sdwordAtOffset: 28 put: anObject! !
+	bytes sdwordAtOffset: 40 put: anObject! !
+!CEF3Settings categoriesFor: #accept_language_list!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #accept_language_list:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #background_color!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #background_color:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #browser_subprocess_path!**compiled accessors**!public! !
@@ -3934,8 +4070,12 @@ windowless_rendering_enabled: anObject
 !CEF3Settings categoriesFor: #cefSize:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #command_line_args_disabled!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #command_line_args_disabled:!**compiled accessors**!public! !
-!CEF3Settings categoriesFor: #context_safety_implementation!**compiled accessors**!public! !
-!CEF3Settings categoriesFor: #context_safety_implementation:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #enable_net_security_expiration!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #enable_net_security_expiration:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #external_message_pump!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #external_message_pump:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #framework_dir_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #framework_dir_path:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #ignore_certificate_errors!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #ignore_certificate_errors:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #initialize!must not strip!public! !
@@ -3957,18 +4097,20 @@ windowless_rendering_enabled: anObject
 !CEF3Settings categoriesFor: #pack_loading_disabled:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #persist_session_cookies!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #persist_session_cookies:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #persist_user_preferences!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #persist_user_preferences:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #product_version!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #product_version:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #remote_debugging_port!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #remote_debugging_port:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #resources_dir_path!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #resources_dir_path:!**compiled accessors**!public! !
-!CEF3Settings categoriesFor: #single_process!**compiled accessors**!public! !
-!CEF3Settings categoriesFor: #single_process:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #uncaught_exception_stack_size!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #uncaught_exception_stack_size:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #user_agent!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #user_agent:!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #user_data_path!**compiled accessors**!public! !
+!CEF3Settings categoriesFor: #user_data_path:!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #windowless_rendering_enabled!**compiled accessors**!public! !
 !CEF3Settings categoriesFor: #windowless_rendering_enabled:!**compiled accessors**!public! !
 
@@ -3981,20 +4123,22 @@ defineFields
 
 		cef_types.h
 
-defineField: #release_dcheck_enabled type: SDWORDField new;
- 
+  
 "
 
 	self
 		defineField: #cefSize type: DWORDField new;
-		defineField: #single_process type: SDWORDField new;
 		defineField: #no_sandbox type: SDWORDField new;
 		defineField: #browser_subprocess_path type: (StructureField type: CEFString);
+		defineField: #framework_dir_path type: (StructureField type: CEFString);
 		defineField: #multi_threaded_message_loop type: SDWORDField new;
+		defineField: #external_message_pump type: SDWORDField new;
 		defineField: #windowless_rendering_enabled type: SDWORDField new;
 		defineField: #command_line_args_disabled type: SDWORDField new;
 		defineField: #cache_path type: (StructureField type: CEFString);
+		defineField: #user_data_path type: (StructureField type: CEFString);
 		defineField: #persist_session_cookies type: SDWORDField new;
+		defineField: #persist_user_preferences type: SDWORDField new;
 		defineField: #user_agent type: (StructureField type: CEFString);
 		defineField: #product_version type: (StructureField type: CEFString);
 		defineField: #locale type: (StructureField type: CEFString);
@@ -4006,9 +4150,10 @@ defineField: #release_dcheck_enabled type: SDWORDField new;
 		defineField: #pack_loading_disabled type: SDWORDField new;
 		defineField: #remote_debugging_port type: SDWORDField new;
 		defineField: #uncaught_exception_stack_size type: SDWORDField new;
-		defineField: #context_safety_implementation type: SDWORDField new;
 		defineField: #ignore_certificate_errors type: SDWORDField new;
-		defineField: #background_color type: DWORDField new! !
+		defineField: #enable_net_security_expiration type: SDWORDField new;
+		defineField: #background_color type: DWORDField new;
+		defineField: #accept_language_list type: (StructureField type: CEFString)! !
 !CEF3Settings class categoriesFor: #defineFields!initializing!public! !
 
 CEF3WindowInfo guid: (GUID fromString: '{08D96B9C-D25C-4930-AAEB-8953C5F8E0D1}')!
@@ -4332,6 +4477,10 @@ defineFields
 
 initalizeCallbacksRegistry
 	CallbackRegistry := self createCallbackRegistry.
+ !
+
+initalizeCallbacksRegistry2
+	CallbackRegistry := self createCallbackRegistry.
 
 
 	"
@@ -4425,6 +4574,7 @@ descriptor: (ExternalDescriptor fromString: 'stdcall: dword CEF3App*')
 				descriptor: (ExternalDescriptor fromString: 'stdcall: dword dword'))! !
 !CEF3App class categoriesFor: #defineFields!initializing!public! !
 !CEF3App class categoriesFor: #initalizeCallbacksRegistry!public! !
+!CEF3App class categoriesFor: #initalizeCallbacksRegistry2!public! !
 
 CEF3BeforeDownloadCallback guid: (GUID fromString: '{3C38FD0F-EE9F-407F-B75C-52741F135038}')!
 CEF3BeforeDownloadCallback comment: ''!
@@ -4754,6 +4904,16 @@ CEF3BrowserHost comment: ''!
 !CEF3BrowserHost categoriesForClass!External-Data-Structured! !
 !CEF3BrowserHost methodsFor!
 
+add_word_to_dictionary
+	"Answer the receiver's add_word_to_dictionary field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 116) asExternalAddress!
+
+add_word_to_dictionary: anObject
+	"Set the receiver's add_word_to_dictionary field to the value of anObject."
+
+	bytes dwordAtOffset: 116 put: anObject!
+
 close_browser
 	"Answer the receiver's close_browser field as a Smalltalk object."
 
@@ -4767,22 +4927,92 @@ close_browser: anObject
 close_dev_tools
 	"Answer the receiver's close_dev_tools field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 76) asExternalAddress!
+	^(bytes dwordAtOffset: 92) asExternalAddress!
 
 close_dev_tools: anObject
 	"Set the receiver's close_dev_tools field to the value of anObject."
 
-	bytes dwordAtOffset: 76 put: anObject!
+	bytes dwordAtOffset: 92 put: anObject!
+
+download_image
+	"Answer the receiver's download_image field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 68) asExternalAddress!
+
+download_image: anObject
+	"Set the receiver's download_image field to the value of anObject."
+
+	bytes dwordAtOffset: 68 put: anObject!
+
+drag_source_ended_at
+	"Answer the receiver's drag_source_ended_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 208) asExternalAddress!
+
+drag_source_ended_at: anObject
+	"Set the receiver's drag_source_ended_at field to the value of anObject."
+
+	bytes dwordAtOffset: 208 put: anObject!
+
+drag_source_system_drag_ended
+	"Answer the receiver's drag_source_system_drag_ended field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 212) asExternalAddress!
+
+drag_source_system_drag_ended: anObject
+	"Set the receiver's drag_source_system_drag_ended field to the value of anObject."
+
+	bytes dwordAtOffset: 212 put: anObject!
+
+drag_target_drag_enter
+	"Answer the receiver's drag_target_drag_enter field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 192) asExternalAddress!
+
+drag_target_drag_enter: anObject
+	"Set the receiver's drag_target_drag_enter field to the value of anObject."
+
+	bytes dwordAtOffset: 192 put: anObject!
+
+drag_target_drag_leave
+	"Answer the receiver's drag_target_drag_leave field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 200) asExternalAddress!
+
+drag_target_drag_leave: anObject
+	"Set the receiver's drag_target_drag_leave field to the value of anObject."
+
+	bytes dwordAtOffset: 200 put: anObject!
+
+drag_target_drag_over
+	"Answer the receiver's drag_target_drag_over field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 196) asExternalAddress!
+
+drag_target_drag_over: anObject
+	"Set the receiver's drag_target_drag_over field to the value of anObject."
+
+	bytes dwordAtOffset: 196 put: anObject!
+
+drag_target_drop
+	"Answer the receiver's drag_target_drop field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 204) asExternalAddress!
+
+drag_target_drop: anObject
+	"Set the receiver's drag_target_drop field to the value of anObject."
+
+	bytes dwordAtOffset: 204 put: anObject!
 
 find
 	"Answer the receiver's find field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 64) asExternalAddress!
+	^(bytes dwordAtOffset: 80) asExternalAddress!
 
 find: anObject
 	"Set the receiver's find field to the value of anObject."
 
-	bytes dwordAtOffset: 64 put: anObject!
+	bytes dwordAtOffset: 80 put: anObject!
 
 get_browser
 	"Answer the receiver's get_browser field as a Smalltalk object."
@@ -4797,316 +5027,504 @@ get_browser: anObject
 get_client
 	"Answer the receiver's get_client field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 36) asExternalAddress!
+	^(bytes dwordAtOffset: 44) asExternalAddress!
 
 get_client: anObject
 	"Set the receiver's get_client field to the value of anObject."
 
-	bytes dwordAtOffset: 36 put: anObject!
+	bytes dwordAtOffset: 44 put: anObject!
 
-get_nstext_input_context
-	"Answer the receiver's get_nstext_input_context field as a Smalltalk object."
+get_extension
+	"Answer the receiver's get_extension field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 132) asExternalAddress!
+	^(bytes dwordAtOffset: 228) asExternalAddress!
 
-get_nstext_input_context: anObject
-	"Set the receiver's get_nstext_input_context field to the value of anObject."
+get_extension: anObject
+	"Set the receiver's get_extension field to the value of anObject."
 
-	bytes dwordAtOffset: 132 put: anObject!
+	bytes dwordAtOffset: 228 put: anObject!
+
+get_navigation_entries
+	"Answer the receiver's get_navigation_entries field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 100) asExternalAddress!
+
+get_navigation_entries: anObject
+	"Set the receiver's get_navigation_entries field to the value of anObject."
+
+	bytes dwordAtOffset: 100 put: anObject!
 
 get_opener_window_handle
 	"Answer the receiver's get_opener_window_handle field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 32) asExternalAddress!
+	^(bytes dwordAtOffset: 36) asExternalAddress!
 
 get_opener_window_handle: anObject
 	"Set the receiver's get_opener_window_handle field to the value of anObject."
 
-	bytes dwordAtOffset: 32 put: anObject!
+	bytes dwordAtOffset: 36 put: anObject!
 
 get_request_context
 	"Answer the receiver's get_request_context field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 40) asExternalAddress!
+	^(bytes dwordAtOffset: 48) asExternalAddress!
 
 get_request_context: anObject
 	"Set the receiver's get_request_context field to the value of anObject."
 
-	bytes dwordAtOffset: 40 put: anObject!
+	bytes dwordAtOffset: 48 put: anObject!
+
+get_visible_navigation_entry
+	"Answer the receiver's get_visible_navigation_entry field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 216) asExternalAddress!
+
+get_visible_navigation_entry: anObject
+	"Set the receiver's get_visible_navigation_entry field to the value of anObject."
+
+	bytes dwordAtOffset: 216 put: anObject!
 
 get_window_handle
 	"Answer the receiver's get_window_handle field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 28) asExternalAddress!
+	^(bytes dwordAtOffset: 32) asExternalAddress!
 
 get_window_handle: anObject
 	"Set the receiver's get_window_handle field to the value of anObject."
 
-	bytes dwordAtOffset: 28 put: anObject!
+	bytes dwordAtOffset: 32 put: anObject!
+
+get_windowless_frame_rate
+	"Answer the receiver's get_windowless_frame_rate field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 168) asExternalAddress!
+
+get_windowless_frame_rate: anObject
+	"Set the receiver's get_windowless_frame_rate field to the value of anObject."
+
+	bytes dwordAtOffset: 168 put: anObject!
 
 get_zoom_level
 	"Answer the receiver's get_zoom_level field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asExternalAddress!
+	^(bytes dwordAtOffset: 52) asExternalAddress!
 
 get_zoom_level: anObject
 	"Set the receiver's get_zoom_level field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject!
+	bytes dwordAtOffset: 52 put: anObject!
 
-handle_key_event_after_text_input_client
-	"Answer the receiver's handle_key_event_after_text_input_client field as a Smalltalk object."
+has_dev_tools
+	"Answer the receiver's has_dev_tools field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 140) asExternalAddress!
+	^(bytes dwordAtOffset: 96) asExternalAddress!
 
-handle_key_event_after_text_input_client: anObject
-	"Set the receiver's handle_key_event_after_text_input_client field to the value of anObject."
+has_dev_tools: anObject
+	"Set the receiver's has_dev_tools field to the value of anObject."
 
-	bytes dwordAtOffset: 140 put: anObject!
+	bytes dwordAtOffset: 96 put: anObject!
 
-handle_key_event_before_text_input_client
-	"Answer the receiver's handle_key_event_before_text_input_client field as a Smalltalk object."
+has_view
+	"Answer the receiver's has_view field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 136) asExternalAddress!
+	^(bytes dwordAtOffset: 40) asExternalAddress!
 
-handle_key_event_before_text_input_client: anObject
-	"Set the receiver's handle_key_event_before_text_input_client field to the value of anObject."
+has_view: anObject
+	"Set the receiver's has_view field to the value of anObject."
 
-	bytes dwordAtOffset: 136 put: anObject!
+	bytes dwordAtOffset: 40 put: anObject!
+
+ime_cancel_composition
+	"Answer the receiver's ime_cancel_composition field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 188) asExternalAddress!
+
+ime_cancel_composition: anObject
+	"Set the receiver's ime_cancel_composition field to the value of anObject."
+
+	bytes dwordAtOffset: 188 put: anObject!
+
+ime_commit_text
+	"Answer the receiver's ime_commit_text field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 180) asExternalAddress!
+
+ime_commit_text: anObject
+	"Set the receiver's ime_commit_text field to the value of anObject."
+
+	bytes dwordAtOffset: 180 put: anObject!
+
+ime_finish_composing_text
+	"Answer the receiver's ime_finish_composing_text field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 184) asExternalAddress!
+
+ime_finish_composing_text: anObject
+	"Set the receiver's ime_finish_composing_text field to the value of anObject."
+
+	bytes dwordAtOffset: 184 put: anObject!
+
+ime_set_composition
+	"Answer the receiver's ime_set_composition field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 176) asExternalAddress!
+
+ime_set_composition: anObject
+	"Set the receiver's ime_set_composition field to the value of anObject."
+
+	bytes dwordAtOffset: 176 put: anObject!
 
 invalidate
 	"Answer the receiver's invalidate field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 104) asExternalAddress!
+	^(bytes dwordAtOffset: 136) asExternalAddress!
 
 invalidate: anObject
 	"Set the receiver's invalidate field to the value of anObject."
 
-	bytes dwordAtOffset: 104 put: anObject!
+	bytes dwordAtOffset: 136 put: anObject!
+
+is_background_host
+	"Answer the receiver's is_background_host field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 232) asExternalAddress!
+
+is_background_host: anObject
+	"Set the receiver's is_background_host field to the value of anObject."
+
+	bytes dwordAtOffset: 232 put: anObject!
 
 is_mouse_cursor_change_disabled
 	"Answer the receiver's is_mouse_cursor_change_disabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 84) asExternalAddress!
+	^(bytes dwordAtOffset: 108) asExternalAddress!
 
 is_mouse_cursor_change_disabled: anObject
 	"Set the receiver's is_mouse_cursor_change_disabled field to the value of anObject."
 
-	bytes dwordAtOffset: 84 put: anObject!
+	bytes dwordAtOffset: 108 put: anObject!
 
 is_window_rendering_disabled
 	"Answer the receiver's is_window_rendering_disabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 88) asExternalAddress!
+	^(bytes dwordAtOffset: 120) asExternalAddress!
 
 is_window_rendering_disabled: anObject
 	"Set the receiver's is_window_rendering_disabled field to the value of anObject."
 
-	bytes dwordAtOffset: 88 put: anObject!
+	bytes dwordAtOffset: 120 put: anObject!
+
+notify_move_or_resize_started
+	"Answer the receiver's notify_move_or_resize_started field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 164) asExternalAddress!
+
+notify_move_or_resize_started: anObject
+	"Set the receiver's notify_move_or_resize_started field to the value of anObject."
+
+	bytes dwordAtOffset: 164 put: anObject!
 
 notify_screen_info_changed
 	"Answer the receiver's notify_screen_info_changed field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 100) asExternalAddress!
+	^(bytes dwordAtOffset: 132) asExternalAddress!
 
 notify_screen_info_changed: anObject
 	"Set the receiver's notify_screen_info_changed field to the value of anObject."
 
-	bytes dwordAtOffset: 100 put: anObject!
+	bytes dwordAtOffset: 132 put: anObject!
 
 print
 	"Answer the receiver's print field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 60) asExternalAddress!
+	^(bytes dwordAtOffset: 72) asExternalAddress!
 
 print: anObject
 	"Set the receiver's print field to the value of anObject."
 
-	bytes dwordAtOffset: 60 put: anObject!
+	bytes dwordAtOffset: 72 put: anObject!
+
+print_to_pdf
+	"Answer the receiver's print_to_pdf field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 76) asExternalAddress!
+
+print_to_pdf: anObject
+	"Set the receiver's print_to_pdf field to the value of anObject."
+
+	bytes dwordAtOffset: 76 put: anObject!
+
+replace_misspelling
+	"Answer the receiver's replace_misspelling field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 112) asExternalAddress!
+
+replace_misspelling: anObject
+	"Set the receiver's replace_misspelling field to the value of anObject."
+
+	bytes dwordAtOffset: 112 put: anObject!
 
 run_file_dialog
 	"Answer the receiver's run_file_dialog field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 52) asExternalAddress!
+	^(bytes dwordAtOffset: 60) asExternalAddress!
 
 run_file_dialog: anObject
 	"Set the receiver's run_file_dialog field to the value of anObject."
 
-	bytes dwordAtOffset: 52 put: anObject!
+	bytes dwordAtOffset: 60 put: anObject!
 
 send_capture_lost_event
 	"Answer the receiver's send_capture_lost_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 128) asExternalAddress!
+	^(bytes dwordAtOffset: 160) asExternalAddress!
 
 send_capture_lost_event: anObject
 	"Set the receiver's send_capture_lost_event field to the value of anObject."
 
-	bytes dwordAtOffset: 128 put: anObject!
+	bytes dwordAtOffset: 160 put: anObject!
 
 send_focus_event
 	"Answer the receiver's send_focus_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 124) asExternalAddress!
+	^(bytes dwordAtOffset: 156) asExternalAddress!
 
 send_focus_event: anObject
 	"Set the receiver's send_focus_event field to the value of anObject."
 
-	bytes dwordAtOffset: 124 put: anObject!
+	bytes dwordAtOffset: 156 put: anObject!
 
 send_key_event
 	"Answer the receiver's send_key_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 108) asExternalAddress!
+	^(bytes dwordAtOffset: 140) asExternalAddress!
 
 send_key_event: anObject
 	"Set the receiver's send_key_event field to the value of anObject."
 
-	bytes dwordAtOffset: 108 put: anObject!
+	bytes dwordAtOffset: 140 put: anObject!
 
 send_mouse_click_event
 	"Answer the receiver's send_mouse_click_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 112) asExternalAddress!
+	^(bytes dwordAtOffset: 144) asExternalAddress!
 
 send_mouse_click_event: anObject
 	"Set the receiver's send_mouse_click_event field to the value of anObject."
 
-	bytes dwordAtOffset: 112 put: anObject!
+	bytes dwordAtOffset: 144 put: anObject!
 
 send_mouse_move_event
 	"Answer the receiver's send_mouse_move_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 116) asExternalAddress!
+	^(bytes dwordAtOffset: 148) asExternalAddress!
 
 send_mouse_move_event: anObject
 	"Set the receiver's send_mouse_move_event field to the value of anObject."
 
-	bytes dwordAtOffset: 116 put: anObject!
+	bytes dwordAtOffset: 148 put: anObject!
 
 send_mouse_wheel_event
 	"Answer the receiver's send_mouse_wheel_event field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 120) asExternalAddress!
+	^(bytes dwordAtOffset: 152) asExternalAddress!
 
 send_mouse_wheel_event: anObject
 	"Set the receiver's send_mouse_wheel_event field to the value of anObject."
 
-	bytes dwordAtOffset: 120 put: anObject!
+	bytes dwordAtOffset: 152 put: anObject!
+
+set_accessibility_state
+	"Answer the receiver's set_accessibility_state field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 220) asExternalAddress!
+
+set_accessibility_state: anObject
+	"Set the receiver's set_accessibility_state field to the value of anObject."
+
+	bytes dwordAtOffset: 220 put: anObject!
+
+set_auto_resize_enabled
+	"Answer the receiver's set_auto_resize_enabled field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 224) asExternalAddress!
+
+set_auto_resize_enabled: anObject
+	"Set the receiver's set_auto_resize_enabled field to the value of anObject."
+
+	bytes dwordAtOffset: 224 put: anObject!
 
 set_focus
 	"Answer the receiver's set_focus field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 24) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 set_focus: anObject
 	"Set the receiver's set_focus field to the value of anObject."
 
-	bytes dwordAtOffset: 24 put: anObject!
+	bytes dwordAtOffset: 28 put: anObject!
 
 set_mouse_cursor_change_disabled
 	"Answer the receiver's set_mouse_cursor_change_disabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 80) asExternalAddress!
+	^(bytes dwordAtOffset: 104) asExternalAddress!
 
 set_mouse_cursor_change_disabled: anObject
 	"Set the receiver's set_mouse_cursor_change_disabled field to the value of anObject."
 
-	bytes dwordAtOffset: 80 put: anObject!
+	bytes dwordAtOffset: 104 put: anObject!
+
+set_windowless_frame_rate
+	"Answer the receiver's set_windowless_frame_rate field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 172) asExternalAddress!
+
+set_windowless_frame_rate: anObject
+	"Set the receiver's set_windowless_frame_rate field to the value of anObject."
+
+	bytes dwordAtOffset: 172 put: anObject!
 
 set_zoom_level
 	"Answer the receiver's set_zoom_level field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asExternalAddress!
+	^(bytes dwordAtOffset: 56) asExternalAddress!
 
 set_zoom_level: anObject
 	"Set the receiver's set_zoom_level field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject!
+	bytes dwordAtOffset: 56 put: anObject!
 
 show_dev_tools
 	"Answer the receiver's show_dev_tools field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 72) asExternalAddress!
+	^(bytes dwordAtOffset: 88) asExternalAddress!
 
 show_dev_tools: anObject
 	"Set the receiver's show_dev_tools field to the value of anObject."
 
-	bytes dwordAtOffset: 72 put: anObject!
+	bytes dwordAtOffset: 88 put: anObject!
 
 start_download
 	"Answer the receiver's start_download field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 56) asExternalAddress!
+	^(bytes dwordAtOffset: 64) asExternalAddress!
 
 start_download: anObject
 	"Set the receiver's start_download field to the value of anObject."
 
-	bytes dwordAtOffset: 56 put: anObject!
+	bytes dwordAtOffset: 64 put: anObject!
 
 stop_finding
 	"Answer the receiver's stop_finding field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 68) asExternalAddress!
+	^(bytes dwordAtOffset: 84) asExternalAddress!
 
 stop_finding: anObject
 	"Set the receiver's stop_finding field to the value of anObject."
 
-	bytes dwordAtOffset: 68 put: anObject!
+	bytes dwordAtOffset: 84 put: anObject!
+
+try_close_browser
+	"Answer the receiver's try_close_browser field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+try_close_browser: anObject
+	"Set the receiver's try_close_browser field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject!
 
 was_hidden
 	"Answer the receiver's was_hidden field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 96) asExternalAddress!
+	^(bytes dwordAtOffset: 128) asExternalAddress!
 
 was_hidden: anObject
 	"Set the receiver's was_hidden field to the value of anObject."
 
-	bytes dwordAtOffset: 96 put: anObject!
+	bytes dwordAtOffset: 128 put: anObject!
 
 was_resized
 	"Answer the receiver's was_resized field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 92) asExternalAddress!
+	^(bytes dwordAtOffset: 124) asExternalAddress!
 
 was_resized: anObject
 	"Set the receiver's was_resized field to the value of anObject."
 
-	bytes dwordAtOffset: 92 put: anObject! !
+	bytes dwordAtOffset: 124 put: anObject! !
+!CEF3BrowserHost categoriesFor: #add_word_to_dictionary!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #add_word_to_dictionary:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #close_browser!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #close_browser:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #close_dev_tools!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #close_dev_tools:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #download_image!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #download_image:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_source_ended_at!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_source_ended_at:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_source_system_drag_ended!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_source_system_drag_ended:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_enter!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_enter:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_leave!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_leave:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_over!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drag_over:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drop!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #drag_target_drop:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #find!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #find:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_browser!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_browser:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_client!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_client:!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #get_nstext_input_context!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #get_nstext_input_context:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_extension!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_extension:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_navigation_entries!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_navigation_entries:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_opener_window_handle!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_opener_window_handle:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_request_context!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_request_context:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_visible_navigation_entry!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_visible_navigation_entry:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_window_handle!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_window_handle:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_windowless_frame_rate!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #get_windowless_frame_rate:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_zoom_level!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #get_zoom_level:!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #handle_key_event_after_text_input_client!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #handle_key_event_after_text_input_client:!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #handle_key_event_before_text_input_client!**compiled accessors**!public! !
-!CEF3BrowserHost categoriesFor: #handle_key_event_before_text_input_client:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #has_dev_tools!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #has_dev_tools:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #has_view!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #has_view:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_cancel_composition!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_cancel_composition:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_commit_text!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_commit_text:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_finish_composing_text!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_finish_composing_text:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_set_composition!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #ime_set_composition:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #invalidate!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #invalidate:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #is_background_host!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #is_background_host:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #is_mouse_cursor_change_disabled!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #is_mouse_cursor_change_disabled:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #is_window_rendering_disabled!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #is_window_rendering_disabled:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #notify_move_or_resize_started!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #notify_move_or_resize_started:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #notify_screen_info_changed!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #notify_screen_info_changed:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #print!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #print:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #print_to_pdf!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #print_to_pdf:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #replace_misspelling!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #replace_misspelling:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #run_file_dialog!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #run_file_dialog:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #send_capture_lost_event!**compiled accessors**!public! !
@@ -5121,10 +5539,16 @@ was_resized: anObject
 !CEF3BrowserHost categoriesFor: #send_mouse_move_event:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #send_mouse_wheel_event!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #send_mouse_wheel_event:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_accessibility_state!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_accessibility_state:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_auto_resize_enabled!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_auto_resize_enabled:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_focus!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_focus:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_mouse_cursor_change_disabled!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_mouse_cursor_change_disabled:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_windowless_frame_rate!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #set_windowless_frame_rate:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_zoom_level!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #set_zoom_level:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #show_dev_tools!**compiled accessors**!public! !
@@ -5133,6 +5557,8 @@ was_resized: anObject
 !CEF3BrowserHost categoriesFor: #start_download:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #stop_finding!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #stop_finding:!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #try_close_browser!**compiled accessors**!public! !
+!CEF3BrowserHost categoriesFor: #try_close_browser:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #was_hidden!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #was_hidden:!**compiled accessors**!public! !
 !CEF3BrowserHost categoriesFor: #was_resized!**compiled accessors**!public! !
@@ -5152,22 +5578,30 @@ defineFields
 	self
 		defineField: #get_browser type: LPVOIDField new;
 		defineField: #close_browser type: LPVOIDField new;
+		defineField: #try_close_browser type: LPVOIDField new;
 		defineField: #set_focus type: LPVOIDField new;
 		defineField: #get_window_handle type: LPVOIDField new;
 		defineField: #get_opener_window_handle type: LPVOIDField new;
+		defineField: #has_view type: LPVOIDField new;
 		defineField: #get_client type: LPVOIDField new;
 		defineField: #get_request_context type: LPVOIDField new;
 		defineField: #get_zoom_level type: LPVOIDField new;
 		defineField: #set_zoom_level type: LPVOIDField new;
 		defineField: #run_file_dialog type: LPVOIDField new;
 		defineField: #start_download type: LPVOIDField new;
+		defineField: #download_image type: LPVOIDField new;
 		defineField: #print type: LPVOIDField new;
+		defineField: #print_to_pdf type: LPVOIDField new;
 		defineField: #find type: LPVOIDField new;
 		defineField: #stop_finding type: LPVOIDField new;
 		defineField: #show_dev_tools type: LPVOIDField new;
 		defineField: #close_dev_tools type: LPVOIDField new;
+		defineField: #has_dev_tools type: LPVOIDField new;
+		defineField: #get_navigation_entries type: LPVOIDField new;
 		defineField: #set_mouse_cursor_change_disabled type: LPVOIDField new;
 		defineField: #is_mouse_cursor_change_disabled type: LPVOIDField new;
+		defineField: #replace_misspelling type: LPVOIDField new;
+		defineField: #add_word_to_dictionary type: LPVOIDField new;
 		defineField: #is_window_rendering_disabled type: LPVOIDField new;
 		defineField: #was_resized type: LPVOIDField new;
 		defineField: #was_hidden type: LPVOIDField new;
@@ -5179,9 +5613,24 @@ defineFields
 		defineField: #send_mouse_wheel_event type: LPVOIDField new;
 		defineField: #send_focus_event type: LPVOIDField new;
 		defineField: #send_capture_lost_event type: LPVOIDField new;
-		defineField: #get_nstext_input_context type: LPVOIDField new;
-		defineField: #handle_key_event_before_text_input_client type: LPVOIDField new;
-		defineField: #handle_key_event_after_text_input_client type: LPVOIDField new! !
+		defineField: #notify_move_or_resize_started type: LPVOIDField new;
+		defineField: #get_windowless_frame_rate type: LPVOIDField new;
+		defineField: #set_windowless_frame_rate type: LPVOIDField new;
+		defineField: #ime_set_composition type: LPVOIDField new;
+		defineField: #ime_commit_text type: LPVOIDField new;
+		defineField: #ime_finish_composing_text type: LPVOIDField new;
+		defineField: #ime_cancel_composition type: LPVOIDField new;
+		defineField: #drag_target_drag_enter type: LPVOIDField new;
+		defineField: #drag_target_drag_over type: LPVOIDField new;
+		defineField: #drag_target_drag_leave type: LPVOIDField new;
+		defineField: #drag_target_drop type: LPVOIDField new;
+		defineField: #drag_source_ended_at type: LPVOIDField new;
+		defineField: #drag_source_system_drag_ended type: LPVOIDField new;
+		defineField: #get_visible_navigation_entry type: LPVOIDField new;
+		defineField: #set_accessibility_state type: LPVOIDField new;
+		defineField: #set_auto_resize_enabled type: LPVOIDField new;
+		defineField: #get_extension type: LPVOIDField new;
+		defineField: #is_background_host type: LPVOIDField new! !
 !CEF3BrowserHost class categoriesFor: #defineFields!initializing!public! !
 
 CEF3BrowserProcessHandler guid: (GUID fromString: '{F6A18C31-0D0C-4199-8583-CA71C0AFD634}')!
@@ -5421,23 +5870,23 @@ get_drag_handler: anObject
 
 	bytes dwordAtOffset: 32 put: anObject!
 
-get_focus_handler
-	"Answer the receiver's get_focus_handler field as a Smalltalk object."
+get_find_handler
+	"Answer the receiver's get_find_handler field as a Smalltalk object."
 
 	^(bytes dwordAtOffset: 36) asExternalAddress!
 
-get_focus_handler: anObject
-	"Set the receiver's get_focus_handler field to the value of anObject."
+get_find_handler: anObject
+	"Set the receiver's get_find_handler field to the value of anObject."
 
 	bytes dwordAtOffset: 36 put: anObject!
 
-get_geolocation_handler
-	"Answer the receiver's get_geolocation_handler field as a Smalltalk object."
+get_focus_handler
+	"Answer the receiver's get_focus_handler field as a Smalltalk object."
 
 	^(bytes dwordAtOffset: 40) asExternalAddress!
 
-get_geolocation_handler: anObject
-	"Set the receiver's get_geolocation_handler field to the value of anObject."
+get_focus_handler: anObject
+	"Set the receiver's get_focus_handler field to the value of anObject."
 
 	bytes dwordAtOffset: 40 put: anObject!
 
@@ -5540,36 +5989,36 @@ requestHandler
 !CEF3Client categoriesFor: #cb_on_process_message_received:browser:source_process:message:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #contextMenuHandler!accessing!private! !
 !CEF3Client categoriesFor: #downloadHandler!accessing!private! !
-!CEF3Client categoriesFor: #get_context_menu_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_context_menu_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_dialog_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_dialog_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_display_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_display_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_download_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_download_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_drag_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_drag_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_focus_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_focus_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_geolocation_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_geolocation_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_jsdialog_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_jsdialog_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_keyboard_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_keyboard_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_life_span_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_life_span_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_load_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_load_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_render_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_render_handler:!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_request_handler!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #get_request_handler:!**compiled accessors**!must not strip!public! !
+!CEF3Client categoriesFor: #get_context_menu_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_context_menu_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_dialog_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_dialog_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_display_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_display_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_download_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_download_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_drag_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_drag_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_find_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_find_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_focus_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_focus_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_jsdialog_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_jsdialog_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_keyboard_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_keyboard_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_life_span_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_life_span_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_load_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_load_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_render_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_render_handler:!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_request_handler!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #get_request_handler:!**compiled accessors**!public! !
 !CEF3Client categoriesFor: #initialize!must not strip!public! !
 !CEF3Client categoriesFor: #lifeSpanHandler!accessing!private! !
-!CEF3Client categoriesFor: #on_process_message_received!**compiled accessors**!must not strip!public! !
-!CEF3Client categoriesFor: #on_process_message_received:!**compiled accessors**!must not strip!public! !
+!CEF3Client categoriesFor: #on_process_message_received!**compiled accessors**!public! !
+!CEF3Client categoriesFor: #on_process_message_received:!**compiled accessors**!public! !
 !CEF3Client categoriesFor: #onCallback:!callback!must not strip!public! !
 !CEF3Client categoriesFor: #requestHandler!accessing!private! !
 
@@ -5589,8 +6038,8 @@ defineFields
 		defineField: #get_display_handler type: LPVOIDField new;
 		defineField: #get_download_handler type: LPVOIDField new;
 		defineField: #get_drag_handler type: LPVOIDField new;
+		defineField: #get_find_handler type: LPVOIDField new;
 		defineField: #get_focus_handler type: LPVOIDField new;
-		defineField: #get_geolocation_handler type: LPVOIDField new;
 		defineField: #get_jsdialog_handler type: LPVOIDField new;
 		defineField: #get_keyboard_handler type: LPVOIDField new;
 		defineField: #get_life_span_handler type: LPVOIDField new;
@@ -6060,22 +6509,32 @@ on_before_context_menu: anObject
 on_context_menu_command
 	"Answer the receiver's on_context_menu_command field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 20) asExternalAddress!
+	^(bytes dwordAtOffset: 24) asExternalAddress!
 
 on_context_menu_command: anObject
 	"Set the receiver's on_context_menu_command field to the value of anObject."
 
-	bytes dwordAtOffset: 20 put: anObject!
+	bytes dwordAtOffset: 24 put: anObject!
 
 on_context_menu_dismissed
 	"Answer the receiver's on_context_menu_dismissed field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 24) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 on_context_menu_dismissed: anObject
 	"Set the receiver's on_context_menu_dismissed field to the value of anObject."
 
-	bytes dwordAtOffset: 24 put: anObject! !
+	bytes dwordAtOffset: 28 put: anObject!
+
+run_context_menu
+	"Answer the receiver's run_context_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+run_context_menu: anObject
+	"Set the receiver's run_context_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject! !
 !CEF3ContextMenuHandler categoriesFor: #cb_on_before_context_menu:browser:frame:params:model:!public! !
 !CEF3ContextMenuHandler categoriesFor: #cb_on_context_menu_command:browser:frame:params:command_id:event_flags:!public! !
 !CEF3ContextMenuHandler categoriesFor: #cb_on_context_menu_dismissed:browser:frame:!public! !
@@ -6085,6 +6544,8 @@ on_context_menu_dismissed: anObject
 !CEF3ContextMenuHandler categoriesFor: #on_context_menu_command:!**compiled accessors**!public! !
 !CEF3ContextMenuHandler categoriesFor: #on_context_menu_dismissed!**compiled accessors**!public! !
 !CEF3ContextMenuHandler categoriesFor: #on_context_menu_dismissed:!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #run_context_menu!**compiled accessors**!public! !
+!CEF3ContextMenuHandler categoriesFor: #run_context_menu:!**compiled accessors**!public! !
 
 !CEF3ContextMenuHandler class methodsFor!
 
@@ -6098,6 +6559,7 @@ defineFields
 	super defineFields.
 	self
 		defineField: #on_before_context_menu type: LPVOIDField new;
+		defineField: #run_context_menu type: LPVOIDField new;
 		defineField: #on_context_menu_command type: LPVOIDField new;
 		defineField: #on_context_menu_dismissed type: LPVOIDField new!
 
@@ -6129,35 +6591,45 @@ CEF3ContextMenuParams comment: ''!
 !CEF3ContextMenuParams categoriesForClass!External-Data-Structured! !
 !CEF3ContextMenuParams methodsFor!
 
+get_dictionary_suggestions
+	"Answer the receiver's get_dictionary_suggestions field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 76) asExternalAddress!
+
+get_dictionary_suggestions: anObject
+	"Set the receiver's get_dictionary_suggestions field to the value of anObject."
+
+	bytes dwordAtOffset: 76 put: anObject!
+
 get_edit_state_flags
 	"Answer the receiver's get_edit_state_flags field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 76) asExternalAddress!
+	^(bytes dwordAtOffset: 88) asExternalAddress!
 
 get_edit_state_flags: anObject
 	"Set the receiver's get_edit_state_flags field to the value of anObject."
 
-	bytes dwordAtOffset: 76 put: anObject!
+	bytes dwordAtOffset: 88 put: anObject!
 
 get_frame_charset
 	"Answer the receiver's get_frame_charset field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 52) asExternalAddress!
+	^(bytes dwordAtOffset: 56) asExternalAddress!
 
 get_frame_charset: anObject
 	"Set the receiver's get_frame_charset field to the value of anObject."
 
-	bytes dwordAtOffset: 52 put: anObject!
+	bytes dwordAtOffset: 56 put: anObject!
 
 get_frame_url
 	"Answer the receiver's get_frame_url field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asExternalAddress!
+	^(bytes dwordAtOffset: 52) asExternalAddress!
 
 get_frame_url: anObject
 	"Set the receiver's get_frame_url field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject!
+	bytes dwordAtOffset: 52 put: anObject!
 
 get_link_url
 	"Answer the receiver's get_link_url field as a Smalltalk object."
@@ -6172,42 +6644,52 @@ get_link_url: anObject
 get_media_state_flags
 	"Answer the receiver's get_media_state_flags field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 60) asExternalAddress!
+	^(bytes dwordAtOffset: 64) asExternalAddress!
 
 get_media_state_flags: anObject
 	"Set the receiver's get_media_state_flags field to the value of anObject."
 
-	bytes dwordAtOffset: 60 put: anObject!
+	bytes dwordAtOffset: 64 put: anObject!
 
 get_media_type
 	"Answer the receiver's get_media_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 56) asExternalAddress!
+	^(bytes dwordAtOffset: 60) asExternalAddress!
 
 get_media_type: anObject
 	"Set the receiver's get_media_type field to the value of anObject."
 
-	bytes dwordAtOffset: 56 put: anObject!
+	bytes dwordAtOffset: 60 put: anObject!
+
+get_misspelled_word
+	"Answer the receiver's get_misspelled_word field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 72) asExternalAddress!
+
+get_misspelled_word: anObject
+	"Set the receiver's get_misspelled_word field to the value of anObject."
+
+	bytes dwordAtOffset: 72 put: anObject!
 
 get_page_url
 	"Answer the receiver's get_page_url field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asExternalAddress!
+	^(bytes dwordAtOffset: 48) asExternalAddress!
 
 get_page_url: anObject
 	"Set the receiver's get_page_url field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject!
+	bytes dwordAtOffset: 48 put: anObject!
 
 get_selection_text
 	"Answer the receiver's get_selection_text field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 64) asExternalAddress!
+	^(bytes dwordAtOffset: 68) asExternalAddress!
 
 get_selection_text: anObject
 	"Set the receiver's get_selection_text field to the value of anObject."
 
-	bytes dwordAtOffset: 64 put: anObject!
+	bytes dwordAtOffset: 68 put: anObject!
 
 get_source_url
 	"Answer the receiver's get_source_url field as a Smalltalk object."
@@ -6218,6 +6700,16 @@ get_source_url: anObject
 	"Set the receiver's get_source_url field to the value of anObject."
 
 	bytes dwordAtOffset: 36 put: anObject!
+
+get_title_text
+	"Answer the receiver's get_title_text field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 44) asExternalAddress!
+
+get_title_text: anObject
+	"Set the receiver's get_title_text field to the value of anObject."
+
+	bytes dwordAtOffset: 44 put: anObject!
 
 get_type_flags
 	"Answer the receiver's get_type_flags field as a Smalltalk object."
@@ -6269,25 +6761,47 @@ has_image_contents: anObject
 
 	bytes dwordAtOffset: 40 put: anObject!
 
+is_custom_menu
+	"Answer the receiver's is_custom_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 92) asExternalAddress!
+
+is_custom_menu: anObject
+	"Set the receiver's is_custom_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 92 put: anObject!
+
 is_editable
 	"Answer the receiver's is_editable field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 68) asExternalAddress!
+	^(bytes dwordAtOffset: 80) asExternalAddress!
 
 is_editable: anObject
 	"Set the receiver's is_editable field to the value of anObject."
 
-	bytes dwordAtOffset: 68 put: anObject!
+	bytes dwordAtOffset: 80 put: anObject!
 
-is_speech_input_enabled
-	"Answer the receiver's is_speech_input_enabled field as a Smalltalk object."
+is_pepper_menu
+	"Answer the receiver's is_pepper_menu field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 72) asExternalAddress!
+	^(bytes dwordAtOffset: 96) asExternalAddress!
 
-is_speech_input_enabled: anObject
-	"Set the receiver's is_speech_input_enabled field to the value of anObject."
+is_pepper_menu: anObject
+	"Set the receiver's is_pepper_menu field to the value of anObject."
 
-	bytes dwordAtOffset: 72 put: anObject! !
+	bytes dwordAtOffset: 96 put: anObject!
+
+is_spell_check_enabled
+	"Answer the receiver's is_spell_check_enabled field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 84) asExternalAddress!
+
+is_spell_check_enabled: anObject
+	"Set the receiver's is_spell_check_enabled field to the value of anObject."
+
+	bytes dwordAtOffset: 84 put: anObject! !
+!CEF3ContextMenuParams categoriesFor: #get_dictionary_suggestions!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_dictionary_suggestions:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_edit_state_flags!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_edit_state_flags:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_frame_charset!**compiled accessors**!public! !
@@ -6300,12 +6814,16 @@ is_speech_input_enabled: anObject
 !CEF3ContextMenuParams categoriesFor: #get_media_state_flags:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_media_type!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_media_type:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_misspelled_word!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_misspelled_word:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_page_url!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_page_url:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_selection_text!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_selection_text:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_source_url!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_source_url:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_title_text!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #get_title_text:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_type_flags!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_type_flags:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #get_unfiltered_link_url!**compiled accessors**!public! !
@@ -6316,10 +6834,14 @@ is_speech_input_enabled: anObject
 !CEF3ContextMenuParams categoriesFor: #get_ycoord:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #has_image_contents!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #has_image_contents:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_custom_menu!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_custom_menu:!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #is_editable!**compiled accessors**!public! !
 !CEF3ContextMenuParams categoriesFor: #is_editable:!**compiled accessors**!public! !
-!CEF3ContextMenuParams categoriesFor: #is_speech_input_enabled!**compiled accessors**!public! !
-!CEF3ContextMenuParams categoriesFor: #is_speech_input_enabled:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_pepper_menu!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_pepper_menu:!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_spell_check_enabled!**compiled accessors**!public! !
+!CEF3ContextMenuParams categoriesFor: #is_spell_check_enabled:!**compiled accessors**!public! !
 
 !CEF3ContextMenuParams class methodsFor!
 
@@ -6339,15 +6861,20 @@ defineFields
 		defineField: #get_unfiltered_link_url type: LPVOIDField new;
 		defineField: #get_source_url type: LPVOIDField new;
 		defineField: #has_image_contents type: LPVOIDField new;
+		defineField: #get_title_text type: LPVOIDField new;
 		defineField: #get_page_url type: LPVOIDField new;
 		defineField: #get_frame_url type: LPVOIDField new;
 		defineField: #get_frame_charset type: LPVOIDField new;
 		defineField: #get_media_type type: LPVOIDField new;
 		defineField: #get_media_state_flags type: LPVOIDField new;
 		defineField: #get_selection_text type: LPVOIDField new;
+		defineField: #get_misspelled_word type: LPVOIDField new;
+		defineField: #get_dictionary_suggestions type: LPVOIDField new;
 		defineField: #is_editable type: LPVOIDField new;
-		defineField: #is_speech_input_enabled type: LPVOIDField new;
-		defineField: #get_edit_state_flags type: LPVOIDField new! !
+		defineField: #is_spell_check_enabled type: LPVOIDField new;
+		defineField: #get_edit_state_flags type: LPVOIDField new;
+		defineField: #is_custom_menu type: LPVOIDField new;
+		defineField: #is_pepper_menu type: LPVOIDField new! !
 !CEF3ContextMenuParams class categoriesFor: #defineFields!initializing!public! !
 
 CEF3DownloadHandler guid: (GUID fromString: '{36CA71C4-4240-4D44-B5A5-B9555C41B01A}')!
@@ -6483,12 +7010,12 @@ execute_java_script: anObject
 get_browser
 	"Answer the receiver's get_browser field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 96) asExternalAddress!
+	^(bytes dwordAtOffset: 100) asExternalAddress!
 
 get_browser: anObject
 	"Set the receiver's get_browser field to the value of anObject."
 
-	bytes dwordAtOffset: 96 put: anObject!
+	bytes dwordAtOffset: 100 put: anObject!
 
 get_identifier
 	"Answer the receiver's get_identifier field as a Smalltalk object."
@@ -6540,15 +7067,25 @@ get_text: anObject
 
 	bytes dwordAtOffset: 56 put: anObject!
 
+get_url
+	"Answer the receiver's get_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 96) asExternalAddress!
+
+get_url: anObject
+	"Set the receiver's get_url field to the value of anObject."
+
+	bytes dwordAtOffset: 96 put: anObject!
+
 get_v8context
 	"Answer the receiver's get_v8context field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 100) asExternalAddress!
+	^(bytes dwordAtOffset: 104) asExternalAddress!
 
 get_v8context: anObject
 	"Set the receiver's get_v8context field to the value of anObject."
 
-	bytes dwordAtOffset: 100 put: anObject!
+	bytes dwordAtOffset: 104 put: anObject!
 
 is_focused
 	"Answer the receiver's is_focused field as a Smalltalk object."
@@ -6663,12 +7200,12 @@ view_source: anObject
 visit_dom
 	"Answer the receiver's visit_dom field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 104) asExternalAddress!
+	^(bytes dwordAtOffset: 108) asExternalAddress!
 
 visit_dom: anObject
 	"Set the receiver's visit_dom field to the value of anObject."
 
-	bytes dwordAtOffset: 104 put: anObject! !
+	bytes dwordAtOffset: 108 put: anObject! !
 !CEF3Frame categoriesFor: #copy!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #copy:!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #cut!**compiled accessors**!public! !
@@ -6689,6 +7226,8 @@ visit_dom: anObject
 !CEF3Frame categoriesFor: #get_source:!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #get_text!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #get_text:!**compiled accessors**!public! !
+!CEF3Frame categoriesFor: #get_url!**compiled accessors**!public! !
+!CEF3Frame categoriesFor: #get_url:!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #get_v8context!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #get_v8context:!**compiled accessors**!public! !
 !CEF3Frame categoriesFor: #is_focused!**compiled accessors**!public! !
@@ -6747,6 +7286,7 @@ defineFields
 		defineField: #get_name type: LPVOIDField new;
 		defineField: #get_identifier type: LPVOIDField new;
 		defineField: #get_parent type: LPVOIDField new;
+		defineField: #get_url type: LPVOIDField new;
 		defineField: #get_browser type: LPVOIDField new;
 		defineField: #get_v8context type: LPVOIDField new;
 		defineField: #visit_dom type: LPVOIDField new! !
@@ -6769,18 +7309,15 @@ cb_on_before_close: this browser: browser
 cb_on_before_popup: this browser: browser frame: frame target_url: target_url target_frame_name: target_frame_name popupFeatures: popupFeatures windowInfo: windowInfo client: client settings: settings no_javascript_access: no_javascript_access 
 	^0!
 
-cb_run_modal: this browser: browser 
-	!
-
 do_close
 	"Answer the receiver's do_close field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 28) asExternalAddress!
+	^(bytes dwordAtOffset: 24) asExternalAddress!
 
 do_close: anObject
 	"Set the receiver's do_close field to the value of anObject."
 
-	bytes dwordAtOffset: 28 put: anObject!
+	bytes dwordAtOffset: 24 put: anObject!
 
 on_after_created
 	"Answer the receiver's on_after_created field as a Smalltalk object."
@@ -6795,12 +7332,12 @@ on_after_created: anObject
 on_before_close
 	"Answer the receiver's on_before_close field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 32) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 on_before_close: anObject
 	"Set the receiver's on_before_close field to the value of anObject."
 
-	bytes dwordAtOffset: 32 put: anObject!
+	bytes dwordAtOffset: 28 put: anObject!
 
 on_before_popup
 	"Answer the receiver's on_before_popup field as a Smalltalk object."
@@ -6810,22 +7347,11 @@ on_before_popup
 on_before_popup: anObject
 	"Set the receiver's on_before_popup field to the value of anObject."
 
-	bytes dwordAtOffset: 16 put: anObject!
-
-run_modal
-	"Answer the receiver's run_modal field as a Smalltalk object."
-
-	^(bytes dwordAtOffset: 24) asExternalAddress!
-
-run_modal: anObject
-	"Set the receiver's run_modal field to the value of anObject."
-
-	bytes dwordAtOffset: 24 put: anObject! !
+	bytes dwordAtOffset: 16 put: anObject! !
 !CEF3LifeSpanHandler categoriesFor: #cb_do_close:browser:!public! !
 !CEF3LifeSpanHandler categoriesFor: #cb_on_after_created:browser:!public! !
 !CEF3LifeSpanHandler categoriesFor: #cb_on_before_close:browser:!public! !
 !CEF3LifeSpanHandler categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!public! !
-!CEF3LifeSpanHandler categoriesFor: #cb_run_modal:browser:!public! !
 !CEF3LifeSpanHandler categoriesFor: #do_close!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #do_close:!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_after_created!**compiled accessors**!public! !
@@ -6834,8 +7360,6 @@ run_modal: anObject
 !CEF3LifeSpanHandler categoriesFor: #on_before_close:!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_before_popup!**compiled accessors**!public! !
 !CEF3LifeSpanHandler categoriesFor: #on_before_popup:!**compiled accessors**!public! !
-!CEF3LifeSpanHandler categoriesFor: #run_modal!**compiled accessors**!public! !
-!CEF3LifeSpanHandler categoriesFor: #run_modal:!**compiled accessors**!public! !
 
 !CEF3LifeSpanHandler class methodsFor!
 
@@ -6850,28 +7374,22 @@ defineFields
 	self
 		defineField: #on_before_popup type: LPVOIDField new;
 		defineField: #on_after_created type: LPVOIDField new;
-		defineField: #run_modal type: LPVOIDField new;
 		defineField: #do_close type: LPVOIDField new;
 		defineField: #on_before_close type: LPVOIDField new!
 
 initalizeCallbacksRegistry
 	CallbackRegistry := self createCallbackRegistry.
-	CallbackRegistry at: #on_before_popup:
+	"CallbackRegistry at: #on_before_popup:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:
 				descriptor: (ExternalDescriptor 
-						fromString: 'stdcall: sdword dword CEF3BrowserEx* dword CEFString* CEFString* dword CEF3WindowInfo* dword CEF3BrowserSettings* dword')).
+						fromString: 'stdcall: sdword dword CEF3BrowserEx* dword CEFString* CEFString* dword CEF3WindowInfo* dword CEF3BrowserSettings* dword'))."
 	CallbackRegistry at: #on_after_created:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
 				selector: #cb_on_after_created:browser:
 				descriptor: (ExternalDescriptor fromString: 'stdcall: void dword CEF3BrowserEx*')).
-	CallbackRegistry at: #run_modal:
-		put: (CEFHandlerMessageCallback 
-				receiver: self
-				selector: #cb_run_modal:browser:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: sdword dword dword')).
 	CallbackRegistry at: #do_close:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -6897,7 +7415,7 @@ cb_on_load_end: aCEF3LoadHandler browser: aCEF3Browser frame: anInteger httpStat
 cb_on_load_error: this browser: b frame: f errorCode: c errorText: t failedUrl: u 
 	self log: 'cb_on_load_error:'.!
 
-cb_on_load_start: aCEF3LoadHandler browser: aCEF3Browser frame: anInteger 
+cb_on_load_start: aCEF3LoadHandler browser: aCEF3Browser frame: anInteger  transition_type: transition_type
 	self log: 'cb_on_load_start:'.
 	^0!
 
@@ -6948,7 +7466,7 @@ on_loading_state_change: anObject
 	bytes dwordAtOffset: 16 put: anObject! !
 !CEF3LoadHandler categoriesFor: #cb_on_load_end:browser:frame:httpStatusCode:!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #cb_on_load_error:browser:frame:errorCode:errorText:failedUrl:!must not strip!public! !
-!CEF3LoadHandler categoriesFor: #cb_on_load_start:browser:frame:!must not strip!public! !
+!CEF3LoadHandler categoriesFor: #cb_on_load_start:browser:frame:transition_type:!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #cb_on_loading_state_change:browser:isLoading:canGoBack:canGoForward:!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #on_load_end!**compiled accessors**!must not strip!public! !
 !CEF3LoadHandler categoriesFor: #on_load_end:!**compiled accessors**!must not strip!public! !
@@ -6987,8 +7505,8 @@ initalizeCallbacksRegistry
 	CallbackRegistry at: #on_load_start:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
-				selector: #cb_on_load_start:browser:frame:
-				descriptor: (ExternalDescriptor fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword')).
+				selector: #cb_on_load_start:browser:frame:transition_type:
+				descriptor: (ExternalDescriptor fromString: 'stdcall: void CEF3LoadHandler* CEF3Browser* dword dword')).
 	CallbackRegistry at: #on_load_end:
 		put: (CEFHandlerMessageCallback 
 				receiver: self
@@ -7012,492 +7530,562 @@ CEF3MenuModel comment: ''!
 add_check_item
 	"Answer the receiver's add_check_item field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 32) asExternalAddress!
+	^(bytes dwordAtOffset: 36) asExternalAddress!
 
 add_check_item: anObject
 	"Set the receiver's add_check_item field to the value of anObject."
 
-	bytes dwordAtOffset: 32 put: anObject!
+	bytes dwordAtOffset: 36 put: anObject!
 
 add_item
 	"Answer the receiver's add_item field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 28) asExternalAddress!
+	^(bytes dwordAtOffset: 32) asExternalAddress!
 
 add_item: anObject
 	"Set the receiver's add_item field to the value of anObject."
 
-	bytes dwordAtOffset: 28 put: anObject!
+	bytes dwordAtOffset: 32 put: anObject!
 
 add_radio_item
 	"Answer the receiver's add_radio_item field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 36) asExternalAddress!
+	^(bytes dwordAtOffset: 40) asExternalAddress!
 
 add_radio_item: anObject
 	"Set the receiver's add_radio_item field to the value of anObject."
 
-	bytes dwordAtOffset: 36 put: anObject!
+	bytes dwordAtOffset: 40 put: anObject!
 
 add_separator
 	"Answer the receiver's add_separator field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 24) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 add_separator: anObject
 	"Set the receiver's add_separator field to the value of anObject."
 
-	bytes dwordAtOffset: 24 put: anObject!
+	bytes dwordAtOffset: 28 put: anObject!
 
 add_sub_menu
 	"Answer the receiver's add_sub_menu field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 40) asExternalAddress!
+	^(bytes dwordAtOffset: 44) asExternalAddress!
 
 add_sub_menu: anObject
 	"Set the receiver's add_sub_menu field to the value of anObject."
 
-	bytes dwordAtOffset: 40 put: anObject!
+	bytes dwordAtOffset: 44 put: anObject!
 
 clear
 	"Answer the receiver's clear field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 16) asExternalAddress!
+	^(bytes dwordAtOffset: 20) asExternalAddress!
 
 clear: anObject
 	"Set the receiver's clear field to the value of anObject."
 
-	bytes dwordAtOffset: 16 put: anObject!
+	bytes dwordAtOffset: 20 put: anObject!
 
 get_accelerator
 	"Answer the receiver's get_accelerator field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 204) asExternalAddress!
+	^(bytes dwordAtOffset: 208) asExternalAddress!
 
 get_accelerator: anObject
 	"Set the receiver's get_accelerator field to the value of anObject."
 
-	bytes dwordAtOffset: 204 put: anObject!
+	bytes dwordAtOffset: 208 put: anObject!
 
 get_accelerator_at
 	"Answer the receiver's get_accelerator_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 208) asExternalAddress!
+	^(bytes dwordAtOffset: 212) asExternalAddress!
 
 get_accelerator_at: anObject
 	"Set the receiver's get_accelerator_at field to the value of anObject."
 
-	bytes dwordAtOffset: 208 put: anObject!
+	bytes dwordAtOffset: 212 put: anObject!
+
+get_color
+	"Answer the receiver's get_color field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 224) asExternalAddress!
+
+get_color: anObject
+	"Set the receiver's get_color field to the value of anObject."
+
+	bytes dwordAtOffset: 224 put: anObject!
+
+get_color_at
+	"Answer the receiver's get_color_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 228) asExternalAddress!
+
+get_color_at: anObject
+	"Set the receiver's get_color_at field to the value of anObject."
+
+	bytes dwordAtOffset: 228 put: anObject!
 
 get_command_id_at
 	"Answer the receiver's get_command_id_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 76) asExternalAddress!
+	^(bytes dwordAtOffset: 80) asExternalAddress!
 
 get_command_id_at: anObject
 	"Set the receiver's get_command_id_at field to the value of anObject."
 
-	bytes dwordAtOffset: 76 put: anObject!
+	bytes dwordAtOffset: 80 put: anObject!
 
 get_count
 	"Answer the receiver's get_count field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 20) asExternalAddress!
+	^(bytes dwordAtOffset: 24) asExternalAddress!
 
 get_count: anObject
 	"Set the receiver's get_count field to the value of anObject."
 
-	bytes dwordAtOffset: 20 put: anObject!
+	bytes dwordAtOffset: 24 put: anObject!
 
 get_group_id
 	"Answer the receiver's get_group_id field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 108) asExternalAddress!
+	^(bytes dwordAtOffset: 112) asExternalAddress!
 
 get_group_id: anObject
 	"Set the receiver's get_group_id field to the value of anObject."
 
-	bytes dwordAtOffset: 108 put: anObject!
+	bytes dwordAtOffset: 112 put: anObject!
 
 get_group_id_at
 	"Answer the receiver's get_group_id_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 112) asExternalAddress!
+	^(bytes dwordAtOffset: 116) asExternalAddress!
 
 get_group_id_at: anObject
 	"Set the receiver's get_group_id_at field to the value of anObject."
 
-	bytes dwordAtOffset: 112 put: anObject!
+	bytes dwordAtOffset: 116 put: anObject!
 
 get_index_of
 	"Answer the receiver's get_index_of field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 72) asExternalAddress!
+	^(bytes dwordAtOffset: 76) asExternalAddress!
 
 get_index_of: anObject
 	"Set the receiver's get_index_of field to the value of anObject."
 
-	bytes dwordAtOffset: 72 put: anObject!
+	bytes dwordAtOffset: 76 put: anObject!
 
 get_label
 	"Answer the receiver's get_label field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 84) asExternalAddress!
+	^(bytes dwordAtOffset: 88) asExternalAddress!
 
 get_label: anObject
 	"Set the receiver's get_label field to the value of anObject."
 
-	bytes dwordAtOffset: 84 put: anObject!
+	bytes dwordAtOffset: 88 put: anObject!
 
 get_label_at
 	"Answer the receiver's get_label_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 88) asExternalAddress!
+	^(bytes dwordAtOffset: 92) asExternalAddress!
 
 get_label_at: anObject
 	"Set the receiver's get_label_at field to the value of anObject."
 
-	bytes dwordAtOffset: 88 put: anObject!
+	bytes dwordAtOffset: 92 put: anObject!
 
 get_sub_menu
 	"Answer the receiver's get_sub_menu field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 124) asExternalAddress!
+	^(bytes dwordAtOffset: 128) asExternalAddress!
 
 get_sub_menu: anObject
 	"Set the receiver's get_sub_menu field to the value of anObject."
 
-	bytes dwordAtOffset: 124 put: anObject!
+	bytes dwordAtOffset: 128 put: anObject!
 
 get_sub_menu_at
 	"Answer the receiver's get_sub_menu_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 128) asExternalAddress!
+	^(bytes dwordAtOffset: 132) asExternalAddress!
 
 get_sub_menu_at: anObject
 	"Set the receiver's get_sub_menu_at field to the value of anObject."
 
-	bytes dwordAtOffset: 128 put: anObject!
+	bytes dwordAtOffset: 132 put: anObject!
 
 get_type
 	"Answer the receiver's get_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 100) asExternalAddress!
+	^(bytes dwordAtOffset: 104) asExternalAddress!
 
 get_type: anObject
 	"Set the receiver's get_type field to the value of anObject."
 
-	bytes dwordAtOffset: 100 put: anObject!
+	bytes dwordAtOffset: 104 put: anObject!
 
 get_type_at
 	"Answer the receiver's get_type_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 104) asExternalAddress!
+	^(bytes dwordAtOffset: 108) asExternalAddress!
 
 get_type_at: anObject
 	"Set the receiver's get_type_at field to the value of anObject."
 
-	bytes dwordAtOffset: 104 put: anObject!
+	bytes dwordAtOffset: 108 put: anObject!
 
 has_accelerator
 	"Answer the receiver's has_accelerator field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 180) asExternalAddress!
+	^(bytes dwordAtOffset: 184) asExternalAddress!
 
 has_accelerator: anObject
 	"Set the receiver's has_accelerator field to the value of anObject."
 
-	bytes dwordAtOffset: 180 put: anObject!
+	bytes dwordAtOffset: 184 put: anObject!
 
 has_accelerator_at
 	"Answer the receiver's has_accelerator_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 184) asExternalAddress!
+	^(bytes dwordAtOffset: 188) asExternalAddress!
 
 has_accelerator_at: anObject
 	"Set the receiver's has_accelerator_at field to the value of anObject."
 
-	bytes dwordAtOffset: 184 put: anObject!
+	bytes dwordAtOffset: 188 put: anObject!
 
 insert_check_item_at
 	"Answer the receiver's insert_check_item_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 52) asExternalAddress!
+	^(bytes dwordAtOffset: 56) asExternalAddress!
 
 insert_check_item_at: anObject
 	"Set the receiver's insert_check_item_at field to the value of anObject."
 
-	bytes dwordAtOffset: 52 put: anObject!
+	bytes dwordAtOffset: 56 put: anObject!
 
 insert_item_at
 	"Answer the receiver's insert_item_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asExternalAddress!
+	^(bytes dwordAtOffset: 52) asExternalAddress!
 
 insert_item_at: anObject
 	"Set the receiver's insert_item_at field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject!
+	bytes dwordAtOffset: 52 put: anObject!
 
 insert_radio_item_at
 	"Answer the receiver's insert_radio_item_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 56) asExternalAddress!
+	^(bytes dwordAtOffset: 60) asExternalAddress!
 
 insert_radio_item_at: anObject
 	"Set the receiver's insert_radio_item_at field to the value of anObject."
 
-	bytes dwordAtOffset: 56 put: anObject!
+	bytes dwordAtOffset: 60 put: anObject!
 
 insert_separator_at
 	"Answer the receiver's insert_separator_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asExternalAddress!
+	^(bytes dwordAtOffset: 48) asExternalAddress!
 
 insert_separator_at: anObject
 	"Set the receiver's insert_separator_at field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject!
+	bytes dwordAtOffset: 48 put: anObject!
 
 insert_sub_menu_at
 	"Answer the receiver's insert_sub_menu_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 60) asExternalAddress!
+	^(bytes dwordAtOffset: 64) asExternalAddress!
 
 insert_sub_menu_at: anObject
 	"Set the receiver's insert_sub_menu_at field to the value of anObject."
 
-	bytes dwordAtOffset: 60 put: anObject!
+	bytes dwordAtOffset: 64 put: anObject!
 
 is_checked
 	"Answer the receiver's is_checked field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 164) asExternalAddress!
+	^(bytes dwordAtOffset: 168) asExternalAddress!
 
 is_checked: anObject
 	"Set the receiver's is_checked field to the value of anObject."
 
-	bytes dwordAtOffset: 164 put: anObject!
+	bytes dwordAtOffset: 168 put: anObject!
 
 is_checked_at
 	"Answer the receiver's is_checked_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 168) asExternalAddress!
+	^(bytes dwordAtOffset: 172) asExternalAddress!
 
 is_checked_at: anObject
 	"Set the receiver's is_checked_at field to the value of anObject."
 
-	bytes dwordAtOffset: 168 put: anObject!
+	bytes dwordAtOffset: 172 put: anObject!
 
 is_enabled
 	"Answer the receiver's is_enabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 148) asExternalAddress!
+	^(bytes dwordAtOffset: 152) asExternalAddress!
 
 is_enabled: anObject
 	"Set the receiver's is_enabled field to the value of anObject."
 
-	bytes dwordAtOffset: 148 put: anObject!
+	bytes dwordAtOffset: 152 put: anObject!
 
 is_enabled_at
 	"Answer the receiver's is_enabled_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 152) asExternalAddress!
+	^(bytes dwordAtOffset: 156) asExternalAddress!
 
 is_enabled_at: anObject
 	"Set the receiver's is_enabled_at field to the value of anObject."
 
-	bytes dwordAtOffset: 152 put: anObject!
+	bytes dwordAtOffset: 156 put: anObject!
+
+is_sub_menu
+	"Answer the receiver's is_sub_menu field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+is_sub_menu: anObject
+	"Set the receiver's is_sub_menu field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
 
 is_visible
 	"Answer the receiver's is_visible field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 132) asExternalAddress!
+	^(bytes dwordAtOffset: 136) asExternalAddress!
 
 is_visible: anObject
 	"Set the receiver's is_visible field to the value of anObject."
 
-	bytes dwordAtOffset: 132 put: anObject!
+	bytes dwordAtOffset: 136 put: anObject!
 
 is_visible_at
 	"Answer the receiver's is_visible_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 136) asExternalAddress!
+	^(bytes dwordAtOffset: 140) asExternalAddress!
 
 is_visible_at: anObject
 	"Set the receiver's is_visible_at field to the value of anObject."
 
-	bytes dwordAtOffset: 136 put: anObject!
+	bytes dwordAtOffset: 140 put: anObject!
 
 remove
 	"Answer the receiver's remove field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 64) asExternalAddress!
+	^(bytes dwordAtOffset: 68) asExternalAddress!
 
 remove: anObject
 	"Set the receiver's remove field to the value of anObject."
 
-	bytes dwordAtOffset: 64 put: anObject!
+	bytes dwordAtOffset: 68 put: anObject!
 
 remove_accelerator
 	"Answer the receiver's remove_accelerator field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 196) asExternalAddress!
+	^(bytes dwordAtOffset: 200) asExternalAddress!
 
 remove_accelerator: anObject
 	"Set the receiver's remove_accelerator field to the value of anObject."
 
-	bytes dwordAtOffset: 196 put: anObject!
+	bytes dwordAtOffset: 200 put: anObject!
 
 remove_accelerator_at
 	"Answer the receiver's remove_accelerator_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 200) asExternalAddress!
+	^(bytes dwordAtOffset: 204) asExternalAddress!
 
 remove_accelerator_at: anObject
 	"Set the receiver's remove_accelerator_at field to the value of anObject."
 
-	bytes dwordAtOffset: 200 put: anObject!
+	bytes dwordAtOffset: 204 put: anObject!
 
 remove_at
 	"Answer the receiver's remove_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 68) asExternalAddress!
+	^(bytes dwordAtOffset: 72) asExternalAddress!
 
 remove_at: anObject
 	"Set the receiver's remove_at field to the value of anObject."
 
-	bytes dwordAtOffset: 68 put: anObject!
+	bytes dwordAtOffset: 72 put: anObject!
 
 set_accelerator
 	"Answer the receiver's set_accelerator field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 188) asExternalAddress!
+	^(bytes dwordAtOffset: 192) asExternalAddress!
 
 set_accelerator: anObject
 	"Set the receiver's set_accelerator field to the value of anObject."
 
-	bytes dwordAtOffset: 188 put: anObject!
+	bytes dwordAtOffset: 192 put: anObject!
 
 set_accelerator_at
 	"Answer the receiver's set_accelerator_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 192) asExternalAddress!
+	^(bytes dwordAtOffset: 196) asExternalAddress!
 
 set_accelerator_at: anObject
 	"Set the receiver's set_accelerator_at field to the value of anObject."
 
-	bytes dwordAtOffset: 192 put: anObject!
+	bytes dwordAtOffset: 196 put: anObject!
 
 set_checked
 	"Answer the receiver's set_checked field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 172) asExternalAddress!
+	^(bytes dwordAtOffset: 176) asExternalAddress!
 
 set_checked: anObject
 	"Set the receiver's set_checked field to the value of anObject."
 
-	bytes dwordAtOffset: 172 put: anObject!
+	bytes dwordAtOffset: 176 put: anObject!
 
 set_checked_at
 	"Answer the receiver's set_checked_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 176) asExternalAddress!
+	^(bytes dwordAtOffset: 180) asExternalAddress!
 
 set_checked_at: anObject
 	"Set the receiver's set_checked_at field to the value of anObject."
 
-	bytes dwordAtOffset: 176 put: anObject!
+	bytes dwordAtOffset: 180 put: anObject!
+
+set_color
+	"Answer the receiver's set_color field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 216) asExternalAddress!
+
+set_color: anObject
+	"Set the receiver's set_color field to the value of anObject."
+
+	bytes dwordAtOffset: 216 put: anObject!
+
+set_color_at
+	"Answer the receiver's set_color_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 220) asExternalAddress!
+
+set_color_at: anObject
+	"Set the receiver's set_color_at field to the value of anObject."
+
+	bytes dwordAtOffset: 220 put: anObject!
 
 set_command_id_at
 	"Answer the receiver's set_command_id_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 80) asExternalAddress!
+	^(bytes dwordAtOffset: 84) asExternalAddress!
 
 set_command_id_at: anObject
 	"Set the receiver's set_command_id_at field to the value of anObject."
 
-	bytes dwordAtOffset: 80 put: anObject!
+	bytes dwordAtOffset: 84 put: anObject!
 
 set_enabled
 	"Answer the receiver's set_enabled field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 156) asExternalAddress!
+	^(bytes dwordAtOffset: 160) asExternalAddress!
 
 set_enabled: anObject
 	"Set the receiver's set_enabled field to the value of anObject."
 
-	bytes dwordAtOffset: 156 put: anObject!
+	bytes dwordAtOffset: 160 put: anObject!
 
 set_enabled_at
 	"Answer the receiver's set_enabled_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 160) asExternalAddress!
+	^(bytes dwordAtOffset: 164) asExternalAddress!
 
 set_enabled_at: anObject
 	"Set the receiver's set_enabled_at field to the value of anObject."
 
-	bytes dwordAtOffset: 160 put: anObject!
+	bytes dwordAtOffset: 164 put: anObject!
+
+set_font_list
+	"Answer the receiver's set_font_list field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 232) asExternalAddress!
+
+set_font_list: anObject
+	"Set the receiver's set_font_list field to the value of anObject."
+
+	bytes dwordAtOffset: 232 put: anObject!
+
+set_font_list_at
+	"Answer the receiver's set_font_list_at field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 236) asExternalAddress!
+
+set_font_list_at: anObject
+	"Set the receiver's set_font_list_at field to the value of anObject."
+
+	bytes dwordAtOffset: 236 put: anObject!
 
 set_group_id
 	"Answer the receiver's set_group_id field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 116) asExternalAddress!
+	^(bytes dwordAtOffset: 120) asExternalAddress!
 
 set_group_id: anObject
 	"Set the receiver's set_group_id field to the value of anObject."
 
-	bytes dwordAtOffset: 116 put: anObject!
+	bytes dwordAtOffset: 120 put: anObject!
 
 set_group_id_at
 	"Answer the receiver's set_group_id_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 120) asExternalAddress!
+	^(bytes dwordAtOffset: 124) asExternalAddress!
 
 set_group_id_at: anObject
 	"Set the receiver's set_group_id_at field to the value of anObject."
 
-	bytes dwordAtOffset: 120 put: anObject!
+	bytes dwordAtOffset: 124 put: anObject!
 
 set_label
 	"Answer the receiver's set_label field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 92) asExternalAddress!
+	^(bytes dwordAtOffset: 96) asExternalAddress!
 
 set_label: anObject
 	"Set the receiver's set_label field to the value of anObject."
 
-	bytes dwordAtOffset: 92 put: anObject!
+	bytes dwordAtOffset: 96 put: anObject!
 
 set_label_at
 	"Answer the receiver's set_label_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 96) asExternalAddress!
+	^(bytes dwordAtOffset: 100) asExternalAddress!
 
 set_label_at: anObject
 	"Set the receiver's set_label_at field to the value of anObject."
 
-	bytes dwordAtOffset: 96 put: anObject!
+	bytes dwordAtOffset: 100 put: anObject!
 
 set_visible
 	"Answer the receiver's set_visible field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 140) asExternalAddress!
+	^(bytes dwordAtOffset: 144) asExternalAddress!
 
 set_visible: anObject
 	"Set the receiver's set_visible field to the value of anObject."
 
-	bytes dwordAtOffset: 140 put: anObject!
+	bytes dwordAtOffset: 144 put: anObject!
 
 set_visible_at
 	"Answer the receiver's set_visible_at field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 144) asExternalAddress!
+	^(bytes dwordAtOffset: 148) asExternalAddress!
 
 set_visible_at: anObject
 	"Set the receiver's set_visible_at field to the value of anObject."
 
-	bytes dwordAtOffset: 144 put: anObject! !
+	bytes dwordAtOffset: 148 put: anObject! !
 !CEF3MenuModel categoriesFor: #add_check_item!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #add_check_item:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #add_item!**compiled accessors**!public! !
@@ -7514,6 +8102,10 @@ set_visible_at: anObject
 !CEF3MenuModel categoriesFor: #get_accelerator:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #get_accelerator_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #get_accelerator_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_color!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_color:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_color_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #get_color_at:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #get_command_id_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #get_command_id_at:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #get_count!**compiled accessors**!public! !
@@ -7558,6 +8150,8 @@ set_visible_at: anObject
 !CEF3MenuModel categoriesFor: #is_enabled:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #is_enabled_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #is_enabled_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_sub_menu!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #is_sub_menu:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #is_visible!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #is_visible:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #is_visible_at!**compiled accessors**!public! !
@@ -7578,12 +8172,20 @@ set_visible_at: anObject
 !CEF3MenuModel categoriesFor: #set_checked:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_checked_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_checked_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_color!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_color:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_color_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_color_at:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_command_id_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_command_id_at:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_enabled!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_enabled:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_enabled_at!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_enabled_at:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_font_list!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_font_list:!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_font_list_at!**compiled accessors**!public! !
+!CEF3MenuModel categoriesFor: #set_font_list_at:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_group_id!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_group_id:!**compiled accessors**!public! !
 !CEF3MenuModel categoriesFor: #set_group_id_at!**compiled accessors**!public! !
@@ -7608,6 +8210,7 @@ defineFields
 
 	super defineFields.
 	self
+		defineField: #is_sub_menu type: LPVOIDField new;
 		defineField: #clear type: LPVOIDField new;
 		defineField: #get_count type: LPVOIDField new;
 		defineField: #add_separator type: LPVOIDField new;
@@ -7656,7 +8259,13 @@ defineFields
 		defineField: #remove_accelerator type: LPVOIDField new;
 		defineField: #remove_accelerator_at type: LPVOIDField new;
 		defineField: #get_accelerator type: LPVOIDField new;
-		defineField: #get_accelerator_at type: LPVOIDField new! !
+		defineField: #get_accelerator_at type: LPVOIDField new;
+		defineField: #set_color type: LPVOIDField new;
+		defineField: #set_color_at type: LPVOIDField new;
+		defineField: #get_color type: LPVOIDField new;
+		defineField: #get_color_at type: LPVOIDField new;
+		defineField: #set_font_list type: LPVOIDField new;
+		defineField: #set_font_list_at type: LPVOIDField new! !
 !CEF3MenuModel class categoriesFor: #defineFields!public! !
 
 CEF3PostData guid: (GUID fromString: '{EEE72B27-4C4D-49AE-B500-0D0FD7C2B101}')!
@@ -7667,32 +8276,42 @@ CEF3PostData comment: ''!
 add_element
 	"Answer the receiver's add_element field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 32) asExternalAddress!
+	^(bytes dwordAtOffset: 36) asExternalAddress!
 
 add_element: anObject
 	"Set the receiver's add_element field to the value of anObject."
 
-	bytes dwordAtOffset: 32 put: anObject!
+	bytes dwordAtOffset: 36 put: anObject!
 
 get_element_count
 	"Answer the receiver's get_element_count field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 20) asExternalAddress!
+	^(bytes dwordAtOffset: 24) asExternalAddress!
 
 get_element_count: anObject
 	"Set the receiver's get_element_count field to the value of anObject."
 
-	bytes dwordAtOffset: 20 put: anObject!
+	bytes dwordAtOffset: 24 put: anObject!
 
 get_elements
 	"Answer the receiver's get_elements field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 24) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 get_elements: anObject
 	"Set the receiver's get_elements field to the value of anObject."
 
-	bytes dwordAtOffset: 24 put: anObject!
+	bytes dwordAtOffset: 28 put: anObject!
+
+has_excluded_elements
+	"Answer the receiver's has_excluded_elements field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+has_excluded_elements: anObject
+	"Set the receiver's has_excluded_elements field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
 
 is_read_only
 	"Answer the receiver's is_read_only field as a Smalltalk object."
@@ -7707,28 +8326,30 @@ is_read_only: anObject
 remove_element
 	"Answer the receiver's remove_element field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 28) asExternalAddress!
+	^(bytes dwordAtOffset: 32) asExternalAddress!
 
 remove_element: anObject
 	"Set the receiver's remove_element field to the value of anObject."
 
-	bytes dwordAtOffset: 28 put: anObject!
+	bytes dwordAtOffset: 32 put: anObject!
 
 remove_elements
 	"Answer the receiver's remove_elements field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 36) asExternalAddress!
+	^(bytes dwordAtOffset: 40) asExternalAddress!
 
 remove_elements: anObject
 	"Set the receiver's remove_elements field to the value of anObject."
 
-	bytes dwordAtOffset: 36 put: anObject! !
+	bytes dwordAtOffset: 40 put: anObject! !
 !CEF3PostData categoriesFor: #add_element!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #add_element:!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #get_element_count!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #get_element_count:!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #get_elements!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #get_elements:!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #has_excluded_elements!**compiled accessors**!public! !
+!CEF3PostData categoriesFor: #has_excluded_elements:!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #is_read_only!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #is_read_only:!**compiled accessors**!public! !
 !CEF3PostData categoriesFor: #remove_element!**compiled accessors**!public! !
@@ -7748,6 +8369,7 @@ defineFields
 	super defineFields.
 	self
 		defineField: #is_read_only type: LPVOIDField new;
+		defineField: #has_excluded_elements type: LPVOIDField new;
 		defineField: #get_element_count type: LPVOIDField new;
 		defineField: #get_elements type: LPVOIDField new;
 		defineField: #remove_element type: LPVOIDField new;
@@ -7988,32 +8610,42 @@ CEF3Request comment: ''!
 get_first_party_for_cookies
 	"Answer the receiver's get_first_party_for_cookies field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 64) asExternalAddress!
+	^(bytes dwordAtOffset: 76) asExternalAddress!
 
 get_first_party_for_cookies: anObject
 	"Set the receiver's get_first_party_for_cookies field to the value of anObject."
 
-	bytes dwordAtOffset: 64 put: anObject!
+	bytes dwordAtOffset: 76 put: anObject!
 
 get_flags
 	"Answer the receiver's get_flags field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 56) asExternalAddress!
+	^(bytes dwordAtOffset: 68) asExternalAddress!
 
 get_flags: anObject
 	"Set the receiver's get_flags field to the value of anObject."
 
-	bytes dwordAtOffset: 56 put: anObject!
+	bytes dwordAtOffset: 68 put: anObject!
 
 get_header_map
 	"Answer the receiver's get_header_map field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asExternalAddress!
+	^(bytes dwordAtOffset: 56) asExternalAddress!
 
 get_header_map: anObject
 	"Set the receiver's get_header_map field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject!
+	bytes dwordAtOffset: 56 put: anObject!
+
+get_identifier
+	"Answer the receiver's get_identifier field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 92) asExternalAddress!
+
+get_identifier: anObject
+	"Set the receiver's get_identifier field to the value of anObject."
+
+	bytes dwordAtOffset: 92 put: anObject!
 
 get_method
 	"Answer the receiver's get_method field as a Smalltalk object."
@@ -8028,32 +8660,52 @@ get_method: anObject
 get_post_data
 	"Answer the receiver's get_post_data field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 36) asExternalAddress!
+	^(bytes dwordAtOffset: 48) asExternalAddress!
 
 get_post_data: anObject
 	"Set the receiver's get_post_data field to the value of anObject."
 
-	bytes dwordAtOffset: 36 put: anObject!
+	bytes dwordAtOffset: 48 put: anObject!
+
+get_referrer_policy
+	"Answer the receiver's get_referrer_policy field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 44) asExternalAddress!
+
+get_referrer_policy: anObject
+	"Set the receiver's get_referrer_policy field to the value of anObject."
+
+	bytes dwordAtOffset: 44 put: anObject!
+
+get_referrer_url
+	"Answer the receiver's get_referrer_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 40) asExternalAddress!
+
+get_referrer_url: anObject
+	"Set the receiver's get_referrer_url field to the value of anObject."
+
+	bytes dwordAtOffset: 40 put: anObject!
 
 get_resource_type
 	"Answer the receiver's get_resource_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 72) asExternalAddress!
+	^(bytes dwordAtOffset: 84) asExternalAddress!
 
 get_resource_type: anObject
 	"Set the receiver's get_resource_type field to the value of anObject."
 
-	bytes dwordAtOffset: 72 put: anObject!
+	bytes dwordAtOffset: 84 put: anObject!
 
 get_transition_type
 	"Answer the receiver's get_transition_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 76) asExternalAddress!
+	^(bytes dwordAtOffset: 88) asExternalAddress!
 
 get_transition_type: anObject
 	"Set the receiver's get_transition_type field to the value of anObject."
 
-	bytes dwordAtOffset: 76 put: anObject!
+	bytes dwordAtOffset: 88 put: anObject!
 
 get_url
 	"Answer the receiver's get_url field as a Smalltalk object."
@@ -8078,42 +8730,42 @@ is_read_only: anObject
 set
 	"Answer the receiver's set field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 52) asExternalAddress!
+	^(bytes dwordAtOffset: 64) asExternalAddress!
 
 set: anObject
 	"Set the receiver's set field to the value of anObject."
 
-	bytes dwordAtOffset: 52 put: anObject!
+	bytes dwordAtOffset: 64 put: anObject!
 
 set_first_party_for_cookies
 	"Answer the receiver's set_first_party_for_cookies field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 68) asExternalAddress!
+	^(bytes dwordAtOffset: 80) asExternalAddress!
 
 set_first_party_for_cookies: anObject
 	"Set the receiver's set_first_party_for_cookies field to the value of anObject."
 
-	bytes dwordAtOffset: 68 put: anObject!
+	bytes dwordAtOffset: 80 put: anObject!
 
 set_flags
 	"Answer the receiver's set_flags field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 60) asExternalAddress!
+	^(bytes dwordAtOffset: 72) asExternalAddress!
 
 set_flags: anObject
 	"Set the receiver's set_flags field to the value of anObject."
 
-	bytes dwordAtOffset: 60 put: anObject!
+	bytes dwordAtOffset: 72 put: anObject!
 
 set_header_map
 	"Answer the receiver's set_header_map field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asExternalAddress!
+	^(bytes dwordAtOffset: 60) asExternalAddress!
 
 set_header_map: anObject
 	"Set the receiver's set_header_map field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject!
+	bytes dwordAtOffset: 60 put: anObject!
 
 set_method
 	"Answer the receiver's set_method field as a Smalltalk object."
@@ -8128,12 +8780,22 @@ set_method: anObject
 set_post_data
 	"Answer the receiver's set_post_data field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 40) asExternalAddress!
+	^(bytes dwordAtOffset: 52) asExternalAddress!
 
 set_post_data: anObject
 	"Set the receiver's set_post_data field to the value of anObject."
 
-	bytes dwordAtOffset: 40 put: anObject!
+	bytes dwordAtOffset: 52 put: anObject!
+
+set_referrer
+	"Answer the receiver's set_referrer field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 36) asExternalAddress!
+
+set_referrer: anObject
+	"Set the receiver's set_referrer field to the value of anObject."
+
+	bytes dwordAtOffset: 36 put: anObject!
 
 set_url
 	"Answer the receiver's set_url field as a Smalltalk object."
@@ -8150,10 +8812,16 @@ set_url: anObject
 !CEF3Request categoriesFor: #get_flags:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_header_map!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_header_map:!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_identifier!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_identifier:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_method!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_method:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_post_data!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_post_data:!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_referrer_policy!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_referrer_policy:!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_referrer_url!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #get_referrer_url:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_resource_type!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_resource_type:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #get_transition_type!**compiled accessors**!public! !
@@ -8174,6 +8842,8 @@ set_url: anObject
 !CEF3Request categoriesFor: #set_method:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #set_post_data!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #set_post_data:!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #set_referrer!**compiled accessors**!public! !
+!CEF3Request categoriesFor: #set_referrer:!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #set_url!**compiled accessors**!public! !
 !CEF3Request categoriesFor: #set_url:!**compiled accessors**!public! !
 
@@ -8193,6 +8863,9 @@ defineFields
 		defineField: #set_url type: LPVOIDField new;
 		defineField: #get_method type: LPVOIDField new;
 		defineField: #set_method type: LPVOIDField new;
+		defineField: #set_referrer type: LPVOIDField new;
+		defineField: #get_referrer_url type: LPVOIDField new;
+		defineField: #get_referrer_policy type: LPVOIDField new;
 		defineField: #get_post_data type: LPVOIDField new;
 		defineField: #set_post_data type: LPVOIDField new;
 		defineField: #get_header_map type: LPVOIDField new;
@@ -8203,7 +8876,8 @@ defineFields
 		defineField: #get_first_party_for_cookies type: LPVOIDField new;
 		defineField: #set_first_party_for_cookies type: LPVOIDField new;
 		defineField: #get_resource_type type: LPVOIDField new;
-		defineField: #get_transition_type type: LPVOIDField new! !
+		defineField: #get_transition_type type: LPVOIDField new;
+		defineField: #get_identifier type: LPVOIDField new! !
 !CEF3Request class categoriesFor: #defineFields!initializing!public! !
 
 CEF3RequestHandler guid: (GUID fromString: '{B1666F35-AD93-4590-9FB2-180A11DB814A}')!
@@ -8861,55 +9535,75 @@ CEF3Response comment: ''!
 !CEF3Response categoriesForClass!External-Data-Structured! !
 !CEF3Response methodsFor!
 
+get_error
+	"Answer the receiver's get_error field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 20) asExternalAddress!
+
+get_error: anObject
+	"Set the receiver's get_error field to the value of anObject."
+
+	bytes dwordAtOffset: 20 put: anObject!
+
 get_header
 	"Answer the receiver's get_header field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 44) asExternalAddress!
+	^(bytes dwordAtOffset: 52) asExternalAddress!
 
 get_header: anObject
 	"Set the receiver's get_header field to the value of anObject."
 
-	bytes dwordAtOffset: 44 put: anObject!
+	bytes dwordAtOffset: 52 put: anObject!
 
 get_header_map
 	"Answer the receiver's get_header_map field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 48) asExternalAddress!
+	^(bytes dwordAtOffset: 56) asExternalAddress!
 
 get_header_map: anObject
 	"Set the receiver's get_header_map field to the value of anObject."
 
-	bytes dwordAtOffset: 48 put: anObject!
+	bytes dwordAtOffset: 56 put: anObject!
 
 get_mime_type
 	"Answer the receiver's get_mime_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 36) asExternalAddress!
+	^(bytes dwordAtOffset: 44) asExternalAddress!
 
 get_mime_type: anObject
 	"Set the receiver's get_mime_type field to the value of anObject."
 
-	bytes dwordAtOffset: 36 put: anObject!
+	bytes dwordAtOffset: 44 put: anObject!
 
 get_status
 	"Answer the receiver's get_status field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 20) asExternalAddress!
+	^(bytes dwordAtOffset: 28) asExternalAddress!
 
 get_status: anObject
 	"Set the receiver's get_status field to the value of anObject."
 
-	bytes dwordAtOffset: 20 put: anObject!
+	bytes dwordAtOffset: 28 put: anObject!
 
 get_status_text
 	"Answer the receiver's get_status_text field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 28) asExternalAddress!
+	^(bytes dwordAtOffset: 36) asExternalAddress!
 
 get_status_text: anObject
 	"Set the receiver's get_status_text field to the value of anObject."
 
-	bytes dwordAtOffset: 28 put: anObject!
+	bytes dwordAtOffset: 36 put: anObject!
+
+get_url
+	"Answer the receiver's get_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 64) asExternalAddress!
+
+get_url: anObject
+	"Set the receiver's get_url field to the value of anObject."
+
+	bytes dwordAtOffset: 64 put: anObject!
 
 is_read_only
 	"Answer the receiver's is_read_only field as a Smalltalk object."
@@ -8921,45 +9615,67 @@ is_read_only: anObject
 
 	bytes dwordAtOffset: 16 put: anObject!
 
+set_error
+	"Answer the receiver's set_error field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 24) asExternalAddress!
+
+set_error: anObject
+	"Set the receiver's set_error field to the value of anObject."
+
+	bytes dwordAtOffset: 24 put: anObject!
+
 set_header_map
 	"Answer the receiver's set_header_map field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 52) asExternalAddress!
+	^(bytes dwordAtOffset: 60) asExternalAddress!
 
 set_header_map: anObject
 	"Set the receiver's set_header_map field to the value of anObject."
 
-	bytes dwordAtOffset: 52 put: anObject!
+	bytes dwordAtOffset: 60 put: anObject!
 
 set_mime_type
 	"Answer the receiver's set_mime_type field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 40) asExternalAddress!
+	^(bytes dwordAtOffset: 48) asExternalAddress!
 
 set_mime_type: anObject
 	"Set the receiver's set_mime_type field to the value of anObject."
 
-	bytes dwordAtOffset: 40 put: anObject!
+	bytes dwordAtOffset: 48 put: anObject!
 
 set_status
 	"Answer the receiver's set_status field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 24) asExternalAddress!
+	^(bytes dwordAtOffset: 32) asExternalAddress!
 
 set_status: anObject
 	"Set the receiver's set_status field to the value of anObject."
 
-	bytes dwordAtOffset: 24 put: anObject!
+	bytes dwordAtOffset: 32 put: anObject!
 
 set_status_text
 	"Answer the receiver's set_status_text field as a Smalltalk object."
 
-	^(bytes dwordAtOffset: 32) asExternalAddress!
+	^(bytes dwordAtOffset: 40) asExternalAddress!
 
 set_status_text: anObject
 	"Set the receiver's set_status_text field to the value of anObject."
 
-	bytes dwordAtOffset: 32 put: anObject! !
+	bytes dwordAtOffset: 40 put: anObject!
+
+set_url
+	"Answer the receiver's set_url field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 68) asExternalAddress!
+
+set_url: anObject
+	"Set the receiver's set_url field to the value of anObject."
+
+	bytes dwordAtOffset: 68 put: anObject! !
+!CEF3Response categoriesFor: #get_error!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #get_error:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #get_header!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #get_header:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #get_header_map!**compiled accessors**!public! !
@@ -8970,8 +9686,12 @@ set_status_text: anObject
 !CEF3Response categoriesFor: #get_status:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #get_status_text!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #get_status_text:!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #get_url!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #get_url:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #is_read_only!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #is_read_only:!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #set_error!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #set_error:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #set_header_map!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #set_header_map:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #set_mime_type!**compiled accessors**!public! !
@@ -8980,6 +9700,8 @@ set_status_text: anObject
 !CEF3Response categoriesFor: #set_status:!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #set_status_text!**compiled accessors**!public! !
 !CEF3Response categoriesFor: #set_status_text:!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #set_url!**compiled accessors**!public! !
+!CEF3Response categoriesFor: #set_url:!**compiled accessors**!public! !
 
 !CEF3Response class methodsFor!
 
@@ -8993,6 +9715,8 @@ defineFields
 	super defineFields.
 	self
 		defineField: #is_read_only type: LPVOIDField new;
+		defineField: #get_error type: LPVOIDField new;
+		defineField: #set_error type: LPVOIDField new;
 		defineField: #get_status type: LPVOIDField new;
 		defineField: #set_status type: LPVOIDField new;
 		defineField: #get_status_text type: LPVOIDField new;
@@ -9001,7 +9725,9 @@ defineFields
 		defineField: #set_mime_type type: LPVOIDField new;
 		defineField: #get_header type: LPVOIDField new;
 		defineField: #get_header_map type: LPVOIDField new;
-		defineField: #set_header_map type: LPVOIDField new ! !
+		defineField: #set_header_map type: LPVOIDField new;
+		defineField: #get_url type: LPVOIDField new;
+		defineField: #set_url type: LPVOIDField new! !
 !CEF3Response class categoriesFor: #defineFields!initializing!public! !
 
 CEF3SchemeHandlerFactory guid: (GUID fromString: '{F29B0BC7-78F9-456A-846C-6732A90F5896}')!
@@ -9047,43 +9773,6 @@ initalizeCallbacksRegistry
 						fromString: 'stdcall: dword CEF3SchemeHandlerFactory* CEF3BrowserEx* CEF3FrameEx* CEFString* CEF3RequestEx*'))! !
 !CEF3SchemeHandlerFactory class categoriesFor: #defineFields!initializing!public! !
 !CEF3SchemeHandlerFactory class categoriesFor: #initalizeCallbacksRegistry!public! !
-
-CEF3SchemeRegistrar guid: (GUID fromString: '{7972B582-B84E-49AB-8D61-0A47A6A2FE8B}')!
-CEF3SchemeRegistrar comment: ''!
-!CEF3SchemeRegistrar categoriesForClass!External-Data-Structured! !
-!CEF3SchemeRegistrar methodsFor!
-
-add_custom_scheme
-	"Answer the receiver's add_custom_scheme field as a Smalltalk object."
-
-	^(bytes dwordAtOffset: 16) asExternalAddress!
-
-add_custom_scheme: anObject
-	"Set the receiver's add_custom_scheme field to the value of anObject."
-
-	bytes dwordAtOffset: 16 put: anObject!
-
-initialize
-	^self.
-	refCount := 1.
-	super initialize.
-	self base cefSize: self class byteSize! !
-!CEF3SchemeRegistrar categoriesFor: #add_custom_scheme!**compiled accessors**!must not strip!public! !
-!CEF3SchemeRegistrar categoriesFor: #add_custom_scheme:!**compiled accessors**!must not strip!public! !
-!CEF3SchemeRegistrar categoriesFor: #initialize!must not strip!public! !
-
-!CEF3SchemeRegistrar class methodsFor!
-
-defineFields
-	" 
-
-	CEF3SchemeRegistrar  compileDefinition
- 
-"
-
-	super defineFields.
-	self defineField: #add_custom_scheme type: LPVOIDField new! !
-!CEF3SchemeRegistrar class categoriesFor: #defineFields!initializing!public! !
 
 CEF3BeforeDownloadCallbackEx guid: (GUID fromString: '{2BDA23BD-E19A-4174-A529-09F8CCD700F8}')!
 CEF3BeforeDownloadCallbackEx comment: ''!
@@ -9575,33 +10264,73 @@ setStatusText: text
 !CEF3ResponseEx categoriesFor: #setStatus:!must not strip!public! !
 !CEF3ResponseEx categoriesFor: #setStatusText:!must not strip!public! !
 
+CEF3SchemeRegistrar guid: (GUID fromString: '{7972B582-B84E-49AB-8D61-0A47A6A2FE8B}')!
+CEF3SchemeRegistrar comment: ''!
+!CEF3SchemeRegistrar categoriesForClass!External-Data-Structured! !
+!CEF3SchemeRegistrar methodsFor!
+
+add_custom_scheme
+	"Answer the receiver's add_custom_scheme field as a Smalltalk object."
+
+	^(bytes dwordAtOffset: 16) asExternalAddress!
+
+add_custom_scheme: anObject
+	"Set the receiver's add_custom_scheme field to the value of anObject."
+
+	bytes dwordAtOffset: 16 put: anObject!
+
+initialize
+	^self.
+	refCount := 1.
+	super initialize.
+	self base cefSize: self class byteSize! !
+!CEF3SchemeRegistrar categoriesFor: #add_custom_scheme!**compiled accessors**!must not strip!public! !
+!CEF3SchemeRegistrar categoriesFor: #add_custom_scheme:!**compiled accessors**!must not strip!public! !
+!CEF3SchemeRegistrar categoriesFor: #initialize!must not strip!public! !
+
+!CEF3SchemeRegistrar class methodsFor!
+
+defineFields
+	" 
+
+	CEF3SchemeRegistrar  compileDefinition
+ 
+"
+
+	super defineFields.
+	self defineField: #add_custom_scheme type: LPVOIDField new! !
+!CEF3SchemeRegistrar class categoriesFor: #defineFields!initializing!public! !
+
 CEF3SchemeRegistrarEx guid: (GUID fromString: '{8E336DF1-079E-48F4-82DD-D86326A1B707}')!
 CEF3SchemeRegistrarEx comment: ''!
 !CEF3SchemeRegistrarEx categoriesForClass!External-Data-Structured! !
 !CEF3SchemeRegistrarEx methodsFor!
 
-add_custom_scheme_ex: this scheme_name: scheme_name is_standard: is_standard is_local: is_local is_display_isolated: is_display_isolated 
-	<stdcall: sdword add_custom_scheme CEF3SchemeRegistrar* CEFString* sdword sdword sdword>
+add_custom_scheme_ex: this scheme_name: scheme_name is_standard: is_standard is_local: is_local is_display_isolated: is_display_isolated is_secure: is_secure is_cors_enabled: is_cors_enabled is_csp_bypassing: is_csp_bypassing
+	<stdcall: sdword add_custom_scheme CEF3SchemeRegistrar* CEFString* sdword sdword sdword sdword sdword sdword>
 	^self invalidCall!
 
-addCustomScheme: name is_standard: is_standard is_local: is_local is_display_isolated: is_display_isolated 
+addCustomScheme: name is_standard: is_standard is_local: is_local is_display_isolated: is_display_isolated is_secure: is_secure is_cors_enabled: is_cors_enabled is_csp_bypassing: is_csp_bypassing 
 	| args |
 	add_custom_scheme_ex ifNil: [self initializeExternalMethods].
-	args := Array new: 5.
+	args := Array new: 8.
 	args
 		at: 1 put: self;
-		at: 2 put: name ;
+		at: 2 put: name;
 		at: 3 put: is_standard;
 		at: 4 put: is_local;
-		at: 5 put: is_display_isolated.
+		at: 5 put: is_display_isolated;
+		at: 6 put: is_secure;
+		at: 7 put: is_cors_enabled;
+		at: 8 put: is_csp_bypassing.
 	^add_custom_scheme_ex value: self withArguments: args!
 
 initializeExternalMethods
 	add_custom_scheme_ex := self 
-				getCompileMethod: #add_custom_scheme_ex:scheme_name:is_standard:is_local:is_display_isolated:
+				getCompileMethod: #add_custom_scheme_ex:scheme_name:is_standard:is_local:is_display_isolated:is_secure:is_cors_enabled:is_csp_bypassing: 
 				proc: self add_custom_scheme! !
-!CEF3SchemeRegistrarEx categoriesFor: #add_custom_scheme_ex:scheme_name:is_standard:is_local:is_display_isolated:!must not strip!private! !
-!CEF3SchemeRegistrarEx categoriesFor: #addCustomScheme:is_standard:is_local:is_display_isolated:!must not strip!public! !
+!CEF3SchemeRegistrarEx categoriesFor: #add_custom_scheme_ex:scheme_name:is_standard:is_local:is_display_isolated:is_secure:is_cors_enabled:is_csp_bypassing:!must not strip!private! !
+!CEF3SchemeRegistrarEx categoriesFor: #addCustomScheme:is_standard:is_local:is_display_isolated:is_secure:is_cors_enabled:is_csp_bypassing:!must not strip!public! !
 !CEF3SchemeRegistrarEx categoriesFor: #initializeExternalMethods!must not strip!private! !
 
 CEFStringUserFree guid: (GUID fromString: '{F0A2EBBE-97F0-414C-BE12-BF44BC97F4FB}')!
@@ -10146,9 +10875,6 @@ cb_on_before_popup: this browser: browser frame: frame target_url: target_url ta
  
 	^0!
 
-cb_run_modal: this browser: browser 
-	!
-
 cefBrowser
 	^cefBrowser!
 
@@ -10279,6 +11005,7 @@ onNewChildBrowser: aCEF3BrowserEx
 
 onViewCreated
 	| aRect |
+self pgHalt.
 	self ensureCefInit.
 	aRect := self clientRectangle.
 	windowInfo := (CEF3WindowInfo new)
@@ -10388,7 +11115,6 @@ wmPaint: message wParam: wParam lParam: lParam
 !CEFView categoriesFor: #cb_on_after_created:browser:!event handling!private! !
 !CEFView categoriesFor: #cb_on_before_close:browser:!private! !
 !CEFView categoriesFor: #cb_on_before_popup:browser:frame:target_url:target_frame_name:popupFeatures:windowInfo:client:settings:no_javascript_access:!private! !
-!CEFView categoriesFor: #cb_run_modal:browser:!private! !
 !CEFView categoriesFor: #cefBrowser!accessing!private! !
 !CEFView categoriesFor: #cefview!accessing!private! !
 !CEFView categoriesFor: #cefview:!accessing!private! !
