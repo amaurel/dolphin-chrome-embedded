@@ -2,18 +2,9 @@
 package := Package name: 'AMCEF'.
 package paxVersion: 1;
 	basicComment: 'CEF3Library default cef_version_infos. #(3 1805 68 0 3440 84)
- #(3 1706 35 0 1916 0)
- 
-
 
 CEFApp new.
-
  
-KernelLibrary default setProcessDEPPolicy: 1.
-
-shell := nil.
-view := nil.
-
 shell := ShellView new 
 			layoutManager: ProportionalLayout new;
 			create; 
@@ -29,41 +20,16 @@ shell show.
  
 view setUrl: ''http://www.google.com''.
 view executeJavascript: ''alert("hello")''.
-view setUrl: ''http://127.0.0.1:8080/am_crosstab_view.html''.
-view setUrl: ''http://127.0.0.1:8080/test2.html''.
-
-view setUrl: ''http://192.168.1.102:9090/am_crosstab_view.html''.
-
-
+  
 view setUrl: ''chrome://chrome-urls/''.
   
-view addResourceHandler: (CEFDirectoryResourceHandler directory:''D:\MyDolphin\bntribe\bn\bin\config\html\pathways'' domain:''http://m/'').
+view addResourceHandler: (CEFDirectoryResourceHandler directory:''c:\web'' domain:''http://m/'').
 view setUrl: ''http://m/main.html''.
 view setUrl: ''http://m/test.html''.
   
 view addResourceHandler: (CEFHtmlResourceHandler html: ''<html><body bgcolor="white">Hello from Dolphin</body></html>'' acceptUrl: [:aUrl |  aUrl = ''http://hello-from-dolphin/'' ] ).
 view setUrl: ''http://hello-from-dolphin''.
-
-"Dart script"
-view addResourceHandler: (CEFHtmlResourceHandler html: ''
-<!!DOCTYPE html>
-<html>
-  <head>
-    <title>Simple Dart App</title>
-  </head>
-  <body>
-    <h1>Hello, Dart!!</h1>
-    <script type="application/dart">
-	import "dart:html";
-	main(){
-		window.alert("hello from dart");
-	}
-    </script>
-  </body>
-</html>
-'' acceptUrl: [:aUrl |  aUrl = ''http://dart-from-dolphin/index.html'' ]).
-
-view setUrl: ''http://dart-from-dolphin/index.html''.
+ 
  
 
 
